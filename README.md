@@ -7,3 +7,14 @@ General files
 2259102 - Ftaimalb
 2199271 - OmarisCodes
 2124146 - AustenVines
+
+Database SQL:
+
+
+Frontend:
+Jenny
+Austen
+
+Backend:
+Josh
+Tom
