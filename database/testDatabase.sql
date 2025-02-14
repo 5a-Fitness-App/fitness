@@ -2,52 +2,103 @@
 
 CREATE TABLE users (
     user_ID SERIAL PRIMARY KEY,
-    
+    user_name VARCHAR(25) NOT NULL,
+    user_dob DATE NOT NULL,
+    user_weight int NOT NULL,
+    user_email VARCHAR(100) NOT NULL,
+    user_phone_number int NOT NULL,
+    user_password VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE friends (
-    user_ID SERIAL PRIMARY KEY,
+    user_id INT,
+    friend_id INT,
+    status ENUM('pending', 'accepted', 'blocked') DEFAULT 'pending', 
+    request_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id), 
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE, 
+    FOREIGN KEY (friend_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    CONSTRAINT unique_friendship UNIQUE (user_id, friend_id)
 );
 
 CREATE TABLE workouts (
     workout_ID SERIAL PRIMARY KEY,
+    workout_title VARCHAR(25) NOT NULL,
+    workout_date_time DATETIME NOT NULL,
+    workout_duration INT NOT NULL,
+    workout_calories_burnt INT NOT NULL,
+
 );
 
 CREATE TABLE activities (
-    activities_ID SERIAL PRIMARY KEY,
+    activity_ID SERIAL PRIMARY KEY,
+    activity_name VARCHAR(25) NOT NULL,
+    activity_type ENUM('cardio', 'strength', 'swim', 'yoga', 'meditation') NOT NULL,
+    activity_distance INT NOT NULL,
+    activity_elevation INT NOT NULL
+    
 );
 
 CREATE TABLE achievements (
     achievements_ID SERIAL PRIMARY KEY,
+    user_id INT,
+    achievement_name VARCHAR(255) NOT NULL, 
+    date_earned TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    FOREIGN KEY (user_id) REFERENCES User(user_id), 
 );
 
 CREATE TABLE comments (
     comments_ID SERIAL PRIMARY KEY,
+    user_id INT, 
+    workout_id INT,
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(user_id),
+    FOREIGN KEY (activity_id) REFERENCES Activity(activity_id)
 );
 
 CREATE TABLE likes (
     likes_ID SERIAL PRIMARY KEY,
-
-);
-
-CREATE TABLE users_friends (
+    user_id INT,
+    activity_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (activity_id) REFERENCES Activity(activity_id) ON DELETE CASCADE,
+    CONSTRAINT unique_like UNIQUE (user_id, activity_id)
 
 );
 
 CREATE TABLE users_achievements (
-
+    user_id INT,
+    achievement_id INT, 
+    PRIMARY KEY (user_id, achievement_id),
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (achievement_id) REFERENCES Achievement(achievement_id) ON DELETE CASCADE
 );
 
 CREATE TABLE users_workout (
-
+    user_id INT,
+    workout_id INT,
+    PRIMARY KEY (user_id, workout_id),s
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (workout_id) REFERENCES Workout(workout_id) ON DELETE CASCADE
 );
 
 CREATE TABLE workout_likes (
-
+    like_id INT,
+    workout_id INT,
+    FOREIGN KEY (like_id) REFERENCES Likes(like_id) ON DELETE CASCADE,
+    FOREIGN KEY (workout_id) REFERENCES Workout(workout_id) ON DELETE CASCADE  
 );
 
 CREATE TABLE workout_comments (
-
+    user_id INT,
+    workout_id INT,
+    comment_id INT,
+    PRIMARY KEY (user_id, workout_id, comment_id),
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (workout_id) REFERENCES Workout(workout_id) ON DELETE CASCADE,
+    FOREIGN KEY (comment_id) REFERENCES Comment(comment_id) ON DELETE CASCADE
 );
 
 
