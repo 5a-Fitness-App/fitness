@@ -114,45 +114,97 @@ CREATE TABLE workout_comments (
 );
 
 -- Insert Data
-INSERT INTO users (user_name, user_dob, user_weight, user_email, user_phone_number, user_password) VALUES
-('John Doe', '1990-05-20', 75, 'john@example.com', 1234567890, 'hashed_password1'),
-('Jane Smith', '1992-08-15', 65, 'jane@example.com', 9876543210, 'hashed_password2');
+INSERT INTO users (user_name, user_dob, user_weight, user_email, user_phone_number, user_password)
+VALUES 
+('Alice Johnson', '1990-05-14', 68, 'alice.johnson@example.com', 1234567890, 'Password123!'),
+('Brian Smith', '1985-09-22', 82, 'brian.smith@example.com', 2345678901, 'SecurePass456$'),
+('Catherine Lee', '1993-12-03', 55, 'catherine.lee@example.com', 3456789012, 'CatLee789@'),
+('David Thompson', '2000-03-18', 75, 'david.thompson@example.com', 4567890123, 'DThompson321#'),
+('Emily Davis', '1995-07-29', 60, 'emily.davis@example.com', 5678901234, 'EmilyPass654%');
 
-INSERT INTO friends (user_ID, friend_ID, status) VALUES 
-(1, 2, 'accepted');
+INSERT INTO friends (user_ID, friend_ID, status)
+VALUES 
+(1, 2, 'accepted'),
+(1, 3, 'pending'),
+(2, 4, 'accepted'),
+(3, 5, 'accepted'),
+(4, 5, 'blocked');
 
-INSERT INTO workouts (workout_title, workout_date_time, workout_duration, workout_calories_burnt) VALUES 
-('Morning Run', '2025-02-15 07:30:00', 45, 350),
-('Evening Yoga', '2025-02-16 18:00:00', 60, 200);
+INSERT INTO workouts (workout_title, workout_date_time, workout_duration, workout_calories_burnt)
+VALUES 
+('Morning Run', '2024-02-15 06:30:00', 45, 400),
+('Evening Yoga', '2024-02-16 18:00:00', 60, 200),
+('HIIT Session', '2024-02-17 07:00:00', 30, 500),
+('Swimming Laps', '2024-02-18 09:00:00', 50, 350),
+('Strength Training', '2024-02-19 17:00:00', 40, 450);
 
-INSERT INTO activities (activity_name, activity_type, activity_distance, activity_elevation) VALUES 
-('5K Run', 'cardio', 5000, 50), 
-('Bench Press', 'strength', 0, 0);
+INSERT INTO activities (activity_name, activity_type, activity_distance, activity_elevation)
+VALUES 
+('Park Run', 'cardio', 5, 50),
+('Mountain Hike', 'strength', 10, 500),
+('Pool Swim', 'swim', 1, 0),
+('Sunrise Yoga', 'yoga', 0, 0),
+('Mindful Meditation', 'meditation', 0, 0);
 
-INSERT INTO achievements (user_ID, achievement_name) VALUES 
-(1, 'Completed 10 Workouts'), 
-(2, 'Ran 10KM in One Go');
+INSERT INTO achievements (user_ID, achievement_name)
+VALUES 
+(1, 'First 5K Run'),
+(2, '100 Workouts Completed'),
+(3, 'Swam 10 Miles Total'),
+(4, 'Meditation Streak - 30 Days'),
+(5, 'Climbed 1,000 Meters');
 
-INSERT INTO comments (user_ID, workout_ID, content) VALUES 
-(1, 1, 'Great morning run! Felt amazing!'), 
-(2, 2, 'Yoga was super relaxing today.');
+INSERT INTO comments (user_ID, workout_ID, content)
+VALUES 
+(2, 1, 'Great run! How was the weather?'),
+(3, 2, 'Yoga sessions are the best for relaxation.'),
+(1, 3, 'HIIT is killer! Well done.'),
+(5, 4, 'Swimming is my favorite too!'),
+(4, 5, 'Strength training is so rewarding!');
 
-INSERT INTO likes (user_ID, activity_ID) VALUES 
-(1, 1), 
-(2, 2);
+INSERT INTO likes (user_ID, activity_ID)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(1, 3),
+(2, 1),
+(5, 2);
 
-INSERT INTO users_achievements (user_ID, achievements_ID) VALUES 
-(1, 1), 
-(2, 2);
+INSERT INTO users_achievements (user_ID, achievements_ID)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(1, 2),
+(2, 5);
 
-INSERT INTO users_workout (user_ID, workout_ID) VALUES 
-(1, 1), 
-(2, 2);
+INSERT INTO users_workout (user_ID, workout_ID)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5),
+(1, 3),
+(3, 4);
 
-INSERT INTO workout_likes (likes_ID, workout_ID) VALUES 
-(1, 1), 
-(2, 2);
+INSERT INTO workout_likes (likes_ID, workout_ID)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
 
-INSERT INTO workout_comments (user_ID, workout_ID, comment_ID) VALUES 
-(1, 1, 1), 
-(2, 2, 2);
+INSERT INTO workout_comments (user_ID, workout_ID, comment_ID)
+VALUES 
+(2, 1, 1),
+(3, 2, 2),
+(1, 3, 3),
+(5, 4, 4),
+(4, 5, 5);
