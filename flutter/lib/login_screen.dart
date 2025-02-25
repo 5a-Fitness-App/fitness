@@ -1,3 +1,4 @@
+import 'package:fitness_app/home_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -32,6 +33,14 @@ class LoginScreenState extends State<LoginScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
+
+  void login() {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      return const HomePage();
+    }));
+  }
+
+  void register() {}
 
   Widget buildForm() {
     return Form(
@@ -188,7 +197,6 @@ class LoginScreenState extends State<LoginScreen> {
             decoration:
                 const BoxDecoration(color: Color.fromRGBO(248, 248, 248, 1)),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 Text(
@@ -202,7 +210,7 @@ class LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 buildForm(),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: registrationMode ? register : login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(10),
                     fixedSize: Size(MediaQuery.of(context).size.width,
