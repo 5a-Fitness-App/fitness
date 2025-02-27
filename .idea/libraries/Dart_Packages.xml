@@ -4,7 +4,7 @@
       <option name="packageNameToDirsMap">
         <entry key="async">
           <value>
-            <list>
+            <list>      
               <option value="$USER_HOME$/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.11.0/lib" />
             </list>
           </value>

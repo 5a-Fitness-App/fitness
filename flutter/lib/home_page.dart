@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   HomePageState createState() => HomePageState();
@@ -46,21 +47,75 @@ class HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              width: MediaQuery.of(context).size.width - 40,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-              ),
-              child: const Column(
+            const SizedBox(
+              height: 25,
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Welcome to the Home Page'),
+                  Container(
+                    width: MediaQuery.of(context).size.width - 50,
+                    padding: const EdgeInsets.only(
+                      top: 20,
+                      bottom: 20,
+                      left: 20,
+                      right: 10,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(100),
+                        bottomLeft: Radius.circular(10),
+                        bottomRight: Radius.circular(10),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      //size minimum ,center
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Streak,",
+                              style: TextStyle(
+                                fontSize: 20,
+                                // fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "You're on fire!",
+                              style: TextStyle(
+                                fontSize: 30,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: CircularPercentIndicator(
+                            radius: 70.0,
+                            lineWidth: 15.0,
+                            percent: 4 / 5,
+                            center: const Text("${4 / 5 * 100}%"),
+                            progressColor:
+                                const Color.fromRGBO(154, 197, 244, 1),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
-            ),
-            const Text(
-              'Welcome to the Home Page',
             ),
           ],
         ),
