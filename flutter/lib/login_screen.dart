@@ -1,3 +1,4 @@
+import 'package:fitness_app/home_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -33,20 +34,28 @@ class LoginScreenState extends State<LoginScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {});
   }
 
+  void login() {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      return const HomePage();
+    }));
+  }
+
+  void register() {}
+
   Widget buildForm() {
     return Form(
       key: formKey,
       child: Column(
         children: [
           SizedBox(
-              height: 90,
+              height: 100,
               child: TextFormField(
                 controller: emailController,
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
                   labelText: 'Email',
                   errorText: emailError,
-                  prefixIcon: const Icon(Icons.lock_outline),
+                  prefixIcon: const Icon(Icons.mail_outline),
                   enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                       borderSide: BorderSide(color: Colors.grey, width: 1)),
@@ -66,7 +75,7 @@ class LoginScreenState extends State<LoginScreen> {
                 },
               )),
           SizedBox(
-              height: 90,
+              height: 100,
               child: TextFormField(
                 controller: passwordController,
                 obscureText: hidePassword,
@@ -126,68 +135,68 @@ class LoginScreenState extends State<LoginScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             )),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Align(alignment: Alignment.center, child: Text('FitFish')),
-
-                Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        registrationMode = false;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
-                            MediaQuery.of(context).size.height * 0.06),
-                        backgroundColor: registrationMode
-                            ? const Color.fromRGBO(248, 248, 248, 0.5)
-                            : const Color.fromRGBO(248, 248, 248, 1),
-                        shadowColor: Colors.transparent,
-                        shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(30),
-                                topRight: Radius.circular(30)))),
-                    child: const Text(
-                      'Sign in',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        registrationMode = true;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
-                            MediaQuery.of(context).size.height * 0.06),
-                        backgroundColor: registrationMode
-                            ? const Color.fromRGBO(248, 248, 248, 1)
-                            : const Color.fromRGBO(248, 248, 248, 0.5),
-                        shadowColor: Colors.transparent,
-                        shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(30),
-                                topRight: Radius.circular(30)))),
-                    child: const Text(
-                      'Sign up',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                ])
-              ],
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Text('FitFish', style: TextStyle(fontSize: 40))],
             ),
+          ),
+          Container(
+            decoration:
+                const BoxDecoration(color: Color.fromRGBO(154, 197, 244, 1)),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    registrationMode = false;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
+                        MediaQuery.of(context).size.height * 0.06),
+                    backgroundColor: registrationMode
+                        ? const Color.fromRGBO(248, 248, 248, 0.5)
+                        : const Color.fromRGBO(248, 248, 248, 1),
+                    shadowColor: Colors.transparent,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30)))),
+                child: const Text(
+                  'Sign in',
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    registrationMode = true;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
+                        MediaQuery.of(context).size.height * 0.06),
+                    backgroundColor: registrationMode
+                        ? const Color.fromRGBO(248, 248, 248, 1)
+                        : const Color.fromRGBO(248, 248, 248, 0.5),
+                    shadowColor: Colors.transparent,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(30),
+                            topRight: Radius.circular(30)))),
+                child: const Text(
+                  'Sign up',
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+              ),
+            ]),
           ),
           Container(
             padding: const EdgeInsets.all(10),
             decoration:
                 const BoxDecoration(color: Color.fromRGBO(248, 248, 248, 1)),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 Text(
@@ -201,11 +210,20 @@ class LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 buildForm(),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: registrationMode ? register : login,
                   style: ElevatedButton.styleFrom(
-                      fixedSize: Size(MediaQuery.of(context).size.width,
-                          MediaQuery.of(context).size.height * 0.035)),
-                  child: const Text('submit'),
+                    padding: const EdgeInsets.all(10),
+                    fixedSize: Size(MediaQuery.of(context).size.width,
+                        MediaQuery.of(context).size.height * 0.06),
+                    backgroundColor: const Color.fromRGBO(154, 197, 244, 1),
+                  ),
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),
