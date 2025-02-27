@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
 
   postgres: ^2.5.4
-
+  percent_indicator: ^4.0.1
   
 
 
