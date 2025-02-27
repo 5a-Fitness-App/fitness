@@ -125,7 +125,7 @@ class LoginScreenState extends State<LoginScreen> {
         children: [
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.35,
+            height: MediaQuery.of(context).size.height * 0.4,
             decoration: const BoxDecoration(
                 gradient: LinearGradient(
               colors: [
