@@ -1,0 +1,2 @@
+D:/fitness/flutter/android/app/.cxx/Debug/5i57k4y1/x86/CMakeFiles/edit_cache.dir
+D:/fitness/flutter/android/app/.cxx/Debug/5i57k4y1/x86/CMakeFiles/rebuild_cache.dir
