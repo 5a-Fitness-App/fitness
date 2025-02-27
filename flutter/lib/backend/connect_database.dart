@@ -5,17 +5,16 @@ void main() async {
   final connection = PostgreSQLConnection(
     'localhost',
     5432,
-    'my_database',
+    'test1',
     username: 'postgres',
-    password: 'your_password',
+    password: 'abc123',
   );
 
   try {
     await connection.open();
     print('Connected to PostgreSQL ✅');
 
-    List<List<dynamic>> results =
-        await connection.query('SELECT * FROM my_table');
+    List<List<dynamic>> results = await connection.query('SELECT * FROM users');
 
     for (final row in results) {
       print(row);
