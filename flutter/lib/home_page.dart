@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:fitness_app/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,112 +14,112 @@ class HomePageState extends State<HomePage> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
-    Text('Index 0: Home', style: optionStyle),
-    Text('Index 1: Business', style: optionStyle),
-    Text('Index 2: School', style: optionStyle),
+    Text('Home', style: optionStyle),
+    Text('Log', style: optionStyle),
+    Text('Profile', style: optionStyle),
   ];
 
+  static const Map<String, int> _optionToIndex = {
+    'Home': 0,
+    'Log': 1,
+    'Profile': 2,
+  };
+
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    _selectedIndex = index;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      if (index == 2) {
+        return const ProfilePage();
+      } else {
+        return const HomePage();
+      }
+    }));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromRGBO(239, 239, 239, 1),
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.add_box_outlined), label: 'Log'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color.fromRGBO(154, 197, 244, 1),
-        onTap: _onItemTapped,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 25,
-            ),
-            SizedBox(
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
               width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width - 50,
-                    padding: const EdgeInsets.only(
-                      top: 20,
-                      bottom: 20,
-                      left: 20,
-                      right: 10,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(100),
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      //size minimum ,center
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          // crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Streak,",
-                              style: TextStyle(
-                                fontSize: 20,
-                                // fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "You're on fire!",
-                              style: TextStyle(
-                                fontSize: 30,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: CircularPercentIndicator(
-                            radius: 70.0,
-                            lineWidth: 15.0,
-                            percent: 4 / 5,
-                            center: const Text("${4 / 5 * 100}%"),
-                            progressColor:
-                                const Color.fromRGBO(154, 197, 244, 1),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                      ],
-                    ),
-                  )
+              decoration: const BoxDecoration(
+                // color: Color.fromRGBO(239, 239, 239, 1),
+                boxShadow: [
+                  BoxShadow(
+                      color: Color.fromARGB(40, 0, 0, 0), offset: Offset(0, 1)),
+                  BoxShadow(
+                    color: Color.fromRGBO(239, 239, 239, 1),
+                    spreadRadius: -2.0,
+                    blurRadius: 5.0,
+                  ),
                 ],
               ),
-            ),
-          ],
-        ),
+              padding: const EdgeInsets.all(25),
+              child: Container(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(40, 0, 0, 0),
+                      spreadRadius: 1.0,
+                      blurRadius: 5.0,
+                      // offset: Offset(0, 1)
+                    )
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(100),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Expanded(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Streak: ",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "You're on fire!",
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    )),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: CircularPercentIndicator(
+                        animation: true,
+                        radius: 70.0,
+                        lineWidth: 15.0,
+                        percent: 4 / 5,
+                        center: const Text("${4 / 5 * 100}%\n daily goals met"),
+                        backgroundColor:
+                            const Color.fromRGBO(154, 197, 244, 0.4),
+                        progressColor: const Color.fromRGBO(154, 197, 244, 1),
+                      ),
+                    ),
+                  ],
+                ),
+              ))
+        ],
       ),
     );
   }
