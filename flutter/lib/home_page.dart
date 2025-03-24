@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:fitness_app/profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,32 +9,6 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home', style: optionStyle),
-    Text('Log', style: optionStyle),
-    Text('Profile', style: optionStyle),
-  ];
-
-  static const Map<String, int> _optionToIndex = {
-    'Home': 0,
-    'Log': 1,
-    'Profile': 2,
-  };
-
-  void _onItemTapped(int index) {
-    _selectedIndex = index;
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      if (index == 2) {
-        return const ProfilePage();
-      } else {
-        return const HomePage();
-      }
-    }));
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

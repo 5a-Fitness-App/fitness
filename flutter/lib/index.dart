@@ -2,7 +2,6 @@ import 'package:fitness_app/log_workout_page.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/profile_page.dart';
 import 'package:fitness_app/home_page.dart';
-import 'package:fitness_app/log_workout_page.dart';
 
 class Index extends StatefulWidget {
   const Index({super.key});
@@ -16,9 +15,11 @@ class IndexState extends State<Index> {
 
   final pages = const [
     HomePage(),
-    LogWorkoutPage(), // TODO: create log workout page
+    LogWorkoutPage(),
     ProfilePage(),
   ];
+
+  final pageName = const ['Home', 'Log Workout', 'Profile'];
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class IndexState extends State<Index> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Fitness App'),
+        title: Text(pageName[selectedPage]),
       ),
       body: pages[selectedPage],
       bottomNavigationBar: Container(
