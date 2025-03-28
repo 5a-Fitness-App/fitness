@@ -6,9 +6,8 @@ CREATE TABLE users (
     user_ID SERIAL PRIMARY KEY,
     user_name VARCHAR(25) NOT NULL,
     user_dob DATE NOT NULL,
-    user_weight INT NOT NULL CHECK (user_weight > 0),
+    user_weight INT CHECK (user_weight > 0),
     user_email VARCHAR(100) NOT NULL UNIQUE,
-    user_phone_number BIGINT NOT NULL UNIQUE,
     user_password VARCHAR(255) NOT NULL
 );
 
