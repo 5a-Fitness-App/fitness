@@ -3,7 +3,7 @@ import 'package:postgres/postgres.dart';
 final connection = PostgreSQLConnection(
   'localhost',
   5432,
-  'test1',
+  'test2',
   username: 'postgres',
   password: 'abc123',
 );
@@ -86,7 +86,84 @@ Future<void> deleteUser(int userId) async {
   }
 }
 
-// MAIN FUNCTION
+// CREATE (Insert a new workout post)
+Future<void> createWorkout(
+    int userId, String title, int duration, int calories) async {
+  await connection.query(
+    '''INSERT INTO workouts (user_id, workout_title, workout_duration, workout_calories_burnt) 
+       VALUES (@userId, @title, @duration, @calories)''',
+    substitutionValues: {
+      'userId': userId,
+      'title': title,
+      'duration': duration,
+      'calories': calories,
+    },
+  );
+  print('Workout post created successfully ✅');
+}
+
+// READ (Get all workout posts)
+Future<void> getWorkouts() async {
+  List<List<dynamic>> results =
+      await connection.query('SELECT * FROM workouts');
+
+  for (final row in results) {
+    print(
+        'Workout ID: ${row[0]}, User ID: ${row[1]}, Title: ${row[2]}, Duration: ${row[3]} mins, Calories Burnt: ${row[4]}');
+  }
+}
+
+// READ (Get a specific workout post by ID)
+Future<void> getWorkoutById(int workoutId) async {
+  List<List<dynamic>> results = await connection.query(
+    'SELECT * FROM workouts WHERE workout_ID = @workoutId',
+    substitutionValues: {'workoutId': workoutId},
+  );
+
+  if (results.isEmpty) {
+    print('Workout not found ❌');
+  } else {
+    final row = results.first;
+    print(
+        'Workout ID: ${row[0]}, User ID: ${row[1]}, Title: ${row[2]}, Duration: ${row[3]} mins, Calories Burnt: ${row[4]}');
+  }
+}
+
+// UPDATE (Modify workout post details)
+Future<void> updateWorkout(
+    int workoutId, String title, int duration, int calories) async {
+  int affectedRows = await connection.execute(
+    '''UPDATE workouts SET workout_title = @title, workout_duration = @duration, 
+       workout_calories_burnt = @calories WHERE workout_ID = @workoutId''',
+    substitutionValues: {
+      'workoutId': workoutId,
+      'title': title,
+      'duration': duration,
+      'calories': calories,
+    },
+  );
+
+  if (affectedRows > 0) {
+    print('Workout updated successfully ✅');
+  } else {
+    print('Workout not found ❌');
+  }
+}
+
+// DELETE (Remove a workout post)
+Future<void> deleteWorkout(int workoutId) async {
+  int affectedRows = await connection.execute(
+    'DELETE FROM workouts WHERE workout_ID = @workoutId',
+    substitutionValues: {'workoutId': workoutId},
+  );
+
+  if (affectedRows > 0) {
+    print('Workout deleted successfully ✅');
+  } else {
+    print('Workout not found ❌');
+  }
+}
+
 Future<void> main() async {
   try {
     await connection.open();
@@ -94,9 +171,15 @@ Future<void> main() async {
 
     //await createUser('Alice Smith', '1995-07-22', 68, 'alice.smith@example.com', 9876543210, 'SecurePass!123');
     //await getUsers();
-    await getUserById(1);
+    //await getUserById(1);
     // await updateUser(1, 'Alice Updated', 70, 'alice.updated@example.com', 1234567890);
     // await deleteUser(2);
+
+    // await createWorkout(1, 'Morning Run', 30, 300);
+    // await getWorkouts();
+    // await getWorkoutById(1);
+    // await updateWorkout(1, 'Evening Jog', 45, 450);
+    // await deleteWorkout(1);
   } catch (e) {
     print('Error connecting to PostgreSQL ❌: $e');
   } finally {
