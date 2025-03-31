@@ -1,7 +1,7 @@
-import 'package:fitness_app/log_workout_page.dart';
+import 'package:fitness_app/frontend/states/log_workout_page.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/profile_page.dart';
-import 'package:fitness_app/home_page.dart';
+import 'package:fitness_app/frontend/states/profile_page.dart';
+import 'package:fitness_app/frontend/states/home_page.dart';
 
 class Index extends StatefulWidget {
   const Index({super.key});
