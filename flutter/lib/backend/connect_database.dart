@@ -26,3 +26,10 @@ void main() async {
     print('Connection closed 🔒');
   }
 }
+
+// TODO : get friends' posts, order by date posted
+// TODO: get own workouts, order by date posted
+// TODO: insert new workout and activities
+// TODO: count achievements
+// TODO: count login streak
+// TODO: get user profile information

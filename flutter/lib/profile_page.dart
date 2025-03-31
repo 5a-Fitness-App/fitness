@@ -18,16 +18,17 @@ class ProfilePageState extends State<ProfilePage> {
           Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Color.fromRGBO(220, 220, 220, 1),
-                // boxShadow: [
-                //   BoxShadow(
-                //       color: Color.fromARGB(40, 0, 0, 0), offset: Offset(0, 1)),
-                //   BoxShadow(
-                //     color: Color.fromRGBO(239, 239, 239, 1),
-                //     spreadRadius: -2.0,
-                //     blurRadius: 5.0,
-                //   ),
-                // ],
+                // color: Color.fromRGBO(239, 239, 239, 1),
+                boxShadow: [
+                  BoxShadow(
+                      color: Color.fromARGB(40, 0, 0, 0),
+                      offset: Offset(0, -10)),
+                  BoxShadow(
+                    color: Color.fromRGBO(239, 239, 239, 1),
+                    spreadRadius: -2.0,
+                    blurRadius: 5.0,
+                  ),
+                ],
               ),
               // padding: const EdgeInsets.all(25),
               child: Column(children: [
@@ -44,15 +45,16 @@ class ProfilePageState extends State<ProfilePage> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                          color: Color.fromARGB(40, 0, 0, 0),
-                          spreadRadius: 1.0,
-                          blurRadius: 5.0,
-                          offset: Offset(0, 1))
+                        color: Color.fromARGB(40, 0, 0, 0),
+                        spreadRadius: 1.0,
+                        blurRadius: 5.0,
+                        // offset: Offset(0, 1)
+                      )
                     ],
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(100),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(100),
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(100),
+                      bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10),
                     ),
                   ),
