@@ -1,4 +1,4 @@
-import 'package:fitness_app/home_page.dart';
+import 'package:fitness_app/index.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -36,7 +36,7 @@ class LoginScreenState extends State<LoginScreen> {
 
   void login() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return const HomePage();
+      return const Index();
     }));
   }
 
