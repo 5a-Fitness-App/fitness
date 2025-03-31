@@ -1,4 +1,4 @@
-import 'package:fitness_app/index.dart';
+import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
