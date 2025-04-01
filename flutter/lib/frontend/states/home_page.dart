@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:intl/intl.dart';
 
