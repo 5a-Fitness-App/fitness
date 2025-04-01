@@ -76,4 +76,18 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
   List<ExerciseField> getActivities() {
     return state.activities;
   }
+
+  void addActivity(ExerciseField activity) {
+    List<ExerciseField> activities = state.activities;
+    activities.add(activity);
+    state = state.copyWith(activites: activities);
+    print("activity added");
+  }
+
+  void deleteActivity(ExerciseField activity) {
+    List<ExerciseField> activities = state.activities;
+    activities.remove(activity);
+    state = state.copyWith(activites: activities);
+    print("activity removed");
+  }
 }
