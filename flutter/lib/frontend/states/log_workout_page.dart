@@ -126,7 +126,7 @@ class ActivityWidget extends ConsumerWidget {
 
     Map<String, List<String>> exercises = {
       'Cardio': ['time', 'speed', 'distance'],
-      'Strength': ['reps', 'weight', 'weightMetric'],
+      'Strength': ['reps', 'weight'],
       'Swimming': ['time', 'distance']
     };
 
@@ -151,8 +151,25 @@ class ActivityWidget extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(exerciseType, style: TextStyle(fontSize: 20)),
-            if (exercises[exerciseType]!.contains('time')) Text('time'),
+            Text(exerciseType,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            if (exercises[exerciseType]!.contains('time'))
+              const Text(
+                'Time',
+                style: TextStyle(fontSize: 20),
+              ),
+            if (exercises[exerciseType]!.contains('weight'))
+              Flex(
+                  direction: Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Weight',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    SizedBox(width: 20),
+                    ElevatedButton(onPressed: () {}, child: Text('hi'))
+                  ]),
             const SizedBox(width: 10),
             Container(
               width: MediaQuery.of(context).size.width - 40,
