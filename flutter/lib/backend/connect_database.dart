@@ -136,21 +136,31 @@ Future<int> createWorkout(int userId, String title, int duration,
 Future<List<Map<String, dynamic>>> getWorkoutsWithDetails() async {
   var workouts = await connection.mappedResultsQuery('''
     SELECT 
-        w.workout_ID,
-        w.user_ID,
-        u.user_name,
-        w.workout_title,
-        w.workout_date_time,
-        w.workout_duration,
-        w.workout_calories_burnt,
-        COALESCE(l.like_count, 0) AS total_likes
-    FROM workouts w
-    JOIN users u ON w.user_ID = u.user_ID
-    LEFT JOIN (
-        SELECT workout_ID, COUNT(*) AS like_count FROM likes GROUP BY workout_ID
-    ) l ON w.workout_ID = l.workout_ID
-    ORDER BY w.workout_date_time DESC;
-    ''');
+    w.workout_ID, 
+    w.user_ID, 
+    u.user_name,
+    w.workout_title, 
+    w.workout_date_time, 
+    w.workout_duration, 
+    w.workout_calories_burnt, 
+    a.activity_ID, 
+    a.activity_name, 
+    a.activity_type, 
+    a.activity_distance, 
+    a.activity_elevation, 
+    e.exercise_name,
+    COUNT(DISTINCT l.user_ID) AS total_likes,
+    COUNT(DISTINCT c.comment_ID) AS total_comments
+FROM workouts w
+JOIN users u ON w.user_ID = u.user_ID
+LEFT JOIN activities a ON w.workout_ID = a.workout_ID
+LEFT JOIN exercises e ON a.exercise_ID = e.exercise_ID
+LEFT JOIN likes l ON w.workout_ID = l.workout_ID
+LEFT JOIN comments c ON w.workout_ID = c.workout_ID
+WHERE w.user_ID = 1  -- Change this to the desired user_ID
+GROUP BY w.workout_ID, u.user_name, a.activity_ID, a.activity_name, a.activity_type, 
+         a.activity_distance, a.activity_elevation, e.exercise_name
+ORDER BY w.workout_date_time DESC;''');
 
   List<Map<String, dynamic>> fullWorkouts = [];
 
@@ -198,10 +208,35 @@ Future<List<Map<String, dynamic>>> getWorkoutsWithDetails() async {
 }
 
 // READ (Get a specific workout post by ID)
-Future<void> getWorkoutById(int workoutId) async {
+Future<void> getWorkouts() async {
   List<List<dynamic>> results = await connection.query(
-    'SELECT * FROM workouts WHERE workout_ID = @workoutId',
-    substitutionValues: {'workoutId': workoutId},
+    '''
+    SELECT 
+    w.workout_ID, 
+    w.user_ID, 
+    u.user_name,
+    w.workout_title, 
+    w.workout_date_time, 
+    w.workout_duration, 
+    w.workout_calories_burnt, 
+    a.activity_ID, 
+    a.activity_name, 
+    a.activity_type, 
+    a.activity_distance, 
+    a.activity_elevation, 
+    e.exercise_name,
+    COUNT(DISTINCT l.user_ID) AS total_likes,
+    COUNT(DISTINCT c.comment_ID) AS total_comments
+FROM workouts w
+JOIN users u ON w.user_ID = u.user_ID
+LEFT JOIN activities a ON w.workout_ID = a.workout_ID
+LEFT JOIN exercises e ON a.exercise_ID = e.exercise_ID
+LEFT JOIN likes l ON w.workout_ID = l.workout_ID
+LEFT JOIN comments c ON w.workout_ID = c.workout_ID
+WHERE w.user_ID = 1  -- Change this to the desired user_ID
+GROUP BY w.workout_ID, u.user_name, a.activity_ID, a.activity_name, a.activity_type, 
+         a.activity_distance, a.activity_elevation, e.exercise_name
+ORDER BY w.workout_date_time DESC;''',
   );
 
   if (results.isEmpty) {
@@ -301,7 +336,8 @@ Future<void> main() async {
     print('Connected to PostgreSQL ✅');
 
     //await createUser('Alice Smith', '1995-07-22', 68, 'alice.smith@example.com', 9876543210, 'SecurePass!123');
-    //await getUsers();
+
+    await getUsers();
     //await getUserById(1);
     //await updateUser(1, 'Alice Updated', 70, 'alice.updated@example.com', 1234567890);
     // await deleteUser(2);
