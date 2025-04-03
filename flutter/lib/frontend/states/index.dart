@@ -1,7 +1,7 @@
-import 'package:fitness_app/log_workout_page.dart';
+import 'package:fitness_app/frontend/states/log_workout_page.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/profile_page.dart';
-import 'package:fitness_app/home_page.dart';
+import 'package:fitness_app/frontend/states/profile_page.dart';
+import 'package:fitness_app/frontend/states/home_page.dart';
 
 class Index extends StatefulWidget {
   const Index({super.key});
@@ -12,14 +12,28 @@ class Index extends StatefulWidget {
 
 class IndexState extends State<Index> {
   int selectedPage = 0;
+  int pageIndex = 0;
 
   final pages = const [
     HomePage(),
-    LogWorkoutPage(),
     ProfilePage(),
   ];
 
   final pageName = const ['Home', 'Log Workout', 'Profile'];
+
+  void openLogWorkoutModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) =>
+          const LogWorkoutPage(), // Use your LogWorkoutPage as a modal
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +66,21 @@ class IndexState extends State<Index> {
                 label: 'Profile',
               ),
             ],
-            currentIndex: selectedPage,
+            currentIndex: pageIndex,
             onTap: (index) {
-              setState(() {
-                selectedPage = index;
-              });
+              if (index == 0) {
+                setState(() {
+                  selectedPage = 0;
+                  pageIndex = 0;
+                });
+              } else if (index == 2) {
+                setState(() {
+                  selectedPage = 1;
+                  pageIndex = 2;
+                });
+              } else if (index == 1) {
+                openLogWorkoutModal();
+              }
             },
           )),
     );

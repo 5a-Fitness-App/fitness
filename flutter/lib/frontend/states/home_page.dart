@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:fitness_app/index.dart';
+
+import 'package:fitness_app/frontend/states/index.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
@@ -193,7 +194,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //  post  widget 
+  //  post  widget
   Widget _Post({
     required String username,
     required String description,
@@ -215,8 +216,7 @@ class _HomePageState extends State<HomePage> {
     } else if (difference.inHours < 24) {
       formattedTime = '${difference.inHours}h ago';
     } else {
-      formattedTime =
-          DateFormat('d MMMM y').format(postTime); 
+      formattedTime = DateFormat('d MMMM y').format(postTime);
     }
 
     return Container(
