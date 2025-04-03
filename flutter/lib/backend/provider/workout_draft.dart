@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ExerciseField {
+class ActivityField {
   String exerciseType;
   String notes;
 
@@ -15,7 +15,7 @@ class ExerciseField {
   double? incline;
   double? speed;
 
-  ExerciseField(
+  ActivityField(
       {required this.exerciseType,
       this.notes = '',
       this.reps,
@@ -26,7 +26,7 @@ class ExerciseField {
       this.incline,
       this.speed});
 
-  ExerciseField copyWith(
+  ActivityField copyWith(
       {String? exerciseType,
       String? notes,
       int? reps,
@@ -36,7 +36,7 @@ class ExerciseField {
       String? time,
       double? incline,
       double? speed}) {
-    return ExerciseField(
+    return ActivityField(
         exerciseType: exerciseType ?? this.exerciseType,
         notes: notes ?? this.notes,
         reps: reps ?? this.reps,
@@ -47,18 +47,20 @@ class ExerciseField {
         incline: incline ?? this.incline,
         speed: speed ?? this.speed);
   }
+
+  void editTime() {}
 }
 
 class WorkoutDraft {
-  final List<ExerciseField> activities;
+  final List<ActivityField> activities;
   String caption;
   WorkoutDraft({required this.activities, this.caption = ''});
-  WorkoutDraft copyWith({List<ExerciseField>? activites, String? caption}) {
+  WorkoutDraft copyWith({List<ActivityField>? activites, String? caption}) {
     return WorkoutDraft(
         activities: activites ?? activities, caption: caption ?? this.caption);
   }
 
-  void deleteActivity(ExerciseField activity) {}
+  void deleteActivity(ActivityField activity) {}
 }
 
 final workoutDraftProvider = StateProvider<int>((ref) => 1);
@@ -73,21 +75,27 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
 
   WorkoutDraftNotifier(this.ref) : super(WorkoutDraft(activities: []));
 
-  List<ExerciseField> getActivities() {
+  List<ActivityField> getActivities() {
     return state.activities;
   }
 
-  void addActivity(ExerciseField activity) {
-    List<ExerciseField> activities = state.activities;
+  void addActivity(ActivityField activity) {
+    // if (activity = re)
+    List<ActivityField> activities = state.activities;
     activities.add(activity);
     state = state.copyWith(activites: activities);
     print("activity added");
   }
 
-  void deleteActivity(ExerciseField activity) {
-    List<ExerciseField> activities = state.activities;
+  void deleteActivity(ActivityField activity) {
+    List<ActivityField> activities = state.activities;
     activities.remove(activity);
     state = state.copyWith(activites: activities);
     print("activity removed");
+  }
+
+  String post() {
+    //createWorkout
+    return 'Post successful';
   }
 }

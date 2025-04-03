@@ -41,7 +41,12 @@ class IndexState extends State<Index> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         title: Text(pageName[selectedPage]),
+        centerTitle: true,
+        scrolledUnderElevation: 0,
+        elevation: 4,
+        shadowColor: const Color.fromARGB(70, 0, 0, 0),
       ),
       body: pages[selectedPage],
       bottomNavigationBar: Container(

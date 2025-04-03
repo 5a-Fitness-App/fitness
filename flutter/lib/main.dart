@@ -17,6 +17,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            useMaterial3: false,
+            dividerTheme: const DividerThemeData(
+              thickness: 1,
+              color: Color.fromARGB(255, 230, 230, 230),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ButtonStyle(
+              elevation: const WidgetStatePropertyAll(0),
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              )),
+            ))),
         home: Builder(builder: (context) => const LoginScreen()));
   }
 }

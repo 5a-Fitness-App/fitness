@@ -90,29 +90,28 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
             ),
           ),
           Container(
-            width: MediaQuery.of(context).size.width - 20,
-            padding: const EdgeInsets.all(10),
-            child: TextFormField(
-              autofocus: true,
-              autocorrect: false,
-              keyboardType: TextInputType.multiline,
-              minLines: 5,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Write a caption...',
-              ),
-            ),
-          ),
-          const Divider(
-            thickness: 1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      autofocus: true,
+                      autocorrect: false,
+                      keyboardType: TextInputType.multiline,
+                      minLines: 5,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Write a caption...',
+                      ),
+                    ),
+                  ])),
+          const Divider(),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  for (ExerciseField activity in activities)
+                  for (ActivityField activity in activities)
                     ActivityWidget(activity: activity)
                 ],
               ),
@@ -130,11 +129,12 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
             child: Flex(
               direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ElevatedButton.icon(
                     onPressed: () {
                       ref.read(workoutDraftNotifier.notifier).addActivity(
-                          ExerciseField(
+                          ActivityField(
                               exerciseType:
                                   selectedActivity!.label) // Use enum value
                           );
@@ -154,17 +154,20 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                 DropdownMenu<ActivityLabel>(
                     enableFilter: false,
                     enableSearch: false,
+                    width: 200,
                     initialSelection: ActivityLabel.cardio,
                     controller: activityController,
                     dropdownMenuEntries: ActivityLabel.entries,
+                    helperText: 'Choose an activity',
                     inputDecorationTheme: InputDecorationTheme(
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.all(10),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Color.fromARGB(255, 110, 110, 110)),
-                            borderRadius: BorderRadius.circular(10))),
+                      filled: true,
+                      fillColor: const Color.fromARGB(255, 230, 230, 230),
+                      enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.transparent),
+                          borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.all(10),
+                    ),
                     onSelected: (ActivityLabel? activity) {
                       setState(() {
                         selectedActivity = activity;
@@ -179,19 +182,21 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
 }
 
 class ActivityWidget extends ConsumerWidget {
-  final ExerciseField activity;
+  final ActivityField activity;
 
   const ActivityWidget({super.key, required this.activity});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(workoutDraftNotifier);
+    // ref.watch(workoutDraftNotifier);
 
     Map<String, List<String>> exercises = {
       'Cardio': ['time', 'speed', 'distance'],
       'Strength': ['reps', 'weight'],
       'Swimming': ['time', 'distance']
     };
+
+    int quantity = 0;
 
     TextEditingController hourController = TextEditingController();
     TextEditingController minuteController = TextEditingController();
@@ -211,7 +216,8 @@ class ActivityWidget extends ConsumerWidget {
       const SizedBox(height: 20),
       Container(
         width: MediaQuery.of(context).size.width - 20,
-        padding: const EdgeInsets.all(20),
+        padding:
+            const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 15),
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: const Color.fromARGB(255, 230, 230, 230)),
@@ -261,6 +267,43 @@ class ActivityWidget extends ConsumerWidget {
                             return null;
                           },
                         )),
+                    const SizedBox(width: 20)
+                  ]),
+            if (exercises[exerciseType]!.contains('reps'))
+              Flex(
+                  direction: Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  spacing: 30,
+                  children: [
+                    const Text(
+                      'Reps:',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Card(
+                      color: const Color.fromARGB(255, 230, 230, 230),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(16), // Custom border radius
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: () {},
+                          ),
+                          Text(quantity.toString()),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              quantity++;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(width: 20)
                   ]),
             const SizedBox(width: 10),
