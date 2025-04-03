@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:fitness_app/backend/provider/workout_draft.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 typedef ActivityEntry = DropdownMenuEntry<ActivityLabel>;
 
@@ -52,66 +53,128 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
     final workoutDraft = ref.watch(workoutDraftNotifier);
     final activities = workoutDraft.activities;
 
-    return SingleChildScrollView(
+    return Container(
+        height: double.infinity,
+        width: double.infinity,
+        padding: const EdgeInsets.only(top: 20),
+        decoration: const BoxDecoration(color: Colors.white),
         child: Column(children: [
-      Container(
-        width: MediaQuery.of(context).size.width - 20,
-        child: TextFormField(
-          autofocus: true,
-          autocorrect: false,
-          keyboardType: TextInputType.multiline,
-          minLines: 4,
-          maxLines: 4,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Write a caption...',
+          Container(
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 15),
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    )),
+                ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor:
+                            const Color.fromARGB(255, 80, 162, 255),
+                        foregroundColor: Colors.white),
+                    child: const Text(
+                      'Post',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    )),
+              ],
+            ),
           ),
-        ),
-      ),
-      const Divider(thickness: 1.5),
-      const SizedBox(
-        height: 10,
-      ),
-      Flex(
-          direction: Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            DropdownMenu<ActivityLabel>(
-                enableFilter: false,
-                enableSearch: false,
-                initialSelection: ActivityLabel.cardio,
-                controller: activityController,
-                dropdownMenuEntries: ActivityLabel.entries,
-                inputDecorationTheme: InputDecorationTheme(
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.all(10),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                            color: Color.fromARGB(255, 110, 110, 110)),
-                        borderRadius: BorderRadius.circular(10))),
-                onSelected: (ActivityLabel? activity) {
-                  setState(() {
-                    selectedActivity = activity;
-                    activityController.text = activity?.label ?? 'cardio';
-                  });
-                }),
-            ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(workoutDraftNotifier.notifier).addActivity(
-                      ExerciseField(
-                          exerciseType:
-                              selectedActivity!.label) // Use enum value
-                      );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Add Activity'))
-          ]),
-      const SizedBox(height: 10),
-      const Divider(thickness: 1.5),
-      for (ExerciseField activity in activities)
-        ActivityWidget(activity: activity)
-    ]));
+          Container(
+            width: MediaQuery.of(context).size.width - 20,
+            padding: const EdgeInsets.all(10),
+            child: TextFormField(
+              autofocus: true,
+              autocorrect: false,
+              keyboardType: TextInputType.multiline,
+              minLines: 5,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Write a caption...',
+              ),
+            ),
+          ),
+          const Divider(
+            thickness: 1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (ExerciseField activity in activities)
+                    ActivityWidget(activity: activity)
+                ],
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(bottom: 30, top: 10),
+            decoration: const BoxDecoration(
+                border: Border(
+                    bottom: BorderSide.none,
+                    left: BorderSide.none,
+                    right: BorderSide.none,
+                    top:
+                        BorderSide(color: Color.fromARGB(255, 230, 230, 230)))),
+            child: Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                    onPressed: () {
+                      ref.read(workoutDraftNotifier.notifier).addActivity(
+                          ExerciseField(
+                              exerciseType:
+                                  selectedActivity!.label) // Use enum value
+                          );
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor:
+                            const Color.fromARGB(255, 80, 162, 255),
+                        foregroundColor: Colors.white),
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                    label: const Text('Add Activity',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold))),
+                DropdownMenu<ActivityLabel>(
+                    enableFilter: false,
+                    enableSearch: false,
+                    initialSelection: ActivityLabel.cardio,
+                    controller: activityController,
+                    dropdownMenuEntries: ActivityLabel.entries,
+                    inputDecorationTheme: InputDecorationTheme(
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.all(10),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 110, 110, 110)),
+                            borderRadius: BorderRadius.circular(10))),
+                    onSelected: (ActivityLabel? activity) {
+                      setState(() {
+                        selectedActivity = activity;
+                        activityController.text = activity?.label ?? 'cardio';
+                      });
+                    }),
+              ],
+            ),
+          )
+        ]));
   }
 }
 
@@ -130,29 +193,36 @@ class ActivityWidget extends ConsumerWidget {
       'Swimming': ['time', 'distance']
     };
 
+    TextEditingController hourController = TextEditingController();
+    TextEditingController minuteController = TextEditingController();
+
+    TextEditingController repController = TextEditingController();
+
+    TextEditingController weightController = TextEditingController();
+    TextEditingController weightMetricController = TextEditingController();
+
+    TextEditingController distanceController = TextEditingController();
+    TextEditingController speedController = TextEditingController();
+    TextEditingController inclineController = TextEditingController();
+
     String exerciseType = activity.exerciseType;
 
     return Column(children: [
-      SizedBox(height: 20),
+      const SizedBox(height: 20),
       Container(
         width: MediaQuery.of(context).size.width - 20,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-                color: Color.fromARGB(50, 0, 0, 0),
-                spreadRadius: 1.0,
-                blurRadius: 4.0,
-                offset: Offset(0, 0))
-          ],
-          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color.fromARGB(255, 230, 230, 230)),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(exerciseType,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             if (exercises[exerciseType]!.contains('time'))
               const Text(
                 'Time',
@@ -167,11 +237,34 @@ class ActivityWidget extends ConsumerWidget {
                       'Weight',
                       style: TextStyle(fontSize: 20),
                     ),
-                    SizedBox(width: 20),
-                    ElevatedButton(onPressed: () {}, child: Text('hi'))
+                    SizedBox(
+                        width: 200,
+                        child: TextFormField(
+                          controller: weightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true), // Numeric keyboard
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(
+                                r'^\d*\.?\d*$')), // Allow only numbers and a decimal point
+                          ],
+                          decoration: const InputDecoration(
+                            labelText: "Enter a decimal number",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a number';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Invalid number';
+                            }
+                            return null;
+                          },
+                        )),
+                    const SizedBox(width: 20)
                   ]),
             const SizedBox(width: 10),
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width - 40,
               child: TextFormField(
                 autofocus: true,
@@ -191,8 +284,18 @@ class ActivityWidget extends ConsumerWidget {
                       .read(workoutDraftNotifier.notifier)
                       .deleteActivity(activity);
                 },
-                icon: const Icon(Icons.delete_outline_rounded),
-                label: const Text('Delete'))
+                style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+                    foregroundColor: Colors.black),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.black,
+                ),
+                label: const Text(
+                  'Delete',
+                  style: TextStyle(fontSize: 16),
+                ))
           ],
         ),
       )
