@@ -19,21 +19,17 @@ Future<void> insertQuery(String query, Map<String, dynamic> dictionary) async {
 // READ
 Future<List<List<dynamic>>> readQuery(String query) async {
   List<List<dynamic>> results = await connection.query(query);
-  return Results;
+  return results;
 }
 
 // UPDATE
-Future<void> updateQuery(String query, Map dictionary) async {
-  int affectedRows = await connection.execute(
-      query,
-    substitutionValues: {
-      dictionary
-    },
-  );
+Future<void> updateQuery(String query, Map<String, dynamic> dictionary) async {
+  int affectedRows =
+      await connection.execute(query, substitutionValues: dictionary);
 }
 
 // DELETE
-Future<Void> deleteQuery(String query, Map<String, dynamic> values) async {
+Future<void> deleteQuery(String query, Map<String, dynamic> values) async {
   int affectedRows = await connection.execute(
     query,
     substitutionValues: values,
