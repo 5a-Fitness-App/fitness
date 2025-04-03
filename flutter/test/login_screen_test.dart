@@ -1,4 +1,4 @@
-import 'package:fitness_app/login_screen.dart';
+import 'package:fitness_app/frontend/states/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
