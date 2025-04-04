@@ -1,19 +1,28 @@
+import 'package:fitness_app/backend/provider/post_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:fitness_app/frontend/states/index.dart';
-import 'package:intl/intl.dart';
 
-class HomePage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // FriendsWorkouts friendsWorkouts = ref.watch(friendsWorkoutsNotifier);
+
     return Scaffold(
       backgroundColor: const Color(0xFFEFEFEF),
       body: SingleChildScrollView(
@@ -31,28 +40,35 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
 
               // dummy data to be replaced with data from backend
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: fetchPosts(),
+              FutureBuilder<List<Workout>>(
+                future: ref
+                    .read(friendsWorkoutsNotifier.notifier)
+                    .getFriendsWorkouts()
+                    .then((_) {
+                  return ref.read(friendsWorkoutsNotifier).workouts;
+                }),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("No posts yet."));
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No workouts yet!'));
                   }
 
                   return Column(
-                    children: snapshot.data!.map((post) {
+                    children: snapshot.data!.map((workout) {
                       return _Post(
-                        username: post['username'],
-                        description: post['description'],
-                        date: post['date'],
-                        workoutType: post['workoutType'],
-                        duration: post['duration'],
-                        exerciseCount: post['exerciseCount'],
-                        likes: post['likes'],
-                        comments: post['comments'],
-                      );
+                          username: workout.workoutUserName ?? "Unknown user",
+                          workoutTitle: workout.workoutTitle ?? "Untitled"
+                          // description: post['description'],
+                          // date: post['date'],
+                          // workoutType: post['workoutType'],
+                          // duration: post['duration'],
+                          // exerciseCount: post['exerciseCount'],
+                          // likes: post['likes'],
+                          // comments: post['comments'],
+                          );
                     }).toList(),
                   );
                 },
@@ -197,27 +213,30 @@ class _HomePageState extends State<HomePage> {
   //  post  widget
   Widget _Post({
     required String username,
-    required String description,
-    required String date,
-    required String workoutType,
-    required int duration,
-    required int exerciseCount,
-    required int likes,
-    required int comments,
-  }) {
-    String formattedTime;
-    final DateTime postTime = DateTime.parse(date);
-    final Duration difference = DateTime.now().difference(postTime);
+    required String workoutTitle,
 
-    if (difference.inMinutes < 1) {
-      formattedTime = 'Just now';
-    } else if (difference.inHours < 1) {
-      formattedTime = '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      formattedTime = '${difference.inHours}h ago';
-    } else {
-      formattedTime = DateFormat('d MMMM y').format(postTime);
-    }
+    // required String username,
+    // required String description,
+    // required String date,
+    // required String workoutType,
+    // required int duration,
+    // required int exerciseCount,
+    // required int likes,
+    // required int comments,
+  }) {
+    // String formattedTime;
+    // final DateTime postTime = DateTime.parse(date);
+    // final Duration difference = DateTime.now().difference(postTime);
+
+    // if (difference.inMinutes < 1) {
+    //   formattedTime = 'Just now';
+    // } else if (difference.inHours < 1) {
+    //   formattedTime = '${difference.inMinutes}m ago';
+    // } else if (difference.inHours < 24) {
+    //   formattedTime = '${difference.inHours}h ago';
+    // } else {
+    //   formattedTime = DateFormat('d MMMM y').format(postTime);
+    // }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -241,54 +260,27 @@ class _HomePageState extends State<HomePage> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          Text(description),
-          const SizedBox(height: 8),
-          Text(
-            formattedTime,
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('❤️ $likes   💬 $comments'),
-              TextButton(
-                onPressed: () {
-                  // View workout detail
-                },
-                child: const Text('View Workout'),
-              ),
-            ],
-          ),
+          Text(workoutTitle),
+          // const SizedBox(height: 8),
+          // Text(
+          //   formattedTime,
+          //   style: const TextStyle(color: Colors.grey, fontSize: 12),
+          // ),
+          // const SizedBox(height: 12),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     // Text('❤️ $likes   💬 $comments'),
+          //     TextButton(
+          //       onPressed: () {
+          //         // View workout detail
+          //       },
+          //       child: const Text('View Workout'),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
   }
-}
-
-// replace with backend logic
-Future<List<Map<String, dynamic>>> fetchPosts() async {
-  await Future.delayed(const Duration(seconds: 1));
-  return [
-    {
-      'username': 'FitFish1',
-      'description': 'Morning Run',
-      'date': '2025-01-15T06:30:00',
-      'workoutType': 'Cardio',
-      'duration': 45,
-      'exerciseCount': 4,
-      'likes': 3,
-      'comments': 1,
-    },
-    {
-      'username': 'FitFish2',
-      'description': 'Strength Training',
-      'date': '2025-01-18T09:00:00',
-      'workoutType': 'Strength',
-      'duration': 60,
-      'exerciseCount': 5,
-      'likes': 5,
-      'comments': 2,
-    }
-  ];
 }
