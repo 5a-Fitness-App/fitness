@@ -5,7 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 
 void main() {
   //Verify the presence of all UI elements
-  testWidgets('Home Screen UI elements are displayed',
+  testWidgets('Home Page UI elements are displayed',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomePage()));
 
