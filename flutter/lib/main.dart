@@ -4,8 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fitness_app/frontend/states/login_screen.dart';
 
+import 'package:fitness_app/backend/services/db_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await dbService.init();
 
   runApp(const ProviderScope(child: MyApp()));
 }

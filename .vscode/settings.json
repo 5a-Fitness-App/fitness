@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/fitness/flutter/windows"
+    "cmake.sourceDirectory": "D:/fitness/flutter/windows",
+    "cmake.ignoreCMakeListsMissing": true
 }

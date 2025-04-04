@@ -43,7 +43,7 @@ Future<void> getUserById(int userId) async {
   );
 
   if (results.isEmpty) {
-    print('User not f children ound ❌');
+    print('User not found ❌');
   } else {
     final row = results.first;
     print('ID: ${row[0]}, Name: ${row[1]}, Email: ${row[4]}');
