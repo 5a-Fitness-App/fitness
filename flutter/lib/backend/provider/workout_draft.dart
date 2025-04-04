@@ -47,8 +47,6 @@ class ActivityField {
         incline: incline ?? this.incline,
         speed: speed ?? this.speed);
   }
-
-  void editTime() {}
 }
 
 class WorkoutDraft {
@@ -79,10 +77,24 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     return state.activities;
   }
 
-  void addActivity(ActivityField activity) {
-    // if (activity = re)
+  void addActivity(ActivityField exerciseType) {
+    Map<String, List<String>> exercises = {
+      'Cardio': ['time', 'speed', 'distance'],
+      'Strength': ['reps', 'weight'],
+      'Swimming': ['time', 'distance']
+    };
+
+    print(exerciseType.exerciseType);
+
     List<ActivityField> activities = state.activities;
-    activities.add(activity);
+
+    if (exercises[exerciseType.exerciseType]!.contains('reps')) {
+      exerciseType = exerciseType.copyWith(reps: 0);
+    } else {
+      print('null');
+    }
+
+    activities.add(exerciseType);
     state = state.copyWith(activites: activities);
     print("activity added");
   }
@@ -92,6 +104,30 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     activities.remove(activity);
     state = state.copyWith(activites: activities);
     print("activity removed");
+  }
+
+  void incrementReps(ActivityField activity) {
+    List<ActivityField> activities = state.activities.map((a) {
+      if (a == activity) {
+        return a.copyWith(reps: (a.reps ?? 0) + 1);
+      }
+      return a;
+    }).toList();
+
+    state = state.copyWith(activites: activities);
+  }
+
+  void decrementReps(ActivityField activity) {
+    if (activity.reps! > 0) {
+      List<ActivityField> activities = state.activities.map((a) {
+        if (a == activity) {
+          return a.copyWith(reps: (a.reps ?? 0) - 1);
+        }
+        return a;
+      }).toList();
+
+      state = state.copyWith(activites: activities);
+    }
   }
 
   String post() {

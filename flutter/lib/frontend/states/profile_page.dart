@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fitness_app/backend/services/db_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -9,6 +11,42 @@ class ProfilePage extends StatefulWidget {
 
 class ProfilePageState extends State<ProfilePage> {
   bool dashBoardMode = true;
+  List<Map<String, dynamic>> user = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    getUser();
+  }
+
+  Future<void> getUser() async {
+    const query = 'SELECT * FROM users WHERE user_ID = 1;';
+
+    try {
+      final result = await dbService.readQuery(query);
+
+      if (result.isNotEmpty) {
+        setState(() {
+          user = result
+              .map((row) => {
+                    'user_id': row[0], // Ensure the correct column is used
+                    'user_name': row[1], // Ensure the correct column is used
+                  })
+              .toList();
+        });
+      } else {
+        setState(() {
+          user = []; // Empty list if no user data found
+        });
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      setState(() {
+        user = []; // Empty list on error
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,19 +76,19 @@ class ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(width: 20),
-                  const Expanded(
+                  Expanded(
                       child: Column(
                     // mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "UserName",
-                        style: TextStyle(
+                        user.isNotEmpty ? user[0]['user_name'] : 'Loading...',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
+                      const Text(
                         "Biography",
                         style: TextStyle(
                           fontSize: 15,
@@ -116,22 +154,22 @@ class ProfilePageState extends State<ProfilePage> {
 }
 
 class Dashboard extends StatelessWidget {
-  Dashboard({super.key});
+  const Dashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [Text('Dashboard')],
     );
   }
 }
 
 class MyPosts extends StatelessWidget {
-  MyPosts({super.key});
+  const MyPosts({super.key});
 
   @override
   Widget build(BuildContext) {
-    return Column(
+    return const Column(
       children: [Text('posts')],
     );
   }
