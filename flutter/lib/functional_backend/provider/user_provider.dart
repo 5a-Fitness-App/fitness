@@ -1,37 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fitness_app/backend/services/db_service.dart';
+import 'package:fitness_app/functional_backend/services/db_service.dart';
+
+import 'package:fitness_app/functional_backend/models/user.dart';
 
 final userProvider = StateProvider<int>((ref) => 1);
 
 final userNotifier = StateNotifierProvider<UserNotifier, User>((ref) {
   return UserNotifier();
 });
-
-class User {
-  int? userID;
-  String userName;
-
-  String userEmail;
-
-  // String userProfilePhoto;
-  // String userDOB;
-  // String user_weight;
-  // Stirng accountCreationDate;
-
-  User({
-    this.userID,
-    this.userName = '',
-    this.userEmail = '',
-  });
-
-  User copyWith({int? userID, String? userName, String? userEmail}) {
-    return User(
-      userID: userID ?? this.userID,
-      userName: userName ?? this.userName,
-      userEmail: userEmail ?? this.userEmail,
-    );
-  }
-}
 
 class UserNotifier extends StateNotifier<User> {
   UserNotifier() : super(User());
@@ -79,5 +55,15 @@ class UserNotifier extends StateNotifier<User> {
       print('Error during login: $e');
       return 'An unexpected error occurred.';
     }
+  }
+
+  void logOut() {
+    state = state.copyWith(
+        userID: null, userName: null, userEmail: '', userWorkouts: []);
+  }
+
+  void register(String email, String username, String password) {
+    // TODO: move this function to somewhere more appropriate
+    // TODO: build register() function
   }
 }
