@@ -1,55 +1,29 @@
+import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/backend/services/db_service.dart';
+import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fitness_app/functional_backend/models/user.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
   ProfilePageState createState() => ProfilePageState();
 }
 
-class ProfilePageState extends State<ProfilePage> {
+class ProfilePageState extends ConsumerState<ProfilePage> {
   bool dashBoardMode = true;
-  List<Map<String, dynamic>> user = [];
+  // List<Map<String, dynamic>> userWorkouts= [];
 
   @override
   void initState() {
     super.initState();
-
-    getUser();
-  }
-
-  Future<void> getUser() async {
-    const query = 'SELECT * FROM users WHERE user_ID = 1;';
-
-    try {
-      final result = await dbService.readQuery(query);
-
-      if (result.isNotEmpty) {
-        setState(() {
-          user = result
-              .map((row) => {
-                    'user_id': row[0], // Ensure the correct column is used
-                    'user_name': row[1], // Ensure the correct column is used
-                  })
-              .toList();
-        });
-      } else {
-        setState(() {
-          user = []; // Empty list if no user data found
-        });
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-      setState(() {
-        user = []; // Empty list on error
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    User user = ref.watch(userNotifier);
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -82,14 +56,14 @@ class ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.isNotEmpty ? user[0]['user_name'] : 'Loading...',
+                        user.userName,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const Text(
-                        "Biography",
+                        "user.biography",
                         style: TextStyle(
                           fontSize: 15,
                         ),
@@ -159,6 +133,7 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Column(
+      // TODO: implement acheivements
       children: [Text('Dashboard')],
     );
   }
@@ -170,6 +145,7 @@ class MyPosts extends StatelessWidget {
   @override
   Widget build(BuildContext) {
     return const Column(
+      // TODO: implement posts
       children: [Text('posts')],
     );
   }

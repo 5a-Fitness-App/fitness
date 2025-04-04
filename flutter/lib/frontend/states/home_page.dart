@@ -1,10 +1,12 @@
-import 'package:fitness_app/backend/provider/post_provider.dart';
+import 'package:fitness_app/functional_backend/provider/friends_workouts_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:fitness_app/frontend/states/index.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:fitness_app/functional_backend/models/workout.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
