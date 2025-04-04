@@ -12,10 +12,10 @@ class DbService {
 
     _connection = await Connection.open(
       Endpoint(
-        host: 'localhost',
+        host: '192.168.0.10',
         database: 'fitness',
-        username: 'jennydoan',
-        password: 'Elgado29#',
+        username: 'jennydoan', //change this to your postgres username
+        password: 'Elgado29#', //change this to your postgres password
       ),
       settings: const ConnectionSettings(sslMode: SslMode.disable),
     );
