@@ -19,6 +19,7 @@ Future<void> insertQuery(String query, Map<String, dynamic> dictionary) async {
 // READ
 Future<List<List<dynamic>>> readQuery(String query) async {
   List<List<dynamic>> results = await connection.query(query);
+  print(results);
   return results;
 }
 
@@ -34,4 +35,18 @@ Future<void> deleteQuery(String query, Map<String, dynamic> values) async {
     query,
     substitutionValues: values,
   );
+}
+
+Future<void> main() async {
+  try {
+    await connection.open();
+    print('Connected to PostgreSQL ✅');
+
+    await readQuery("SELECT * FROM USERS");
+  } catch (e) {
+    print('Error connecting to PostgreSQL ❌: $e');
+  } finally {
+    await connection.close();
+    print('Connection closed 🔒');
+  }
 }

@@ -1,11 +1,13 @@
+import "connect_database.dart";
+
 /// 1. Authenticate User (Login)
 String login = '''SELECT user_ID, user_name, user_email, user_password 
 FROM users 
-WHERE user_email = 'user@example.com';
+WHERE user_email = 'john@example.com';
 ''';
 // 2. Check if Email Exists (Before Login or Registration)
 String emailCheck =
-    '''SELECT user_ID FROM users WHERE user_email = 'user@example.com';''';
+    '''SELECT user_ID FROM users WHERE user_email = 'john@example.com';''';
 
 // 3. Register a New User (Sign Up)
 String signUp =
@@ -32,4 +34,16 @@ WHERE user_email = 'user@example.com';''';
 String deleteUser =
     '''DELETE FROM users WHERE user_ID = 1;  -- Replace with actual user_ID''';
 
-void main(List<String> args) {}
+Future<void> main() async {
+  try {
+    await connection.open();
+    print('Connected to PostgreSQL ✅');
+
+    await readQuery(login);
+  } catch (e) {
+    print('Error connecting to PostgreSQL ❌: $e');
+  } finally {
+    await connection.close();
+    print('Connection closed 🔒');
+  }
+}
