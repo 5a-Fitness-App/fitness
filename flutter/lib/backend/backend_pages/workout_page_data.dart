@@ -33,6 +33,6 @@ WHERE
     AND w.workout_date_time >= CURRENT_DATE - INTERVAL '3 days'
 ORDER BY 
     w.workout_date_time DESC;
-'''
+''';
 
-readQuery(workoutListQuery)
+readQuery(workoutListQuery);
