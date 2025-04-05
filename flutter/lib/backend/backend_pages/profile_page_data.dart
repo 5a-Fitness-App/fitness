@@ -1,3 +1,5 @@
+import '../connect_database.dart';
+
 profileDataQuery =
 '''
 SELECT 
@@ -40,4 +42,6 @@ WHERE
     u.user_ID = $user_id -- This will be replaced by the actual user_id dynamically
 GROUP BY 
     u.user_ID;
-'''
+''';
+
+readQuery(profileDataQuery);
