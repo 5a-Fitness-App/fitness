@@ -1,6 +1,7 @@
-import '../connect_database.dart';
+import 'connect_database.dart';
 
-workoutListQuery =
+int user_id = 0;
+String workoutListQuery =
 '''
 SELECT 
     a.activity_ID,
