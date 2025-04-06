@@ -1,6 +1,6 @@
-import '../connect_database.dart';
-
-profileDataQuery =
+import 'connect_database.dart';
+int user_id = 0;
+String profileDataQuery =
 '''
 SELECT 
     u.user_ID,
