@@ -1,14 +1,16 @@
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
   LoginScreenState createState() => LoginScreenState();
 }
 
-class LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends ConsumerState<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -27,20 +29,98 @@ class LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void login() async {
+    setState(() {
+      emailError = null; // Reset errors before validating
+      passwordError = null;
+    });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+    try {
+      if (formKey.currentState!.validate()) {
+        String? errorMessage = await ref
+            .read(userNotifier.notifier)
+            .login(emailController.text.trim(), passwordController.text.trim());
+
+        if (errorMessage == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text('Welcome back, ${emailController.text.trim()}')),
+            );
+
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) {
+              return const Index();
+            }));
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content:
+                      Text('Login failed. Please check your credentials.')),
+            );
+          }
+
+          setState(() {
+            if (errorMessage == 'Email or password is incorrect') {
+              emailError = '';
+              passwordError =
+                  errorMessage; // Show error message in the password field
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An unexpected error occurred.')),
+        );
+      }
+    }
   }
 
-  void login() {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return const Index();
-    }));
-  }
+  void register() async {}
+  //   setState(() {
+  //     emailError = null; // Reset errors before validating
+  //     passwordError = null;
+  //   });
 
-  void register() {}
+  //   try {
+  //     String? errorMessage = await registerEmail(
+  //         emailController.text.trim(), passwordController.text.trim());
+
+  //     if (errorMessage == null) {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(
+  //               content:
+  //                   Text('Account created for ${emailController.text.trim()}')),
+  //         );
+  //       }
+  //     } else {
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Registration failed: Please try again')),
+  //         );
+  //       }
+
+  //       if (errorMessage == 'An account with this email already exists') {
+  //         setState(() {
+  //           emailError =
+  //               errorMessage; // Show error message in the password field
+  //         });
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('An unexpected error occurred.')),
+  //       );
+  //     }
+  //   }
+  // }
 
   Widget buildForm() {
     return Form(
@@ -65,12 +145,14 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'Please enter your email';
                   }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
+                  if (!RegExp(
+                          r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
+                      .hasMatch(value)) {
+                    return 'Enter a valid email address';
                   }
-                  //if password incorrect
+                  //if (email notFound)
                   return null;
                 },
               )),
