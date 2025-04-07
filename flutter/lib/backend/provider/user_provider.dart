@@ -5,7 +5,7 @@ class DatabaseService {
   late final connection = PostgreSQLConnection(
     'localhost',
     5432,
-    'test1',
+    'fitnessDatabase',
     username: 'postgres',
     password: 'abc123',
   );
