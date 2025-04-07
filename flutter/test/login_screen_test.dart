@@ -23,9 +23,8 @@ void main() {
     expect(find.text('Submit'), findsOneWidget);
   });
 
-  // Verify that empty fields show error messages if the user tries to submit
-  testWidgets('Login validation: empty fields show errors',
-      (WidgetTester tester) async {
+  // Verify that empty fields show error messages if the user tries to submit,
+  testWidgets('Empty fields show errors', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
 
     // Tap submit button without entering anything
@@ -49,7 +48,7 @@ void main() {
     expect(find.text('Please enter your email'), findsOneWidget);
   });
 
-  // Verify if Forgot Password sends an email and link
+  // Verify if Forgot Password sends an email to the user
   testWidgets('Forgot Password email test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
 
