@@ -1,7 +1,7 @@
-import '../connect_database.dart';
+import 'connect_database.dart';
 
-profileDataQuery =
-'''
+int user_id = 0;
+String profileDataQuery = '''
 SELECT 
     u.user_ID,
     u.user_name,
@@ -44,4 +44,16 @@ GROUP BY
     u.user_ID;
 ''';
 
-readQuery(profileDataQuery);
+Future<void> main() async {
+  try {
+    await connection.open();
+    print('Connected to PostgreSQL ✅');
+
+    await readQuery("SELECT * from activities");
+  } catch (e) {
+    print('Error connecting to PostgreSQL ❌: $e');
+  } finally {
+    await connection.close();
+    print('Connection closed 🔒');
+  }
+}

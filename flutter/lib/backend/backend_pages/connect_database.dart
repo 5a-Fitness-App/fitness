@@ -3,7 +3,7 @@ import 'package:postgres/postgres.dart';
 final connection = PostgreSQLConnection(
   'localhost',
   5432,
-  'test2',
+  'fitnessdatabase',
   username: 'postgres',
   password: 'abc123',
 );

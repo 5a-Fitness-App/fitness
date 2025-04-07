@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/frontend/states/profile_page.dart';
 
 void main() {
-  //Verify the presence of all UI elements
+  // Verify the presence of all UI elements
   testWidgets('Profile Page UI elements are displayed',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: ProfilePage()));

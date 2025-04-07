@@ -1,7 +1,7 @@
-import '../connect_database.dart';
+import 'connect_database.dart';
 
-workoutListQuery =
-'''
+int user_id = 2;
+String workoutListQuery = '''
 SELECT 
     a.activity_ID,
     a.workout_ID,
@@ -12,8 +12,6 @@ SELECT
     a.activity_elevation,
     w.workout_date_time,
     w.workout_title,
-    w.workout_duration,
-    w.workout_calories_burnt,
     u.user_name AS workout_user_name,
     e.exercise_name  -- Adding exercise name to the query
 FROM 
@@ -30,9 +28,50 @@ WHERE
         FROM friends 
         WHERE user_ID = $user_id
     )
-    AND w.workout_date_time >= CURRENT_DATE - INTERVAL '3 days'
+    AND w.workout_date_time >= CURRENT_DATE - INTERVAL '20 days'
 ORDER BY 
     w.workout_date_time DESC;
 ''';
 
-readQuery(workoutListQuery);
+String workoutQuerryAll = '''SELECT 
+    a.activity_ID,
+    a.workout_ID,
+    w.user_ID,
+    a.activity_name,
+    a.activity_type,
+    a.activity_distance,
+    a.activity_elevation,
+    w.workout_date_time,
+    w.workout_title,
+    u.user_name AS workout_user_name,
+    e.exercise_name  -- Adding exercise name to the query
+FROM 
+    activities a
+JOIN 
+    workouts w ON a.workout_ID = w.workout_ID
+JOIN 
+    users u ON w.user_ID = u.user_ID
+JOIN 
+    exercises e ON a.exercise_ID = e.exercise_ID  -- Join with exercises table to get exercise name
+WHERE 
+    w.user_ID IN (
+        SELECT friend_ID 
+        FROM friends 
+        WHERE user_ID = $user_id
+    )
+ORDER BY 
+    w.workout_date_time DESC;
+''';
+Future<void> main() async {
+  try {
+    await connection.open();
+    print('Connected to PostgreSQL ✅');
+
+    await readQuery(workoutListQuery);
+  } catch (e) {
+    print('Error connecting to PostgreSQL ❌: $e');
+  } finally {
+    await connection.close();
+    print('Connection closed 🔒');
+  }
+}

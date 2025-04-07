@@ -1,5 +1,6 @@
-CREATE DATABASE fitnessDatabase;
-\c fitnessDatabase;
+-- Create and connect to database
+CREATE DATABASE fitnessdatabase;
+\c fitnessdatabase;
 
 -- ENUM types
 CREATE TYPE user_profile_photo_enum AS ENUM ('fish', 'shark', 'crab', 'dolphin');
@@ -17,7 +18,7 @@ CREATE TABLE users (
     user_dob DATE NOT NULL,
     user_weight INT NOT NULL CHECK (user_weight > 0),
     user_units units_enum NOT NULL,
-    users_account_creation_date DATE NOT NULL, -- Fixed period typo
+    users_account_creation_date DATE NOT NULL,
     user_email VARCHAR(100) NOT NULL UNIQUE,
     user_password VARCHAR(255) NOT NULL
 );
@@ -69,13 +70,13 @@ CREATE TABLE activities (
     activity_name VARCHAR(25) NOT NULL,
     activity_type activity_enum NOT NULL,
     activity_notes TEXT,
-    activity_reps INT NOT NULL,
-    activity_time TIMESTAMP NOT NULL,
-    activity_weight_metric units_enum NOT NULL,
+    activity_reps INT CHECK (activity_reps >= 0),
+    activity_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activity_weight_metric units_enum,
     activity_incline INT,
-    activity_distance_metric distance_metric_enum NOT NULL, -- fixed typo "metic"
-    activity_distance INT NOT NULL CHECK (activity_distance >= 0),
-    activity_elevation INT NOT NULL CHECK (activity_elevation >= 0),
+    activity_distance_metric distance_metric_enum,
+    activity_distance INT CHECK (activity_distance >= 0),
+    activity_elevation INT CHECK (activity_elevation >= 0),
     FOREIGN KEY (workout_ID) REFERENCES workouts(workout_ID) ON DELETE CASCADE,
     FOREIGN KEY (exercise_ID) REFERENCES exercises(exercise_ID) ON DELETE CASCADE
 );
@@ -92,7 +93,7 @@ CREATE TABLE achievements (
 CREATE TABLE comments (
     comment_ID SERIAL PRIMARY KEY,
     user_ID INT NOT NULL,
-    workout_ID INT NOT NULL, -- added to make FK reference work
+    workout_ID INT NOT NULL,
     content TEXT NOT NULL,
     date_commented TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_ID) REFERENCES users(user_ID) ON DELETE CASCADE,
@@ -128,18 +129,24 @@ CREATE TABLE workout_comments (
     FOREIGN KEY (workout_ID) REFERENCES workouts(workout_ID) ON DELETE CASCADE,
     FOREIGN KEY (comment_ID) REFERENCES comments(comment_ID) ON DELETE CASCADE
 );
-<<<<<<< HEAD
 
-
-
+-- === INSERT EXERCISES ===
+-- USERS
 INSERT INTO users (user_name, user_profile_photo, user_bio, user_dob, user_weight, user_units, users_account_creation_date, user_email, user_password) VALUES
-('Alice', 'fish', 'Loves swimming and strength training.', '1990-05-12', 65, 'kg', '2024-01-10', 'alice@example.com', 'hashedpassword1'),
-('Bob', 'shark', 'Runner and yoga enthusiast.', '1985-09-30', 75, 'kg', '2024-02-15', 'bob@example.com', 'hashedpassword2'),
-('Charlie', 'crab', 'Cardio king.', '1992-12-20', 80, 'lb', '2024-03-01', 'charlie@example.com', 'hashedpassword3'),
-('Diana', 'dolphin', 'Weightlifter and food lover.', '1995-07-18', 70, 'kg', '2024-03-20', 'diana@example.com', 'hashedpassword4'),
-('Eli', 'fish', 'All about meditation and core strength.', '1998-04-22', 60, 'kg', '2024-04-01', 'eli@example.com', 'hashedpassword5');
+('Alice', 'fish', 'Loves swimming and strength training.', '1990-05-12', 65, 'kg', '2024-01-10', 'alice@example.com', 'pass1'),
+('Bob', 'shark', 'Runner and yoga enthusiast.', '1985-09-30', 75, 'kg', '2024-02-15', 'bob@example.com', 'pass2'),
+('Charlie', 'crab', 'Cardio king.', '1992-12-20', 80, 'lb', '2024-03-01', 'charlie@example.com', 'pass3'),
+('Diana', 'dolphin', 'Weightlifter and foodie.', '1995-07-18', 70, 'kg', '2024-03-20', 'diana@example.com', 'pass4'),
+('Eli', 'fish', 'Meditation and core master.', '1998-04-22', 60, 'kg', '2024-04-01', 'eli@example.com', 'pass5');
 
+-- FRIENDS
+INSERT INTO friends (user_ID, friend_ID) VALUES
+(1, 2), (2, 1),
+(1, 3), (3, 1),
+(2, 4), (4, 2),
+(3, 5), (5, 3);
 
+-- EXERCISES (static set to use in activities)
 INSERT INTO exercises (exercise_type, exercise_name) VALUES
 ('legs', 'Squats'),
 ('glutes', 'Hip Thrusts'),
@@ -151,65 +158,71 @@ INSERT INTO exercises (exercise_type, exercise_name) VALUES
 ('core', 'Plank'),
 ('cardio', 'Running');
 
-
+-- WORKOUTS (5 per user, so 25 total)
+-- Format: (user_ID, workout_title, workout_date_time, workout_public)
 INSERT INTO workouts (user_ID, workout_title, workout_date_time, workout_public) VALUES
-(1, 'Leg Day', '2025-04-01 09:00:00', true),
-(1, 'Upper Body Blast', '2025-04-02 10:00:00', false),
-(1, 'Core Strength', '2025-04-03 11:00:00', true),
-(1, 'Cardio Burn', '2025-04-04 08:00:00', false),
-(2, 'Morning Yoga', '2025-04-01 07:00:00', true),
-(2, 'Strength Push', '2025-04-02 12:00:00', false),
-(2, 'Long Run', '2025-04-03 06:00:00', true),
-(2, 'Back and Biceps', '2025-04-04 09:30:00', false),
-(3, 'Cardio Madness', '2025-04-01 17:00:00', true),
-(3, 'Full Body HIIT', '2025-04-02 17:00:00', true),
-(3, 'Core & Cardio', '2025-04-03 17:00:00', true),
-(3, 'Run + Plank', '2025-04-04 17:00:00', true),
-(4, 'Chest Power', '2025-04-01 14:00:00', false),
-(4, 'Glute Gains', '2025-04-02 15:00:00', true),
-(4, 'Arm Strength', '2025-04-03 13:00:00', false),
-(4, 'Yoga Recovery', '2025-04-04 16:00:00', true),
-(5, 'Core and Meditation', '2025-04-01 10:00:00', true),
-(5, 'Stretch and Strength', '2025-04-02 10:30:00', true),
-(5, 'Run & Reflect', '2025-04-03 07:00:00', true),
-(5, 'Total Body Flow', '2025-04-04 11:00:00', false);
-
-
-
-INSERT INTO activities (
-    workout_ID, exercise_ID, activity_name, activity_type, activity_notes, activity_reps, activity_time,
-    activity_weight_metric, activity_incline, activity_distance_metric, activity_distance, activity_elevation
-) VALUES
 -- Alice
-(1, 1, 'Back Squats', 'strength', 'Focus on form', 10, '2025-04-01 09:05:00', 'kg', 0, 'km', 0, 0),
-(1, 2, 'Hip Thrusts', 'strength', 'Use resistance bands', 12, '2025-04-01 09:15:00', 'kg', 0, 'km', 0, 0),
-(2, 3, 'Bench Press', 'strength', '3 sets, heavy', 8, '2025-04-02 10:10:00', 'kg', 0, 'km', 0, 0),
-(2, 5, 'Overhead Press', 'strength', 'Stand firm', 10, '2025-04-02 10:20:00', 'kg', 0, 'km', 0, 0),
-(3, 8, 'Plank Hold', 'core', '1-minute hold', 1, '2025-04-03 11:10:00', 'kg', 0, 'km', 0, 0),
-(4, 9, 'Treadmill Run', 'cardio', 'Moderate pace', 1, '2025-04-04 08:05:00', 'kg', 1, 'km', 5, 50),
+(1, 'Legs Day', '2025-04-01 09:00:00', true),
+(1, 'Core + Cardio', '2025-04-02 10:00:00', false),
+(1, 'Strength Push', '2025-04-03 11:00:00', true),
+(1, 'Recovery Flow', '2025-04-04 12:00:00', false),
+(1, 'Upper Body', '2025-04-05 13:00:00', true),
 
 -- Bob
-(5, 9, 'Sun Salutations', 'yoga', 'Flow series', 1, '2025-04-01 07:10:00', 'kg', 0, 'km', 0, 0),
-(6, 1, 'Squats', 'strength', '5x5', 5, '2025-04-02 12:10:00', 'kg', 0, 'km', 0, 0),
-(7, 9, 'Trail Run', 'cardio', 'Outside run', 1, '2025-04-03 06:15:00', 'kg', 2, 'Miles', 3, 70),
-(8, 6, 'Bicep Curls', 'strength', '3 sets of 10', 10, '2025-04-04 09:40:00', 'kg', 0, 'km', 0, 0),
+(2, 'Morning Run', '2025-04-01 07:00:00', true),
+(2, 'Chest and Back', '2025-04-02 08:00:00', false),
+(2, 'Leg Pump', '2025-04-03 09:00:00', true),
+(2, 'Core Engage', '2025-04-04 10:00:00', false),
+(2, 'Stretch Out', '2025-04-05 11:00:00', true),
 
 -- Charlie
-(9, 9, 'Spin Class', 'cardio', '45 minutes', 1, '2025-04-01 17:10:00', 'kg', 3, 'km', 15, 100),
-(10, 1, 'Jump Squats', 'cardio', 'Explosive power', 15, '2025-04-02 17:20:00', 'kg', 0, 'km', 0, 0),
-(11, 8, 'Plank March', 'core', 'Engage abs', 2, '2025-04-03 17:30:00', 'kg', 0, 'km', 0, 0),
-(12, 9, 'Evening Jog', 'cardio', 'Wind down', 1, '2025-04-04 17:40:00', 'kg', 0, 'Miles', 2, 30),
+(3, 'Cardio Burn', '2025-04-01 17:00:00', true),
+(3, 'Fast Core', '2025-04-02 17:30:00', true),
+(3, 'Spin & Sprint', '2025-04-03 18:00:00', true),
+(3, 'Stair Climb', '2025-04-04 18:30:00', true),
+(3, 'Quick Run', '2025-04-05 19:00:00', true),
 
 -- Diana
-(13, 3, 'Flat Bench Press', 'strength', 'Max out', 5, '2025-04-01 14:05:00', 'kg', 0, 'km', 0, 0),
-(14, 2, 'Barbell Glute Bridges', 'strength', 'Activate glutes', 12, '2025-04-02 15:15:00', 'kg', 0, 'km', 0, 0),
-(15, 7, 'Tricep Dips', 'strength', 'Bodyweight', 10, '2025-04-03 13:20:00', 'kg', 0, 'km', 0, 0),
-(16, 4, 'Downward Dog Flow', 'yoga', 'Breathing focus', 1, '2025-04-04 16:05:00', 'kg', 0, 'km', 0, 0),
+(4, 'Glute Blast', '2025-04-01 14:00:00', true),
+(4, 'Upper Strength', '2025-04-02 15:00:00', true),
+(4, 'Push Day', '2025-04-03 16:00:00', false),
+(4, 'Deadlifts + Core', '2025-04-04 17:00:00', false),
+(4, 'Mobility & Balance', '2025-04-05 18:00:00', true),
 
 -- Eli
-(17, 8, 'Plank Variations', 'core', 'Hold each 30s', 4, '2025-04-01 10:10:00', 'kg', 0, 'km', 0, 0),
-(18, 5, 'Overhead Dumbbell Press', 'strength', 'Light weight', 10, '2025-04-02 10:40:00', 'kg', 0, 'km', 0, 0),
-(19, 9, 'Morning Jog', 'cardio', 'Paced run', 1, '2025-04-03 07:10:00', 'kg', 1, 'km', 3, 40),
-(20, 4, 'Yoga Flow + Meditation', 'meditation', 'End with 10m breathwork', 1, '2025-04-04 11:10:00', 'kg', 0, 'km', 0, 0);
-=======
->>>>>>> 52cea3ab94986d269bb572fc9351094259e38185
+(5, 'Stretch + Core', '2025-04-01 10:00:00', true),
+(5, 'Run & Reflect', '2025-04-02 11:00:00', true),
+(5, 'Core Power', '2025-04-03 12:00:00', true),
+(5, 'Shoulder Focus', '2025-04-04 13:00:00', false),
+(5, 'Evening Calm', '2025-04-05 14:00:00', true);
+
+
+-- Alice (workouts 1–5)
+INSERT INTO activities VALUES
+(DEFAULT, 1, 1, 'Squats', 'strength', 'Heavy sets', 10, '2025-04-01 09:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 1, 8, 'Plank', 'strength', 'Hold for 60s', 1, '2025-04-01 09:20:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 2, 9, 'Running', 'cardio', 'Outdoor jog', 1, '2025-04-02 10:10:00', 'kg', 0, 'km', 3, 50),
+(DEFAULT, 2, 8, 'Plank', 'strength', 'Side plank', 1, '2025-04-02 10:20:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 3, 3, 'Bench Press', 'strength', '3x10', 10, '2025-04-03 11:10:00', 'kg', 0, 'km', 0, 0),
+
+-- Bob (workouts 6–10)
+(DEFAULT, 6, 9, 'Running', 'cardio', 'Morning tempo', 1, '2025-04-01 07:10:00', 'kg', 0, 'km', 5, 60),
+(DEFAULT, 7, 3, 'Bench Press', 'strength', 'Flat press', 8, '2025-04-02 08:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 7, 4, 'Deadlift', 'strength', 'Focus on form', 6, '2025-04-02 08:20:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 8, 1, 'Squats', 'strength', 'High volume', 12, '2025-04-03 09:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 9, 8, 'Plank', 'strength', 'Variation holds', 2, '2025-04-04 10:10:00', 'kg', 0, 'km', 0, 0),
+
+-- Charlie (workouts 11–15)
+(DEFAULT, 11, 9, 'Running', 'cardio', 'Sprint intervals', 1, '2025-04-01 17:10:00', 'kg', 0, 'km', 4, 80),
+(DEFAULT, 12, 8, 'Plank', 'strength', 'Plank to pushup', 3, '2025-04-02 17:40:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 13, 9, 'Running', 'cardio', 'Hill sprints', 1, '2025-04-03 18:10:00', 'kg', 2, 'km', 3, 100),
+
+-- Diana (workouts 16–20)
+(DEFAULT, 16, 2, 'Hip Thrusts', 'strength', 'Glute bridges', 15, '2025-04-01 14:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 17, 5, 'Overhead Press', 'strength', 'Standing press', 8, '2025-04-02 15:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 18, 7, 'Tricep Dips', 'strength', 'Bodyweight dips', 10, '2025-04-03 16:10:00', 'kg', 0, 'km', 0, 0),
+
+-- Eli (workouts 21–25)
+(DEFAULT, 21, 8, 'Plank', 'strength', '4 rounds of 45s', 4, '2025-04-01 10:10:00', 'kg', 0, 'km', 0, 0),
+(DEFAULT, 22, 9, 'Running', 'cardio', 'Jog and cool down', 1, '2025-04-02 11:10:00', 'kg', 0, 'km', 2, 40),
+(DEFAULT, 23, 8, 'Plank', 'strength', 'Side plank sets', 2, '2025-04-03 12:10:00', 'kg', 0, 'km', 0, 0);
