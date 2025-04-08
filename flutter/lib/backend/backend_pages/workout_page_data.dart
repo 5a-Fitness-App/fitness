@@ -1,6 +1,7 @@
 import 'connect_database.dart';
 
 int user_id = 1;
+int workout_Id = 1;
 String workoutListQuery = '''
 SELECT 
     a.activity_ID,
@@ -80,7 +81,10 @@ String getWorkout_IDForUser = '''SELECT workout_ID
 FROM workouts
 WHERE user_ID = $user_id;''';
 
-int workout_id = 1;
+String getActivitiesIdForWorkout = '''SELECT activity_ID
+FROM activities
+WHERE workout_ID = $workout_Id;''';
+
 String activityQuery = '''
 SELECT 
     a.activity_ID,
@@ -88,6 +92,7 @@ SELECT
     w.user_ID,
     a.activity_name,
     a.activity_type,
+    a.activity_notes,
     a.activity_distance,
     a.activity_elevation,
     w.workout_date_time,
@@ -104,7 +109,7 @@ JOIN
     exercises e ON a.exercise_ID = e.exercise_ID
 WHERE 
     w.user_ID = $user_id
-    AND a.workout_ID = $workout_id
+    AND a.workout_ID = $workout_Id
 ORDER BY 
     a.activity_ID;
 ''';
@@ -116,19 +121,19 @@ INSERT INTO activities (
   activity_distance_metric, activity_distance, activity_elevation
 )
 VALUES (
-  @workoutId, @exerciseId, '@activityName', '@activityType', '@notes',
-  @reps, '@activityTime', '@weightMetric', @incline,
-  '@distanceMetric', @distance, @elevation
+  @workoutId, @exerciseId, @activityName, @activityType, @notes,
+  @reps, @activityTime, @weightMetric, @incline,
+  @distanceMetric, @distance, @elevation
 );
 ''';
 
 Map<String, dynamic> activityData = {
-  'workoutId': 0,
-  'exerciseId': 0,
+  'workoutId': 1,
+  'exerciseId': 2,
   'activityName': 'Squats',
   'activityType': 'strength',
-  'notes': '',
-  'reps': 0,
+  'notes': 'test',
+  'reps': 10,
   'activityTime':
       DateTime.now().toIso8601String().split('.').first.replaceFirst('T', ' '),
   'weightMetric': 'kg',
@@ -144,6 +149,9 @@ Future<void> main() async {
     print('Connected to PostgreSQL ✅');
 
     await readQuery(activityQuery);
+    // await insertQuery(insertActivity, activityData);
+    //await readQuery(getActivitiesIdForWorkout);
+
     // await insertQuery(createWorkout, workoutData);
   } catch (e) {
     print('Error connecting to PostgreSQL ❌: $e');
