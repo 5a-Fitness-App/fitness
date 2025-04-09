@@ -19,7 +19,7 @@ class IndexState extends State<Index> {
     ProfilePage(),
   ];
 
-  final pageName = const ['Home', 'Log Workout', 'Profile'];
+  final pageName = const ['Home', 'Profile'];
 
   void openLogWorkoutModal() {
     showModalBottomSheet(
@@ -58,6 +58,8 @@ class IndexState extends State<Index> {
                 offset: Offset(0, 1))
           ]),
           child: BottomNavigationBar(
+            unselectedItemColor: Colors.grey.shade500,
+            selectedItemColor: Colors.black,
             backgroundColor: Colors.white,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(

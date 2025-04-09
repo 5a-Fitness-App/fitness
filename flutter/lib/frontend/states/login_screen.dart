@@ -1,6 +1,6 @@
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/backend/provider/user_provider.dart';
+import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -186,9 +186,9 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
+                  // if (value.length < 6) {
+                  //   return 'Password must be at least 6 characters';
+                  // }
                   //if password incorrect
                   return null;
                 },

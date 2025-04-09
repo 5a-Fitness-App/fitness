@@ -1,5 +1,7 @@
 import 'package:fitness_app/functional_backend/provider/friends_workouts_provider.dart';
+import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_app/functional_backend/models/user.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:fitness_app/frontend/states/index.dart';
@@ -7,6 +9,8 @@ import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fitness_app/functional_backend/models/workout.dart';
+
+import 'package:intl/intl.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -23,68 +27,30 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // FriendsWorkouts friendsWorkouts = ref.watch(friendsWorkoutsNotifier);
+    User user = ref.watch(userNotifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFEFEF),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildStreakBanner(),
-              const SizedBox(height: 24),
-              const Text(
-                'Recent Activity',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-
-              // dummy data to be replaced with data from backend
-              FutureBuilder<List<Workout>>(
-                future: ref
-                    .read(friendsWorkoutsNotifier.notifier)
-                    .getFriendsWorkouts()
-                    .then((_) {
-                  return ref.read(friendsWorkoutsNotifier).workouts;
-                }),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No workouts yet!'));
-                  }
-
-                  return Column(
-                    children: snapshot.data!.map((workout) {
-                      return _Post(
-                          username: workout.workoutUserName ?? "Unknown user",
-                          workoutTitle: workout.workoutTitle ?? "Untitled"
-                          // description: post['description'],
-                          // date: post['date'],
-                          // workoutType: post['workoutType'],
-                          // duration: post['duration'],
-                          // exerciseCount: post['exerciseCount'],
-                          // likes: post['likes'],
-                          // comments: post['comments'],
-                          );
-                    }).toList(),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-              Center(
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text('View More Workouts'),
-                ),
-              ),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStreakBanner(),
+            const SizedBox(height: 24),
+            const Text(
+              'Recent Activity',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            FriendsPosts(workouts: user.friendsWorkouts),
+            const SizedBox(height: 12),
+            // Center(
+            //   child: TextButton(
+            //     onPressed: () {},
+            //     child: const Text('View More Workouts'),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
@@ -211,78 +177,90 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+}
 
-  //  post  widget
-  Widget _Post({
-    required String username,
-    required String workoutTitle,
+class FriendsPosts extends StatelessWidget {
+  List<Workout> workouts;
 
-    // required String username,
-    // required String description,
-    // required String date,
-    // required String workoutType,
-    // required int duration,
-    // required int exerciseCount,
-    // required int likes,
-    // required int comments,
-  }) {
-    // String formattedTime;
-    // final DateTime postTime = DateTime.parse(date);
-    // final Duration difference = DateTime.now().difference(postTime);
+  FriendsPosts({super.key, required this.workouts});
 
-    // if (difference.inMinutes < 1) {
-    //   formattedTime = 'Just now';
-    // } else if (difference.inHours < 1) {
-    //   formattedTime = '${difference.inMinutes}m ago';
-    // } else if (difference.inHours < 24) {
-    //   formattedTime = '${difference.inHours}h ago';
-    // } else {
-    //   formattedTime = DateFormat('d MMMM y').format(postTime);
-    // }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(20, 0, 0, 0),
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            username,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Text(workoutTitle),
-          // const SizedBox(height: 8),
-          // Text(
-          //   formattedTime,
-          //   style: const TextStyle(color: Colors.grey, fontSize: 12),
-          // ),
-          // const SizedBox(height: 12),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     // Text('❤️ $likes   💬 $comments'),
-          //     TextButton(
-          //       onPressed: () {
-          //         // View workout detail
-          //       },
-          //       child: const Text('View Workout'),
-          //     ),
-          //   ],
-          // ),
-        ],
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (workouts.isEmpty) Text("You're friends haven't posted"),
+        for (Workout workout in workouts) ...[
+          Container(
+              padding: const EdgeInsets.only(
+                  top: 12, right: 15, left: 12, bottom: 5),
+              child: Flex(
+                  direction: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 10,
+                  children: [
+                    Container(
+                        width: 35,
+                        height: 35,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color.fromARGB(255, 167, 227, 255)
+                            // image: DecorationImage(
+                            //   image: AssetImage('assets/images/profile.jpg'),
+                            //   fit: BoxFit.fill,
+                            // ),
+                            )),
+                    Expanded(
+                        child: Flex(
+                            direction: Axis.vertical,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 5,
+                            children: [
+                          Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              spacing: 5,
+                              children: [
+                                Text(
+                                  workout.workoutUserName ?? '',
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                    DateFormat('dd MMMM yyyy')
+                                        .format(workout.workoutDateTime),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade700))
+                              ]),
+                          Text(workout.workoutTitle ?? '',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                //fontWeight: FontWeight.w600
+                              )),
+                          Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {},
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.black),
+                                    child: const Text(
+                                      'View Workout',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ))
+                              ])
+                        ]))
+                  ])),
+          const Divider()
+        ]
+      ],
     );
   }
 }
