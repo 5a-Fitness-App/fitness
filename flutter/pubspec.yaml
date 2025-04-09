@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  postgres: ^3.5.5
+  postgres: 3.4.8
   percent_indicator: ^4.0.1
   intl: ^0.18.1
   flutter_riverpod: ^2.0.0
