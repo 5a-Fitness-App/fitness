@@ -71,6 +71,7 @@ class UserNotifier extends StateNotifier<User> {
               userEmail: user[0]['user_email']);
           getUserWorkout();
           getFriendsWorkouts();
+          getFriendCount();
           return null;
         } else {
           // If passwords don't match, return an error message
@@ -93,15 +94,19 @@ class UserNotifier extends StateNotifier<User> {
             u.user_name,
             w.workout_title,
             w.workout_date_time,
-            w.workout_public
+            w.workout_public,
+            ARRAY(
+              SELECT a.activity_ID 
+              FROM activities a
+              WHERE a.workout_ID = w.workout_ID
+            ) AS workout_activities
           FROM 
             users u 
           JOIN workouts w ON u.user_ID = w.user_ID
           WHERE 
-            u.user_ID = @user_id
-
+            u.user_ID = @user_ID
           ORDER BY 
-            w.workout_date_time DESC;''', {'user_id': userID});
+            w.workout_date_time DESC;''', {'user_ID': userID});
 
       List<Map<String, dynamic>> workouts = workoutsResults
           .map((row) => {
@@ -109,7 +114,8 @@ class UserNotifier extends StateNotifier<User> {
                 'user_name': row[1],
                 'workout_title': row[2],
                 'workout_date_time': row[3],
-                'workout_public': row[4]
+                'workout_public': row[4],
+                'workout_activities': row[5]
               })
           .toList();
 
@@ -121,7 +127,8 @@ class UserNotifier extends StateNotifier<User> {
             workoutUserName: workout['user_name'],
             workoutTitle: workout['workout_title'],
             workoutDateTime: workout['workout_date_time'],
-            workoutPublic: workout['workout_public']));
+            workoutPublic: workout['workout_public'],
+            activities: workout['workout_activities']));
       }
 
       print(workoutList);
@@ -178,6 +185,23 @@ class UserNotifier extends StateNotifier<User> {
       print('Error during post retrieval: $e');
       // return 'An unexpected error occurred.';
     }
+  }
+
+  Future<void> getFriendCount() async {
+    List<List<dynamic>> query = await dbService.readQuery('''
+        SELECT
+          COUNT(f.friend_ID) AS friend_count
+        FROM 
+          users u 
+          JOIN friends f ON u.user_ID = f.user_ID
+        WHERE
+          u.user_ID = @user_ID;
+      ''', {'user_ID': state.userID});
+
+    List<Map<String, dynamic>> friendCount =
+        query.map((row) => {'friend_count': row[0]}).toList();
+
+    state = state.copyWith(friendCount: friendCount[0]['friend_count']);
   }
 
   void logOut() {

@@ -217,17 +217,25 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             )),
-            child: Row(
+            child: Flex(
+              direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
+                  width: 150,
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/Logo.png'),
                     ),
                   ),
                 ),
-                const Text('FitFish', style: TextStyle(fontSize: 40))
+                const Text(
+                  'FitFish',
+                  style: TextStyle(fontSize: 40),
+                ),
+                const SizedBox(
+                  width: 10,
+                )
               ],
             ),
           ),

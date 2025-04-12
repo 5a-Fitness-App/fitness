@@ -41,7 +41,7 @@ class Workout {
   DateTime workoutDateTime;
   int? comments;
   int? likes;
-  List<Activity>? activities;
+  List<int?>? activities;
 
   bool? workoutPublic;
 
@@ -62,7 +62,7 @@ class Workout {
       DateTime? workoutDateTime,
       int? comments,
       int? likes,
-      List<Activity>? activities,
+      List<int?>? activities,
       bool? workoutPublic}) {
     return Workout(
         workoutID: workoutID ?? this.workoutID,

@@ -22,6 +22,8 @@ class User {
 
   List<Workout> friendsWorkouts;
 
+  int friendCount;
+
   User(
       {this.userID,
       this.userName = '',
@@ -32,7 +34,8 @@ class User {
       required this.accountCreationDate,
       this.userEmail = '',
       this.userWorkouts = const [],
-      this.friendsWorkouts = const []});
+      this.friendsWorkouts = const [],
+      this.friendCount = 0});
 
   User copyWith(
       {int? userID,
@@ -44,7 +47,8 @@ class User {
       DateTime? accountCreationDate,
       String? userEmail,
       List<Workout>? userWorkouts,
-      List<Workout>? friendsWorkouts}) {
+      List<Workout>? friendsWorkouts,
+      int? friendCount}) {
     return User(
         userID: userID ?? this.userID,
         userName: userName ?? this.userName,
@@ -55,6 +59,7 @@ class User {
         accountCreationDate: accountCreationDate ?? this.accountCreationDate,
         userEmail: userEmail ?? this.userEmail,
         userWorkouts: userWorkouts ?? this.userWorkouts,
-        friendsWorkouts: friendsWorkouts ?? this.friendsWorkouts);
+        friendsWorkouts: friendsWorkouts ?? this.friendsWorkouts,
+        friendCount: friendCount ?? this.friendCount);
   }
 }

@@ -201,17 +201,6 @@ class ActivityWidget extends ConsumerWidget {
   const ActivityWidget({super.key, required this.activity});
 
   @override
-  void initState() {
-    Map<String, List<String>> exercises = {
-      'Cardio': ['time', 'speed', 'distance'],
-      'Strength': ['reps', 'weight'],
-      'Swimming': ['time', 'distance']
-    };
-
-    if (activity.exerciseType == 'cardio') {}
-  }
-
-  @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ref.watch(workoutDraftNotifier);
     Map<String, List<String>> exercises = {

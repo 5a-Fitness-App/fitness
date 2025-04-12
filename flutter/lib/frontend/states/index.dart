@@ -1,16 +1,19 @@
 import 'package:fitness_app/frontend/states/log_workout_page.dart';
+import 'package:fitness_app/frontend/states/login_screen.dart';
+import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/frontend/states/profile_page.dart';
 import 'package:fitness_app/frontend/states/home_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Index extends StatefulWidget {
+class Index extends ConsumerStatefulWidget {
   const Index({super.key});
 
   @override
   IndexState createState() => IndexState();
 }
 
-class IndexState extends State<Index> {
+class IndexState extends ConsumerState<Index> {
   int selectedPage = 0;
   int pageIndex = 0;
 
@@ -35,10 +38,32 @@ class IndexState extends State<Index> {
     );
   }
 
+  void logout() {
+    ref.read(userNotifier.notifier).logOut();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      endDrawer: Drawer(
+        child: TextButton(
+            onPressed: () {},
+            child: ListView(
+              children: [
+                const DrawerHeader(
+                  child: Text('Settings'),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Log out'),
+                  onTap: logout,
+                ),
+              ],
+            )),
+      ),
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,

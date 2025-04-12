@@ -19,7 +19,7 @@ SELECT
         WHERE ua.user_ID = u.user_ID AND ua.completed = TRUE
     ) AS completed_achievements, -- Completed achievements
     ARRAY(
-        SELECT friend_user_name
+        SELECT f.user_name
         FROM users f 
         JOIN friends fr ON f.user_ID = fr.friend_ID 
         WHERE fr.user_ID = u.user_ID
@@ -39,7 +39,7 @@ LEFT JOIN
 LEFT JOIN 
     achievements a ON a.user_ID = u.user_ID
 WHERE 
-    u.user_ID = $user_id -- This will be replaced by the actual user_id dynamically
+    u.user_ID = 1
 GROUP BY 
     u.user_ID;
 ''';

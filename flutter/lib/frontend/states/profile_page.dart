@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/functional_backend/models/user.dart';
 import 'package:fitness_app/functional_backend/models/workout.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness_app/frontend/states/my_workout.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -17,11 +18,11 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
   bool dashBoardMode = true;
   // List<Map<String, dynamic>> userWorkouts= [];
 
-  @override
-  void initState() {
-    ref.read(userNotifier.notifier).getUserWorkout();
-    super.initState();
-  }
+  // @override
+  // void initState() {
+  //   ref.read(userNotifier.notifier).getUserWorkout();
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                         ),
                       ),
                       Text(
-                        '10 friends',
+                        '${user.friendCount} friends',
                         style: const TextStyle(
                           fontSize: 15,
                         ),
@@ -162,8 +163,9 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
       ]),
       const Divider(),
       SingleChildScrollView(
-        child:
-            dashBoardMode ? MyPosts(workouts: user.userWorkouts) : Dashboard(),
+        child: dashBoardMode
+            ? MyPosts(workouts: user.userWorkouts)
+            : const Dashboard(),
       )
     ]));
   }
@@ -186,12 +188,25 @@ class MyPosts extends StatelessWidget {
 
   MyPosts({super.key, required this.workouts});
 
+  void openWorkoutModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) => const MyWorkoutPage(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (workouts.isEmpty) Text('Log a workout!'),
+        if (workouts.isEmpty) const Text('Log a workout!'),
         for (Workout workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(
@@ -260,7 +275,9 @@ class MyPosts extends StatelessWidget {
                                   width: 10,
                                 ),
                                 ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      openWorkoutModal(context);
+                                    },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.black),
                                     child: const Text(
