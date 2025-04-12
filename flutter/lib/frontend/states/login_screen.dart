@@ -1,6 +1,8 @@
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
-import '/functional_backend/provider/user_provider.dart';
+
+import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -186,9 +188,9 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
+                  // if (value.length < 6) {
+                  //   return 'Password must be at least 6 characters';
+                  // }
                   //if password incorrect
                   return null;
                 },
@@ -217,9 +219,26 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             )),
-            child: const Column(
+            child: Flex(
+              direction: Axis.horizontal,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text('FitFish', style: TextStyle(fontSize: 40))],
+              children: [
+                Container(
+                  width: 150,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/Logo.png'),
+                    ),
+                  ),
+                ),
+                const Text(
+                  'FitFish',
+                  style: TextStyle(fontSize: 40),
+                ),
+                const SizedBox(
+                  width: 10,
+                )
+              ],
             ),
           ),
           Container(

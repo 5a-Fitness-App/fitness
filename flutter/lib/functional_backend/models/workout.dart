@@ -1,4 +1,5 @@
 import 'package:fitness_app/functional_backend/models/user.dart';
+import 'package:fitness_app/functional_backend/services/db_service.dart';
 
 class Comment {
   int commentID;
@@ -37,28 +38,47 @@ class Workout {
   int? workoutID;
   String? workoutTitle;
   String? workoutUserName;
-  // String? workoutDateTime;
-  List<Comment>? comments;
-  List<Activity>? activities;
+  DateTime workoutDateTime;
+  int? comments;
+  int? likes;
+  List<int?>? activities;
+
+  bool? workoutPublic;
 
   Workout(
       {required this.workoutID,
       required this.workoutUserName,
       required this.workoutTitle,
+      required this.workoutDateTime,
       this.comments,
-      this.activities});
+      this.likes,
+      this.activities,
+      this.workoutPublic});
 
   Workout copyWith(
       {int? workoutID,
       String? workoutUserName,
       String? workoutTitle,
-      List<Comment>? comments,
-      List<Activity>? activities}) {
+      DateTime? workoutDateTime,
+      int? comments,
+      int? likes,
+      List<int?>? activities,
+      bool? workoutPublic}) {
     return Workout(
         workoutID: workoutID ?? this.workoutID,
         workoutUserName: workoutUserName ?? this.workoutUserName,
         workoutTitle: workoutTitle ?? this.workoutTitle,
+        workoutDateTime: workoutDateTime ?? this.workoutDateTime,
         comments: comments ?? this.comments,
-        activities: activities ?? this.activities);
+        likes: likes ?? this.likes,
+        activities: activities ?? this.activities,
+        workoutPublic: workoutPublic ?? this.workoutPublic);
+  }
+
+  Future<int> countComments() async {
+    List<List<dynamic>> commentCount = await dbService.readQuery('''
+      ''', {'workout_ID': this.workoutID});
+
+    return 1;
   }
 }
