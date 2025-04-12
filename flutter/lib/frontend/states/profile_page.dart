@@ -1,6 +1,5 @@
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/functional_backend/models/user.dart';
 import 'package:fitness_app/functional_backend/models/workout.dart';

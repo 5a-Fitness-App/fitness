@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:fitness_app/functional_backend/models/workout.dart';
 import 'package:fitness_app/functional_backend/models/user.dart';
+import 'dart:convert';
 
 final userProvider = StateProvider<int>((ref) => 1);
 
@@ -59,14 +60,17 @@ class UserNotifier extends StateNotifier<User> {
                   })
               .toList();
 
+          print(utf8.decode(user[0]['user_profile_photo'].bytes));
+
           state = state.copyWith(
               userID: user[0]['user_ID'],
               userName: user[0]['user_name'],
-              //userProfilePhoto: user[0]['user_profile_photo'],
+              userProfilePhoto:
+                  utf8.decode(user[0]['user_profile_photo'].bytes),
               userBio: user[0]['user_bio'],
               userDOB: user[0]['user_dob'],
               userWeight: user[0]['user_weight'],
-              // userUnits: user[0]['user_units'],
+              userUnits: utf8.decode(user[0]['user_units'].bytes),
               accountCreationDate: user[0]['users_account_creation_date'],
               userEmail: user[0]['user_email']);
           getUserWorkout();

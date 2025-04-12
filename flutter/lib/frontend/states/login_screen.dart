@@ -1,4 +1,6 @@
+import 'package:fitness_app/backend/backend_pages/sign_in_data.dart';
 import 'package:fitness_app/frontend/states/index.dart';
+import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
@@ -13,16 +15,63 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class LoginScreenState extends ConsumerState<LoginScreen> {
-  final formKey = GlobalKey<FormState>();
+  final signUpFormKey = GlobalKey<FormState>();
+  final signInFormKey = GlobalKey<FormState>();
+
+  // Signing in controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Signing up controllers
+  final userNameController = TextEditingController();
+  final signUpEmailController = TextEditingController();
+  final weightController = TextEditingController();
+  final signUpPasswordController = TextEditingController();
+  final passwordConfirmController = TextEditingController();
 
   String? emailError;
   String? passwordError;
 
+  String? usernameError;
+
   bool hidePassword = true;
   bool registrationMode =
       false; //if false shows login form, if true shows registration form
+
+  // Initially selected profile image
+  String selectedProfileImage = 'fish';
+
+  // Method to update the selected profile image
+  void selectImage(String image) {
+    setState(() {
+      selectedProfileImage = image;
+    });
+  }
+
+  Widget imageWithBorder(String image, String imageName) {
+    bool isSelected = selectedProfileImage == imageName;
+    return Container(
+        decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected
+                  ? Colors.blue
+                  : Colors.transparent, // Blue border for selected image
+              width: 4.0,
+            ),
+            shape: BoxShape.circle // Rounded corners for the border
+            ),
+        child: ClipOval(
+          child: InkWell(
+            onTap: () => selectImage(imageName),
+            child: Image.asset(
+              'assets/$image.png', // Image path based on the selected name
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ));
+  }
 
   @override
   void dispose() {
@@ -38,7 +87,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      if (formKey.currentState!.validate()) {
+      if (signInFormKey.currentState!.validate()) {
         String? errorMessage = await ref
             .read(userNotifier.notifier)
             .login(emailController.text.trim(), passwordController.text.trim());
@@ -83,50 +132,57 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void register() async {}
-  //   setState(() {
-  //     emailError = null; // Reset errors before validating
-  //     passwordError = null;
-  //   });
+  void register() async {
+    setState(() {
+      emailError = null; // Reset errors before validating
+      passwordError = null;
+    });
 
-  //   try {
-  //     String? errorMessage = await registerEmail(
-  //         emailController.text.trim(), passwordController.text.trim());
+    try {
+      await dbService.insertQuery(
+          '''INSERT INTO users (user_name, user_profile_photo, user_dob, user_weight, user_units, users_account_creation_date, user_email, user_password) VALUES
+        (@username, 'shark', '1995-06-15', @weight, 'kg', CURRENT_DATE, @email, @password);''',
+          {
+            'username': userNameController.text.trim(),
+            'email': signUpEmailController.text.trim(),
+            'weight': int.parse(weightController.text.trim()),
+            'password': signUpPasswordController.text.trim()
+          });
 
-  //     if (errorMessage == null) {
-  //       if (mounted) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(
-  //               content:
-  //                   Text('Account created for ${emailController.text.trim()}')),
-  //         );
-  //       }
-  //     } else {
-  //       if (mounted) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text('Registration failed: Please try again')),
-  //         );
-  //       }
+      // if (errorMessage == null) {
+      //   if (mounted) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(
+      //           content:
+      //               Text('Account created for ${emailController.text.trim()}')),
+      //     );
+      //   }
+      // } else {
+      //   if (mounted) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text('Registration failed: Please try again')),
+      //     );
+      //   }
 
-  //       if (errorMessage == 'An account with this email already exists') {
-  //         setState(() {
-  //           emailError =
-  //               errorMessage; // Show error message in the password field
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('An unexpected error occurred.')),
-  //       );
-  //     }
-  //   }
-  // }
+      //   if (errorMessage == 'An account with this email already exists') {
+      //     setState(() {
+      //       emailError =
+      //           errorMessage; // Show error message in the password field
+      //     });
+      //   }
+      // }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An unexpected error occurred.')),
+        );
+      }
+    }
+  }
 
-  Widget buildForm() {
+  Widget buildSignInForm() {
     return Form(
-      key: formKey,
+      key: signInFormKey,
       child: Column(
         children: [
           SizedBox(
@@ -188,10 +244,180 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
                   }
-                  // if (value.length < 6) {
-                  //   return 'Password must be at least 6 characters';
-                  // }
-                  //if password incorrect
+                  return null;
+                },
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget buildSignUpForm() {
+    return Form(
+      key: signUpFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: userNameController,
+                decoration: InputDecoration(
+                  hintText: 'Enter a username',
+                  labelText: 'Username',
+                  errorText: usernameError,
+                  prefixIcon: const Icon(Icons.person),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  if (!RegExp(r'^[a-zA-Z0-9._-]+$').hasMatch(value)) {
+                    return 'Username can only contain letters, numbers, underscores, periods, and hyphens';
+                  }
+                  //if (email notFound)
+                  return null;
+                },
+              )),
+          Text(
+            'Select a Profile Image: $selectedProfileImage',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 10),
+          Flex(
+              direction: Axis.horizontal,
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                imageWithBorder('fish', 'fish'),
+                imageWithBorder('shark', 'shark'),
+              ]),
+          const SizedBox(height: 30),
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: weightController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your weight',
+                  labelText: 'weight',
+                  errorText: emailError,
+                  prefixIcon: const Icon(Icons.mail_outline),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+
+                  return null;
+                },
+              )),
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: signUpEmailController,
+                decoration: InputDecoration(
+                  hintText: 'Enter your email',
+                  labelText: 'Email',
+                  errorText: emailError,
+                  prefixIcon: const Icon(Icons.mail_outline),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(
+                          r'^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$')
+                      .hasMatch(value)) {
+                    return 'Enter a valid email address';
+                  }
+                  //if (email notFound)
+                  return null;
+                },
+              )),
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: signUpPasswordController,
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  hintText: 'Enter your password',
+                  labelText: 'Password',
+                  errorText: passwordError,
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
+                    icon: Icon(
+                        hidePassword ? Icons.visibility : Icons.visibility_off),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+              )),
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: passwordConfirmController,
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  hintText: 'Enter your password again',
+                  labelText: 'Password',
+                  errorText: passwordError,
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
+                    icon: Icon(
+                        hidePassword ? Icons.visibility : Icons.visibility_off),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null ||
+                      value.isEmpty ||
+                      value != signUpPasswordController.text) {
+                    return "Passwords don't match";
+                  }
                   return null;
                 },
               )),
@@ -309,7 +535,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                buildForm(),
+                registrationMode ? buildSignUpForm() : buildSignInForm(),
                 ElevatedButton(
                   onPressed: registrationMode ? register : login,
                   style: ElevatedButton.styleFrom(

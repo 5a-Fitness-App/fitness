@@ -143,20 +143,20 @@ Map<String, dynamic> activityData = {
   'elevation': 0,
 };
 
-Future<void> main() async {
-  try {
-    await connection.open();
-    print('Connected to PostgreSQL ✅');
+// Future<void> main() async {
+//   try {
+//     await connection.open();
+//     print('Connected to PostgreSQL ✅');
 
-    await readQuery(activityQuery);
-    // await insertQuery(insertActivity, activityData);
-    //await readQuery(getActivitiesIdForWorkout);
+//     await readQuery(activityQuery);
+//     // await insertQuery(insertActivity, activityData);
+//     //await readQuery(getActivitiesIdForWorkout);
 
-    // await insertQuery(createWorkout, workoutData);
-  } catch (e) {
-    print('Error connecting to PostgreSQL ❌: $e');
-  } finally {
-    await connection.close();
-    print('Connection closed 🔒');
-  }
-}
+//     // await insertQuery(createWorkout, workoutData);
+//   } catch (e) {
+//     print('Error connecting to PostgreSQL ❌: $e');
+//   } finally {
+//     await connection.close();
+//     print('Connection closed 🔒');
+//   }
+// }

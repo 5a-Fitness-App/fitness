@@ -46,16 +46,16 @@ WHERE
 GROUP BY 
     u.user_ID;''';
 
-Future<void> main() async {
-  try {
-    await connection.open();
-    print('Connected to PostgreSQL ✅');
+// Future<void> main() async {
+//   try {
+//     await connection.open();
+//     print('Connected to PostgreSQL ✅');
 
-    await readQuery("SELECT * from activities");
-  } catch (e) {
-    print('Error connecting to PostgreSQL ❌: $e');
-  } finally {
-    await connection.close();
-    print('Connection closed 🔒');
-  }
-}
+//     await readQuery("SELECT * from activities");
+//   } catch (e) {
+//     print('Error connecting to PostgreSQL ❌: $e');
+//   } finally {
+//     await connection.close();
+//     print('Connection closed 🔒');
+//   }
+// }

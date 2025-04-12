@@ -34,16 +34,16 @@ WHERE user_email = 'user@example.com';''';
 String deleteUser =
     '''DELETE FROM users WHERE user_ID = 1;  -- Replace with actual user_ID''';
 
-Future<void> main() async {
-  try {
-    await connection.open();
-    print('Connected to PostgreSQL ✅');
+// Future<void> main() async {
+//   try {
+//     await connection.open();
+//     print('Connected to PostgreSQL ✅');
 
-    await readQuery(login);
-  } catch (e) {
-    print('Error connecting to PostgreSQL ❌: $e');
-  } finally {
-    await connection.close();
-    print('Connection closed 🔒');
-  }
-}
+//     await readQuery(login);
+//   } catch (e) {
+//     print('Error connecting to PostgreSQL ❌: $e');
+//   } finally {
+//     await connection.close();
+//     print('Connection closed 🔒');
+//   }
+// }
