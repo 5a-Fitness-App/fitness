@@ -9,7 +9,7 @@ import 'package:fitness_app/functional_backend/services/db_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dbService.init();
+  // await dbService.init();
 
   runApp(const ProviderScope(child: MyApp()));
 }

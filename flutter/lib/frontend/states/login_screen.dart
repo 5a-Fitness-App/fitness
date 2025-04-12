@@ -1,6 +1,8 @@
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
+
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
