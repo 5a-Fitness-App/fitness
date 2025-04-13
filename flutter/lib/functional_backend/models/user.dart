@@ -1,5 +1,3 @@
-import 'package:fitness_app/functional_backend/models/workout.dart';
-
 class User {
   int? userID;
 
@@ -11,7 +9,7 @@ class User {
 
   DateTime userDOB;
 
-  int userWeight;
+  double userWeight;
 
   String userUnits;
 
@@ -19,51 +17,39 @@ class User {
 
   String userEmail;
 
-  List<Workout> userWorkouts;
+  User({
+    this.userID,
+    this.userName = '',
+    this.userProfilePhoto = 'fish',
+    this.userBio = '',
+    required this.userDOB,
+    this.userWeight = 0,
+    this.userUnits = 'kg',
+    required this.accountCreationDate,
+    this.userEmail = '',
+  });
 
-  List<Workout> friendsWorkouts;
-
-  int friendCount;
-
-  User(
-      {this.userID,
-      this.userName = '',
-      this.userProfilePhoto = 'fish',
-      this.userBio = '',
-      required this.userDOB,
-      this.userWeight = 0,
-      this.userUnits = 'kg',
-      required this.accountCreationDate,
-      this.userEmail = '',
-      this.userWorkouts = const [],
-      this.friendsWorkouts = const [],
-      this.friendCount = 0});
-
-  User copyWith(
-      {int? userID,
-      String? userName,
-      String? userProfilePhoto,
-      String? userBio,
-      DateTime? userDOB,
-      int? userWeight,
-      String? userUnits,
-      DateTime? accountCreationDate,
-      String? userEmail,
-      List<Workout>? userWorkouts,
-      List<Workout>? friendsWorkouts,
-      int? friendCount}) {
+  User copyWith({
+    int? userID,
+    String? userName,
+    String? userProfilePhoto,
+    String? userBio,
+    DateTime? userDOB,
+    double? userWeight,
+    String? userUnits,
+    DateTime? accountCreationDate,
+    String? userEmail,
+  }) {
     return User(
-        userID: userID ?? this.userID,
-        userProfilePhoto: userProfilePhoto ?? this.userProfilePhoto,
-        userName: userName ?? this.userName,
-        userBio: userBio ?? this.userBio,
-        userDOB: userDOB ?? this.userDOB,
-        userWeight: userWeight ?? this.userWeight,
-        userUnits: userUnits ?? this.userUnits,
-        accountCreationDate: accountCreationDate ?? this.accountCreationDate,
-        userEmail: userEmail ?? this.userEmail,
-        userWorkouts: userWorkouts ?? this.userWorkouts,
-        friendsWorkouts: friendsWorkouts ?? this.friendsWorkouts,
-        friendCount: friendCount ?? this.friendCount);
+      userID: userID ?? this.userID,
+      userProfilePhoto: userProfilePhoto ?? this.userProfilePhoto,
+      userName: userName ?? this.userName,
+      userBio: userBio ?? this.userBio,
+      userDOB: userDOB ?? this.userDOB,
+      userWeight: userWeight ?? this.userWeight,
+      userUnits: userUnits ?? this.userUnits,
+      accountCreationDate: accountCreationDate ?? this.accountCreationDate,
+      userEmail: userEmail ?? this.userEmail,
+    );
   }
 }

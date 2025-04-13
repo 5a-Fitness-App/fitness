@@ -15,8 +15,6 @@ class ActivityField {
   double? incline;
   double? speed;
 
-  // TODO: bool public == false
-
   ActivityField(
       {required this.exerciseType,
       this.notes = '',

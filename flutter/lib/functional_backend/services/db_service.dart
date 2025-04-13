@@ -13,7 +13,7 @@ class DbService {
     _connection = await Connection.open(
       Endpoint(
         host: 'localhost',
-        database: 'fitnessdatabase',
+        database: 'testfitness',
         username: 'jennydoan', //change this to your postgres username
         password: 'Elgado29#', //change this to your postgres password
       ),

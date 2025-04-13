@@ -5,26 +5,105 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
-typedef ActivityEntry = DropdownMenuEntry<ActivityLabel>;
+typedef ActivityEntry = DropdownMenuEntry<ExerciseTypeLabel>;
 
 // DropdownMenuEntry labels and values for the first dropdown menu.
-enum ActivityLabel {
-  cardio('Cardio'),
-  swimming('Swimming'),
-  strength('Strength');
+enum ExerciseTypeLabel {
+  // Legs
+  backSquats('Back Squats'),
+  frontSquats('Front Squats'),
+  hackSquats('Hack Squats'),
+  bulgarianSplitSquats('Bulgarian Split Squats'),
+  stepUps('Step-ups'),
+  gobletSquats('Goblet Squats'),
+  rdls('RDLS'),
+  legExtensions('Leg Extensions (Machine)'),
+  legCurls('Leg Curls (Machine)'),
+  calfRaises('Calf Raises'),
+  singleLegLegPress('Single-leg Leg Press'),
 
-  const ActivityLabel(this.label);
+  // Glutes
+  hipThrust('Hip Thrust'),
+  donkeyKick('Donkey Kick'),
+  hipAbductor('Hip Abductor'),
+
+  // Chest
+  benchPress('Bench Press'),
+  chestFlys('Chest Flys'),
+  pushUps('Push-Ups'),
+  dumbbellChestPress('Dumbbell Chest Press'),
+  chestPressMachine('Chest Press (Machine)'),
+  deadlifts('Deadlifts'),
+  pullUps('Pull-ups'),
+  rowsBarbell('Rows (Barbell)'),
+  rowsDumbbell('Rows (Dumbbell)'),
+  latPulldown('Lat Pulldown'),
+  tBarRows('T-Bar Rows'),
+
+  // Back
+  latRowsMachine('Lat Rows (Machine)'),
+  latRowsCable('Lat Rows (Cable)'),
+  upperBackRowsMachine('Upper Back Rows (Machine)'),
+  upperBackRowsCable('Upper Back Rows (Cable)'),
+  pullovers('Pullovers'),
+
+  // Shoulders
+  overheadPress('Overhead Press'),
+  shoulderPress('Shoulder Press'),
+  latRaises('Lat Raises'),
+  frontRaises('Front Raises'),
+  rearDeltFlys('Rear Delt Flys'),
+  facePulls('Face Pulls'),
+  shrugs('Shrugs'),
+
+  // Biceps
+  bicepCurls('Bicep Curls'),
+  hammerCurls('Hammer Curls'),
+  barbellCurls('Barbell Curls'),
+  preacherCurls('Preacher Curls'),
+  concentrationCurls('Concentration Curls'),
+
+  // Triceps
+  tricepDips('Tricep Dips'),
+  tricepPushdowns('Tricep Pushdowns'),
+  skullCrushers('Skull Crushers'),
+  closeGripBenchPress('Close-Grip Bench Press'),
+  overheadTricepExtensions('Overhead Tricep Extensions'),
+
+  // Core
+  planks('Planks'),
+  russianTwists('Russian Twists'),
+  legRaises('Leg Raises'),
+  sitUps('Sit-Ups'),
+  bicycleCrunches('Bicycle Crunches'),
+  hangingLegRaises('Hanging Leg Raises'),
+  cableWoodchoppers('Cable Woodchoppers'),
+  abRollouts('Ab Rollouts'),
+
+  // Cardio
+  running('Running'),
+  walking('Walking'),
+  treadmill('Treadmill'),
+  cycling('Cycling'),
+  swimming('Swimming'),
+  rowing('Rowing'),
+  jumpingJacks('Jumping Jacks'),
+  stairClimbing('Stair Climbing');
+
+  const ExerciseTypeLabel(this.label);
   final String label;
 
   static final List<ActivityEntry> entries =
       UnmodifiableListView<ActivityEntry>(
-    values.map<ActivityEntry>(
-      (ActivityLabel activity) => ActivityEntry(
-        value: activity,
-        label: activity.label,
-        enabled: activity.label != 'Grey',
-      ),
-    ),
+    values
+        .map<ActivityEntry>(
+          (ExerciseTypeLabel activity) => ActivityEntry(
+            value: activity,
+            label: activity.label,
+            enabled: activity.label != 'Grey',
+          ),
+        )
+        .toList(),
   );
 }
 
@@ -37,7 +116,7 @@ class LogWorkoutPage extends ConsumerStatefulWidget {
 
 class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   final TextEditingController activityController = TextEditingController();
-  ActivityLabel? selectedActivity;
+  ExerciseTypeLabel? selectedExercise;
 
   @override
   void dispose() {
@@ -50,7 +129,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
     super.initState();
 
     setState(() {
-      selectedActivity = ActivityLabel.cardio;
+      selectedExercise = ExerciseTypeLabel.running;
     });
   }
 
@@ -151,7 +230,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                           ref.read(workoutDraftNotifier.notifier).addActivity(
                               ActivityField(
                                   exerciseType:
-                                      selectedActivity!.label) // Use enum value
+                                      selectedExercise!.label) // Use enum value
                               );
                         },
                         style: ElevatedButton.styleFrom(
@@ -166,13 +245,13 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                         label: const Text('Add Activity',
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold))),
-                    DropdownMenu<ActivityLabel>(
+                    DropdownMenu<ExerciseTypeLabel>(
                         enableFilter: false,
                         enableSearch: false,
                         width: 200,
-                        initialSelection: ActivityLabel.cardio,
+                        initialSelection: ExerciseTypeLabel.running,
                         controller: activityController,
-                        dropdownMenuEntries: ActivityLabel.entries,
+                        dropdownMenuEntries: ExerciseTypeLabel.entries,
                         helperText: 'Select an activity to add',
                         inputDecorationTheme: InputDecorationTheme(
                           filled: true,
@@ -183,9 +262,9 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                               borderRadius: BorderRadius.circular(10)),
                           contentPadding: const EdgeInsets.all(10),
                         ),
-                        onSelected: (ActivityLabel? activity) {
+                        onSelected: (ExerciseTypeLabel? activity) {
                           setState(() {
-                            selectedActivity = activity;
+                            selectedExercise = activity;
                           });
                         }),
                   ],

@@ -1,11 +1,35 @@
-import 'package:fitness_app/backend/backend_pages/sign_in_data.dart';
 import 'package:fitness_app/frontend/states/index.dart';
-import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:flutter/material.dart';
-
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fitness_app/functional_backend/api.dart';
+
+import 'package:flutter/services.dart';
+
+import 'dart:collection';
+
+typedef WeightUnits = DropdownMenuEntry<WeightUnitsLabel>;
+
+enum WeightUnitsLabel {
+  kg('kg'),
+  lb('lb');
+
+  const WeightUnitsLabel(this.label);
+  final String label;
+
+  static final List<WeightUnits> entries = UnmodifiableListView<WeightUnits>(
+    values
+        .map<WeightUnits>(
+          (WeightUnitsLabel activity) => WeightUnits(
+            value: activity,
+            label: activity.label,
+            enabled: activity.label != 'Grey',
+          ),
+        )
+        .toList(),
+  );
+}
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +49,10 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   // Signing up controllers
   final userNameController = TextEditingController();
   final signUpEmailController = TextEditingController();
+  DateTime? selectedDoB;
   final weightController = TextEditingController();
+  final weightUnitsController = TextEditingController();
+  WeightUnitsLabel? selectedWeightUnit;
   final signUpPasswordController = TextEditingController();
   final passwordConfirmController = TextEditingController();
 
@@ -48,8 +75,22 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     });
   }
 
+  Future<void> _selectDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2021, 7, 25),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2025),
+    );
+
+    setState(() {
+      selectedDoB = pickedDate;
+    });
+  }
+
   Widget imageWithBorder(String image, String imageName) {
     bool isSelected = selectedProfileImage == imageName;
+
     return Container(
         decoration: BoxDecoration(
             border: Border.all(
@@ -65,8 +106,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             onTap: () => selectImage(imageName),
             child: Image.asset(
               'assets/$image.png', // Image path based on the selected name
-              width: 50,
-              height: 50,
+              width: 60,
+              height: 60,
               fit: BoxFit.cover,
             ),
           ),
@@ -132,49 +173,49 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void register() async {
+  void registerButton() async {
     setState(() {
       emailError = null; // Reset errors before validating
       passwordError = null;
     });
 
     try {
-      await dbService.insertQuery(
-          '''INSERT INTO users (user_name, user_profile_photo, user_dob, user_weight, user_units, users_account_creation_date, user_email, user_password) VALUES
-        (@username, 'shark', '1995-06-15', @weight, 'kg', CURRENT_DATE, @email, @password);''',
-          {
-            'username': userNameController.text.trim(),
-            'email': signUpEmailController.text.trim(),
-            'weight': int.parse(weightController.text.trim()),
-            'password': signUpPasswordController.text.trim()
+      String? errorMessage = await register(
+          userNameController.text.trim(),
+          selectedProfileImage,
+          selectedDoB!,
+          double.parse(weightController.text.trim()),
+          selectedWeightUnit!.label,
+          signUpEmailController.text.trim(),
+          signUpPasswordController.text.trim());
+
+      if (errorMessage == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Account created for ${emailController.text.trim()}')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Registration failed: Please try again')),
+          );
+        }
+
+        if (errorMessage == 'An account with this email already exists') {
+          setState(() {
+            emailError =
+                errorMessage; // Show error message in the password field
           });
-
-      // if (errorMessage == null) {
-      //   if (mounted) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(
-      //           content:
-      //               Text('Account created for ${emailController.text.trim()}')),
-      //     );
-      //   }
-      // } else {
-      //   if (mounted) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(content: Text('Registration failed: Please try again')),
-      //     );
-      //   }
-
-      //   if (errorMessage == 'An account with this email already exists') {
-      //     setState(() {
-      //       emailError =
-      //           errorMessage; // Show error message in the password field
-      //     });
-      //   }
-      // }
+        }
+      }
     } catch (e) {
+      print(e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An unexpected error occurred.')),
+          const SnackBar(content: Text('An unexpected error occurred.')),
         );
       }
     }
@@ -298,32 +339,104 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 imageWithBorder('fish', 'fish'),
                 imageWithBorder('shark', 'shark'),
+                imageWithBorder('crab', 'crab'),
+                imageWithBorder('dolphin', 'dolphin')
               ]),
           const SizedBox(height: 30),
           SizedBox(
               height: 100,
-              child: TextFormField(
-                controller: weightController,
-                decoration: InputDecoration(
-                  hintText: 'Enter your weight',
-                  labelText: 'weight',
-                  errorText: emailError,
-                  prefixIcon: const Icon(Icons.mail_outline),
-                  enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      borderSide: BorderSide(color: Colors.grey, width: 1)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      borderSide: BorderSide(color: Colors.grey, width: 2)),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-
-                  return null;
-                },
+              child: Flex(
+                direction: Axis.horizontal,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: weightController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true), // Numeric keyboard
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*$')),
+                      ], // Allow only numbers and a decimal point
+                      decoration: InputDecoration(
+                        hintText: 'Enter your weight',
+                        labelText: 'Weight',
+                        errorText: emailError,
+                        prefixIcon: const Icon(Icons.monitor_weight_outlined),
+                        enabledBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 1)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 2)),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a number';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Invalid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  DropdownMenu<WeightUnitsLabel>(
+                      enableFilter: false,
+                      enableSearch: false,
+                      width: 125,
+                      initialSelection: WeightUnitsLabel.kg,
+                      controller: weightUnitsController,
+                      dropdownMenuEntries: WeightUnitsLabel.entries,
+                      helperText: 'Select weight unit',
+                      inputDecorationTheme: InputDecorationTheme(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 230, 230, 230),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.all(10),
+                      ),
+                      onSelected: (WeightUnitsLabel? weightUnit) {
+                        setState(() {
+                          selectedWeightUnit = weightUnit;
+                        });
+                      })
+                ],
               )),
+          Flex(
+            direction: Axis.horizontal,
+            spacing: 10,
+            children: [
+              const Text("Enter your birthday: ",
+                  style: TextStyle(fontSize: 16)),
+              Expanded(
+                child: ElevatedButton(
+                    onPressed: _selectDate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+                      foregroundColor: Colors.black,
+                      minimumSize: const Size(100, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // ← change radius here
+                      ),
+                    ),
+                    child: Text(
+                      selectedDoB != null
+                          ? '${selectedDoB!.day}/${selectedDoB!.month}/${selectedDoB!.year}'
+                          : 'No date selected',
+                    )),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -393,7 +506,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 obscureText: hidePassword,
                 decoration: InputDecoration(
                   hintText: 'Enter your password again',
-                  labelText: 'Password',
+                  labelText: 'Confirm Password',
                   errorText: passwordError,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
@@ -415,7 +528,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 validator: (value) {
                   if (value == null ||
                       value.isEmpty ||
-                      value != signUpPasswordController.text) {
+                      value != signUpPasswordController.text.trim()) {
                     return "Passwords don't match";
                   }
                   return null;
@@ -537,7 +650,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 registrationMode ? buildSignUpForm() : buildSignInForm(),
                 ElevatedButton(
-                  onPressed: registrationMode ? register : login,
+                  onPressed: registrationMode ? registerButton : login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(10),
                     fixedSize: Size(MediaQuery.of(context).size.width,

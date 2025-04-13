@@ -1,16 +1,15 @@
-import 'package:fitness_app/functional_backend/provider/friends_workouts_provider.dart';
+import 'package:fitness_app/functional_backend/api.dart';
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/functional_backend/models/user.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import 'package:fitness_app/frontend/states/index.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fitness_app/functional_backend/models/workout.dart';
-
 import 'package:intl/intl.dart';
+
+import 'package:fitness_app/frontend/states/my_workout.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -20,15 +19,21 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  late Future<List<Map<String, dynamic>>> friendsWorkouts;
+  bool _initialized = false;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final userID = ref.watch(userNotifier).userID ?? 0;
+      friendsWorkouts = getFriendsWorkouts(userID);
+      _initialized = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    User user = ref.watch(userNotifier);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -36,13 +41,32 @@ class _HomePageState extends ConsumerState<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildStreakBanner(),
-            const SizedBox(height: 24),
-            const Text(
-              'Recent Activity',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Divider(),
+            const SizedBox(height: 10),
+            const Row(children: [
+              SizedBox(
+                width: 15,
+              ),
+              Text(
+                'Recent Activity',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            ]),
             const SizedBox(height: 12),
-            FriendsPosts(workouts: user.friendsWorkouts),
+            FutureBuilder(
+                future: friendsWorkouts,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No activities found.'));
+                  } else {
+                    return FriendsPosts(workouts: snapshot.data!);
+                  }
+                }),
+
             const SizedBox(height: 12),
             // Center(
             //   child: TextButton(
@@ -60,22 +84,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildStreakBanner() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(100),
-          bottomLeft: Radius.circular(10),
-          bottomRight: Radius.circular(10),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromARGB(40, 0, 0, 0),
-            offset: Offset(0, 1),
-            blurRadius: 4,
-          ),
-        ],
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -126,24 +134,24 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          //  Implement Start Workout logic
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey.shade300,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Start Workout',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ),
+                    // Expanded(
+                    //   child: ElevatedButton(
+                    //     onPressed: () {
+                    //       //  Implement Start Workout logic
+                    //     },
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: Colors.grey.shade300,
+                    //       padding: const EdgeInsets.symmetric(vertical: 12),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(10),
+                    //       ),
+                    //     ),
+                    //     child: const Text(
+                    //       'Start Workout',
+                    //       style: TextStyle(color: Colors.black),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
@@ -180,17 +188,30 @@ class _HomePageState extends ConsumerState<HomePage> {
 }
 
 class FriendsPosts extends StatelessWidget {
-  List<Workout> workouts;
+  final List<Map<String, dynamic>> workouts;
 
-  FriendsPosts({super.key, required this.workouts});
+  const FriendsPosts({super.key, required this.workouts});
+
+  void openWorkoutModal(BuildContext context, int workoutID) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) => MyWorkoutPage(workoutID: workoutID),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (workouts.isEmpty) Text("You're friends haven't posted"),
-        for (Workout workout in workouts) ...[
+        if (workouts.isEmpty) const Text("You're friends haven't posted"),
+        for (Map<String, dynamic> workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(
                   top: 12, right: 15, left: 12, bottom: 5),
@@ -202,14 +223,14 @@ class FriendsPosts extends StatelessWidget {
                     Container(
                         width: 35,
                         height: 35,
-                        decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.fromARGB(255, 167, 227, 255)
-                            // image: DecorationImage(
-                            //   image: AssetImage('assets/images/profile.jpg'),
-                            //   fit: BoxFit.fill,
-                            // ),
-                            )),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage(
+                                'assets/${workout['user_profile_photo']}.png'),
+                            fit: BoxFit.fill,
+                          ),
+                        )),
                     Expanded(
                         child: Flex(
                             direction: Axis.vertical,
@@ -222,19 +243,19 @@ class FriendsPosts extends StatelessWidget {
                               spacing: 5,
                               children: [
                                 Text(
-                                  workout.workoutUserName ?? '',
+                                  workout['user_name'] ?? '',
                                   style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                     DateFormat('dd MMMM yyyy')
-                                        .format(workout.workoutDateTime),
+                                        .format(workout['workout_date_time']),
                                     style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.grey.shade700))
                               ]),
-                          Text(workout.workoutTitle ?? '',
+                          Text(workout['workout_caption'] ?? '',
                               style: const TextStyle(
                                 fontSize: 18,
                                 //fontWeight: FontWeight.w600
@@ -247,7 +268,10 @@ class FriendsPosts extends StatelessWidget {
                                   width: 10,
                                 ),
                                 ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      openWorkoutModal(
+                                          context, workout['workout_ID'] ?? 0);
+                                    },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.black),
                                     child: const Text(

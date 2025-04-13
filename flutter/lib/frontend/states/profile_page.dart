@@ -1,8 +1,8 @@
+import 'package:fitness_app/functional_backend/api.dart';
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/functional_backend/models/user.dart';
-import 'package:fitness_app/functional_backend/models/workout.dart';
 import 'package:intl/intl.dart';
 import 'package:fitness_app/frontend/states/my_workout.dart';
 
@@ -15,13 +15,18 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class ProfilePageState extends ConsumerState<ProfilePage> {
   bool dashBoardMode = true;
-  // List<Map<String, dynamic>> userWorkouts= [];
+  late Future<List<Map<String, dynamic>>> userWorkouts;
+  bool _initialized = false;
 
-  // @override
-  // void initState() {
-  //   ref.read(userNotifier.notifier).getUserWorkout();
-  //   super.initState();
-  // }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final userID = ref.watch(userNotifier).userID ?? 0;
+      userWorkouts = getUserWorkout(userID);
+      _initialized = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +50,15 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Container(
                       width: 60,
                       height: 60,
-                      decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color.fromARGB(255, 167, 227, 255)
-                          // image: DecorationImage(
-                          //   image: AssetImage('assets/images/profile.jpg'),
-                          //   fit: BoxFit.fill,
-                          // ),
-                          ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        // color: Color.fromARGB(255, 167, 227, 255)
+                        image: DecorationImage(
+                          image:
+                              AssetImage('assets/${user.userProfilePhoto}.png'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -70,11 +76,19 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '${user.friendCount} friends',
-                        style: const TextStyle(
-                          fontSize: 15,
-                        ),
+                      FutureBuilder<int>(
+                        future:
+                            getFriendCount(ref.watch(userNotifier).userID ?? 0),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            return Text('${snapshot.data} friends');
+                          }
+                        },
                       ),
                     ],
                   )),
@@ -161,10 +175,23 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ]),
       const Divider(),
-      SingleChildScrollView(
-        child: dashBoardMode
-            ? MyPosts(workouts: user.userWorkouts)
-            : const Dashboard(),
+      FutureBuilder<List<Map<String, dynamic>>>(
+        future: userWorkouts,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No activities found.'));
+          } else {
+            return SingleChildScrollView(
+              child: dashBoardMode
+                  ? MyPosts(workouts: snapshot.data!)
+                  : const Dashboard(),
+            );
+          }
+        },
       )
     ]));
   }
@@ -183,11 +210,11 @@ class Dashboard extends StatelessWidget {
 }
 
 class MyPosts extends StatelessWidget {
-  List<Workout> workouts;
+  final List<Map<String, dynamic>> workouts;
 
-  MyPosts({super.key, required this.workouts});
+  const MyPosts({super.key, required this.workouts});
 
-  void openWorkoutModal(BuildContext context) {
+  void openWorkoutModal(BuildContext context, int workoutID) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -196,7 +223,7 @@ class MyPosts extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
       ),
-      builder: (context) => const MyWorkoutPage(),
+      builder: (context) => MyWorkoutPage(workoutID: workoutID),
     );
   }
 
@@ -206,7 +233,7 @@ class MyPosts extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (workouts.isEmpty) const Text('Log a workout!'),
-        for (Workout workout in workouts) ...[
+        for (Map<String, dynamic> workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(
                   top: 12, right: 15, left: 12, bottom: 5),
@@ -218,14 +245,14 @@ class MyPosts extends StatelessWidget {
                     Container(
                         width: 35,
                         height: 35,
-                        decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.fromARGB(255, 167, 227, 255)
-                            // image: DecorationImage(
-                            //   image: AssetImage('assets/images/profile.jpg'),
-                            //   fit: BoxFit.fill,
-                            // ),
-                            )),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage(
+                                'assets/${workout['user_profile_photo']}.png'),
+                            fit: BoxFit.fill,
+                          ),
+                        )),
                     Expanded(
                         child: Flex(
                             direction: Axis.vertical,
@@ -242,26 +269,26 @@ class MyPosts extends StatelessWidget {
                                     spacing: 5,
                                     children: [
                                       Text(
-                                        workout.workoutUserName ?? '',
+                                        workout['user_name'] ?? '',
                                         style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Text(
-                                          DateFormat('dd MMMM yyyy')
-                                              .format(workout.workoutDateTime),
+                                          DateFormat('dd MMMM yyyy').format(
+                                              workout['workout_date_time']),
                                           style: TextStyle(
                                               fontSize: 15,
                                               color: Colors.grey.shade700))
                                     ]),
                                 Text(
-                                    workout.workoutPublic ?? false
-                                        ? 'Private'
-                                        : 'Public',
+                                    workout['workout_public']
+                                        ? 'Public'
+                                        : 'Private',
                                     style:
                                         TextStyle(color: Colors.grey.shade700))
                               ]),
-                          Text(workout.workoutTitle ?? '',
+                          Text(workout['workout_caption'] ?? '',
                               style: const TextStyle(
                                 fontSize: 18,
                                 //fontWeight: FontWeight.w600
@@ -275,7 +302,8 @@ class MyPosts extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                     onPressed: () {
-                                      openWorkoutModal(context);
+                                      openWorkoutModal(
+                                          context, workout['workout_ID'] ?? 0);
                                     },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.black),

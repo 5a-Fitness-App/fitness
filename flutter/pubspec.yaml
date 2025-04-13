@@ -66,6 +66,8 @@ flutter:
     - assets/Logo.png
     - assets/shark.png
     - assets/fish.png
+    - assets/crab.png
+    - assets/dolphin.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
