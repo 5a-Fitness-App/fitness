@@ -1,13 +1,13 @@
 import 'package:postgres/postgres.dart';
 
+// Create the connection object
 final connection = PostgreSQLConnection(
-  'localhost',
-  5432,
-  'test2',
-  username: 'postgres',
-  password: 'abc123',
+  'localhost', // host
+  5432, // port (default PostgreSQL port is 5432)
+  'fitnessdatabase', // database name
+  username: 'postgres', // username
+  password: 'abc123', // password
 );
-
 // CREATE (Insert a new user)
 Future<void> createUser(String name, String dob, int weight, String email,
     int phone, String password) async {
@@ -299,42 +299,6 @@ Future<void> main() async {
   try {
     await connection.open();
     print('Connected to PostgreSQL ✅');
-
-    //await createUser('Alice Smith', '1995-07-22', 68, 'alice.smith@example.com', 9876543210, 'SecurePass!123');
-    //await getUsers();
-    //await getUserById(1);
-    //await updateUser(1, 'Alice Updated', 70, 'alice.updated@example.com', 1234567890);
-    // await deleteUser(2);
-
-    // int workoutId = await createWorkout(
-    //     1, // User ID
-    //     "Morning Routine",
-    //     60, // Duration in minutes
-    //     400, // Calories burnt
-    //     [
-    //       {
-    //         "exerciseId": 2,
-    //         "activityName": "Treadmill Run",
-    //         "activityType": "cardio",
-    //         "activityDistance": 5,
-    //         "activityElevation": 10
-    //       },
-    //       {
-    //         "exerciseId": 3,
-    //         "activityName": "Push-ups",
-    //         "activityType": "strength"
-    //       }
-    //     ]);
-
-    // print("New Workout ID: $workoutId");
-    // getWorkoutsWithDetails();
-    // await getWorkouts();
-
-    // await getWorkoutById(1);
-    // await updateWorkout(1, 'Evening Jog', 45, 450);
-    // await deleteWorkout(1);
-
-    //await getWorkoutComments(1);
   } catch (e) {
     print('Error connecting to PostgreSQL ❌: $e');
   } finally {
