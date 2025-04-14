@@ -133,7 +133,7 @@ CREATE TABLE workout_comments (
 -- === INSERT EXERCISES ===
 -- USERS
 INSERT INTO users (user_name, user_profile_photo, user_bio, user_dob, user_weight, user_units, users_account_creation_date, user_email, user_password) VALUES
-('Alice', 'fish', 'Loves swimming and strength training.', '1990-05-12', 65, 'kg', '2024-01-10', 'alice@example.com', 'pass1'),
+('Alice', 'fish', 'Loves swimming and strength training.', '1990-05-12', 65, 'kg', '2024-01-10', 'alice@example.com', 'password'),
 ('Bob', 'shark', 'Runner and yoga enthusiast.', '1985-09-30', 75, 'kg', '2024-02-15', 'bob@example.com', 'pass2'),
 ('Charlie', 'crab', 'Cardio king.', '1992-12-20', 80, 'lb', '2024-03-01', 'charlie@example.com', 'pass3'),
 ('Diana', 'dolphin', 'Weightlifter and foodie.', '1995-07-18', 70, 'kg', '2024-03-20', 'diana@example.com', 'pass4'),
