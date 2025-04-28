@@ -2,9 +2,9 @@ import 'package:fitness_app/functional_backend/api.dart';
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
+import 'package:fitness_app/functional_backend/provider/post_provider.dart';
 import 'package:fitness_app/frontend/states/index.dart';
-
+import 'package:fitness_app/functional_backend/models/post.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:intl/intl.dart';
@@ -19,21 +19,16 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  late Future<List<Map<String, dynamic>>> friendsWorkouts;
-  bool _initialized = false;
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final userID = ref.watch(userNotifier).userID ?? 0;
-      friendsWorkouts = getFriendsWorkouts(userID);
-      _initialized = true;
-    }
+  void initState() {
+    ref.read(postNotifier.notifier).loadFriendsWorkouts();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    Posts posts = ref.watch(postNotifier);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -53,19 +48,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               )
             ]),
             const SizedBox(height: 12),
-            FutureBuilder(
-                future: friendsWorkouts,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No activities found.'));
-                  } else {
-                    return FriendsPosts(workouts: snapshot.data!);
-                  }
-                }),
+            FriendsPosts(workouts: posts.friendsWorkouts),
 
             const SizedBox(height: 12),
             // Center(
@@ -264,9 +247,26 @@ class FriendsPosts extends StatelessWidget {
                               direction: Axis.horizontal,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const SizedBox(
-                                  width: 10,
-                                ),
+                                Flex(
+                                    direction: Axis.horizontal,
+                                    spacing: 5,
+                                    children: [
+                                      const Icon(
+                                          Icons.favorite_outline_rounded),
+                                      Text(
+                                        workout['total_likes'].toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      const Icon(
+                                          Icons.chat_bubble_outline_rounded),
+                                      Text(
+                                        workout['total_comments'].toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ]),
                                 ElevatedButton(
                                     onPressed: () {
                                       openWorkoutModal(

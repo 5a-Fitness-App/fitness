@@ -1,5 +1,6 @@
 import 'package:fitness_app/frontend/states/log_workout_page.dart';
 import 'package:fitness_app/frontend/states/login_screen.dart';
+import 'package:fitness_app/functional_backend/provider/post_provider.dart';
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/frontend/states/profile_page.dart';
@@ -102,11 +103,13 @@ class IndexState extends ConsumerState<Index> {
             onTap: (index) {
               if (index == 0) {
                 setState(() {
+                  ref.read(postNotifier.notifier).loadFriendsWorkouts();
                   selectedPage = 0;
                   pageIndex = 0;
                 });
               } else if (index == 2) {
                 setState(() {
+                  ref.read(postNotifier.notifier).loadUserWorkouts();
                   selectedPage = 1;
                   pageIndex = 2;
                 });

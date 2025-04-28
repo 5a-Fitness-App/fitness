@@ -12,7 +12,7 @@ class DbService {
 
     _connection = await Connection.open(
       Endpoint(
-        host: 'localhost',
+        host: '192.168.1.217',
         database: 'testfitness',
         username: 'jennydoan', //change this to your postgres username
         password: 'Elgado29#', //change this to your postgres password
@@ -30,6 +30,17 @@ class DbService {
       Sql.named(sql),
       parameters: values,
     );
+  }
+
+  // INSERT AND RETURN ID
+  Future<int> insertAndReturnId(String sql, Map<String, dynamic> values) async {
+    final result = await _connection.execute(
+      Sql.named(sql),
+      parameters: values,
+    );
+
+    // Return the ID from the first row
+    return result.first[0] as int;
   }
 
   // READ

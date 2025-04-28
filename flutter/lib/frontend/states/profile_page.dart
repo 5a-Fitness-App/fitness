@@ -1,10 +1,12 @@
 import 'package:fitness_app/functional_backend/api.dart';
+import 'package:fitness_app/functional_backend/provider/post_provider.dart';
 import 'package:fitness_app/functional_backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/functional_backend/models/user.dart';
 import 'package:intl/intl.dart';
 import 'package:fitness_app/frontend/states/my_workout.dart';
+import 'package:fitness_app/functional_backend/models/post.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -15,22 +17,11 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class ProfilePageState extends ConsumerState<ProfilePage> {
   bool dashBoardMode = true;
-  late Future<List<Map<String, dynamic>>> userWorkouts;
-  bool _initialized = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      final userID = ref.watch(userNotifier).userID ?? 0;
-      userWorkouts = getUserWorkout(userID);
-      _initialized = true;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     User user = ref.watch(userNotifier);
+    Posts posts = ref.watch(postNotifier);
 
     return SingleChildScrollView(
         child: Column(children: [
@@ -77,19 +68,25 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                         ),
                       ),
                       FutureBuilder<int>(
-                        future:
-                            getFriendCount(ref.watch(userNotifier).userID ?? 0),
+                        future: getFriendCount(ref.watch(userNotifier).userID ??
+                            0), // The future you're waiting on
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
+                            return Text(
+                                'Loading...'); // Show a loading indicator or message while waiting
                           } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
+                            return Text(
+                                'Error: ${snapshot.error}'); // Handle errors if any
+                          } else if (snapshot.hasData) {
+                            return Text(
+                                '${snapshot.data} friends'); // Show the result when data is available
                           } else {
-                            return Text('${snapshot.data} friends');
+                            return Text(
+                                'No data'); // Handle case where no data is returned
                           }
                         },
-                      ),
+                      )
                     ],
                   )),
                 ],
@@ -134,12 +131,15 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
       ),
       Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              dashBoardMode = false;
-            });
-          },
+          onPressed: dashBoardMode
+              ? () {
+                  setState(() {
+                    dashBoardMode = false;
+                  });
+                }
+              : null,
           style: ElevatedButton.styleFrom(
+            disabledBackgroundColor: Colors.transparent,
             backgroundColor: Colors.transparent,
             fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
                 MediaQuery.of(context).size.height * 0.06),
@@ -154,12 +154,15 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              dashBoardMode = true;
-            });
-          },
+          onPressed: dashBoardMode
+              ? null
+              : () {
+                  setState(() {
+                    dashBoardMode = true;
+                  });
+                },
           style: ElevatedButton.styleFrom(
+            disabledBackgroundColor: Colors.transparent,
             backgroundColor: Colors.transparent,
             fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
                 MediaQuery.of(context).size.height * 0.06),
@@ -175,23 +178,10 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
         ),
       ]),
       const Divider(),
-      FutureBuilder<List<Map<String, dynamic>>>(
-        future: userWorkouts,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No activities found.'));
-          } else {
-            return SingleChildScrollView(
-              child: dashBoardMode
-                  ? MyPosts(workouts: snapshot.data!)
-                  : const Dashboard(),
-            );
-          }
-        },
+      SingleChildScrollView(
+        child: dashBoardMode
+            ? MyPosts(workouts: posts.userWorkouts)
+            : const Dashboard(),
       )
     ]));
   }
@@ -297,9 +287,26 @@ class MyPosts extends StatelessWidget {
                               direction: Axis.horizontal,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const SizedBox(
-                                  width: 10,
-                                ),
+                                Flex(
+                                    direction: Axis.horizontal,
+                                    spacing: 5,
+                                    children: [
+                                      const Icon(
+                                          Icons.favorite_outline_rounded),
+                                      Text(
+                                        workout['total_likes'].toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      const Icon(
+                                          Icons.chat_bubble_outline_rounded),
+                                      Text(
+                                        workout['total_comments'].toString(),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ]),
                                 ElevatedButton(
                                     onPressed: () {
                                       openWorkoutModal(

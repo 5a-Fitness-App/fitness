@@ -36,9 +36,12 @@ class MyApp extends StatelessWidget {
             ))),
         home: Builder(builder: (context) => const LoginScreen()));
   }
-}
 
-// TODO: get friend requests 
-// TODO: settings drawer menu
-// TODO: get profile photos
-// TODO: process date and time from database
+  // TODO: PostProvider(),
+  // TODO: Implement Achievements
+  // TODO: Create Dashboard
+  // TODO: clean up code,
+  // TODO: comment creation, deletion
+  // TODO: muscle groups piechart
+  // TODO: delete account
+}

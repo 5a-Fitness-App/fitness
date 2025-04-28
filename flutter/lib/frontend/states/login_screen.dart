@@ -69,7 +69,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   String selectedProfileImage = 'fish';
 
   // Method to update the selected profile image
-  void selectImage(String image) {
+  void _selectImage(String image) {
     setState(() {
       selectedProfileImage = image;
     });
@@ -78,9 +78,9 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime(2021, 7, 25),
+      initialDate: DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate: DateTime(2025),
+      lastDate: DateTime.now(),
     );
 
     setState(() {
@@ -103,11 +103,11 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             ),
         child: ClipOval(
           child: InkWell(
-            onTap: () => selectImage(imageName),
+            onTap: () => _selectImage(imageName),
             child: Image.asset(
               'assets/$image.png', // Image path based on the selected name
-              width: 60,
-              height: 60,
+              width: 50,
+              height: 50,
               fit: BoxFit.cover,
             ),
           ),
@@ -179,6 +179,22 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
       passwordError = null;
     });
 
+    if (selectedDoB == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select your date of birth.')),
+        );
+      }
+      return;
+    }
+
+    if (selectedWeightUnit == null) {
+      if (mounted) {
+        selectedWeightUnit = WeightUnitsLabel.kg;
+      }
+      return;
+    }
+
     try {
       String? errorMessage = await register(
           userNameController.text.trim(),
@@ -200,7 +216,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed: Please try again')),
+            const SnackBar(
+                content: Text('Registration failed: Please try again')),
           );
         }
 
@@ -297,45 +314,37 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     return Form(
       key: signUpFormKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-              height: 100,
-              child: TextFormField(
-                controller: userNameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter a username',
-                  labelText: 'Username',
-                  errorText: usernameError,
-                  prefixIcon: const Icon(Icons.person),
-                  enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      borderSide: BorderSide(color: Colors.grey, width: 1)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+          Container(
+              decoration: const BoxDecoration(
+                  shape: BoxShape.circle // Rounded corners for the border
+                  ),
+              child: ClipOval(
+                child: InkWell(
+                  onTap: () => _selectImage(selectedProfileImage),
+                  child: Image.asset(
+                    'assets/$selectedProfileImage.png', // Image path based on the selected name
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a username';
-                  }
-                  if (!RegExp(r'^[a-zA-Z0-9._-]+$').hasMatch(value)) {
-                    return 'Username can only contain letters, numbers, underscores, periods, and hyphens';
-                  }
-                  //if (email notFound)
-                  return null;
-                },
               )),
-          Text(
-            'Select a Profile Image: $selectedProfileImage',
-            style: const TextStyle(fontSize: 16),
+          const SizedBox(
+            height: 15,
           ),
-          const SizedBox(height: 10),
-          Flex(
-              direction: Axis.horizontal,
+          Text(
+            'Select a Profile Image',
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
               spacing: 10,
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 imageWithBorder('fish', 'fish'),
                 imageWithBorder('shark', 'shark'),
@@ -343,6 +352,34 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 imageWithBorder('dolphin', 'dolphin')
               ]),
           const SizedBox(height: 30),
+          Row(
+            spacing: 10,
+            children: [
+              const Text("Enter your birthday: ",
+                  style: TextStyle(fontSize: 16)),
+              Expanded(
+                child: ElevatedButton(
+                    onPressed: _selectDate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+                      foregroundColor: Colors.black,
+                      minimumSize: const Size(100, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // ← change radius here
+                      ),
+                    ),
+                    child: Text(
+                      selectedDoB != null
+                          ? '${selectedDoB!.day}/${selectedDoB!.month}/${selectedDoB!.year}'
+                          : 'MM/DD/YYYY',
+                    )),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
           SizedBox(
               height: 100,
               child: Flex(
@@ -408,35 +445,33 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       })
                 ],
               )),
-          Flex(
-            direction: Axis.horizontal,
-            spacing: 10,
-            children: [
-              const Text("Enter your birthday: ",
-                  style: TextStyle(fontSize: 16)),
-              Expanded(
-                child: ElevatedButton(
-                    onPressed: _selectDate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
-                      foregroundColor: Colors.black,
-                      minimumSize: const Size(100, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(10), // ← change radius here
-                      ),
-                    ),
-                    child: Text(
-                      selectedDoB != null
-                          ? '${selectedDoB!.day}/${selectedDoB!.month}/${selectedDoB!.year}'
-                          : 'No date selected',
-                    )),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
+          SizedBox(
+              height: 100,
+              child: TextFormField(
+                controller: userNameController,
+                decoration: InputDecoration(
+                  hintText: 'Enter a username',
+                  labelText: 'Username',
+                  errorText: usernameError,
+                  prefixIcon: const Icon(Icons.person),
+                  enabledBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 1)),
+                  focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      borderSide: BorderSide(color: Colors.grey, width: 2)),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  if (!RegExp(r'^[a-zA-Z0-9._-]+$').hasMatch(value)) {
+                    return 'Username can only contain letters, numbers, underscores, periods, and hyphens';
+                  }
+                  //if (email notFound)
+                  return null;
+                },
+              )),
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -583,57 +618,60 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           Container(
             decoration:
                 const BoxDecoration(color: Color.fromRGBO(154, 197, 244, 1)),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    registrationMode = false;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
-                        MediaQuery.of(context).size.height * 0.06),
-                    backgroundColor: registrationMode
-                        ? const Color.fromRGBO(248, 248, 248, 0.5)
-                        : const Color.fromRGBO(248, 248, 248, 1),
-                    shadowColor: Colors.transparent,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30)))),
-                child: const Text(
-                  'Sign in',
-                  style: TextStyle(fontSize: 20, color: Colors.black),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    registrationMode = true;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
-                        MediaQuery.of(context).size.height * 0.06),
-                    backgroundColor: registrationMode
-                        ? const Color.fromRGBO(248, 248, 248, 1)
-                        : const Color.fromRGBO(248, 248, 248, 0.5),
-                    shadowColor: Colors.transparent,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30)))),
-                child: const Text(
-                  'Sign up',
-                  style: TextStyle(fontSize: 20, color: Colors.black),
-                ),
-              ),
-            ]),
+            child: Flex(
+                direction: Axis.horizontal,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        registrationMode = false;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
+                            MediaQuery.of(context).size.height * 0.06),
+                        backgroundColor: registrationMode
+                            ? const Color.fromRGBO(248, 248, 248, 0.5)
+                            : const Color.fromRGBO(248, 248, 248, 1),
+                        shadowColor: Colors.transparent,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30)))),
+                    child: const Text(
+                      'Sign in',
+                      style: TextStyle(fontSize: 20, color: Colors.black),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        registrationMode = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
+                            MediaQuery.of(context).size.height * 0.06),
+                        backgroundColor: registrationMode
+                            ? const Color.fromRGBO(248, 248, 248, 1)
+                            : const Color.fromRGBO(248, 248, 248, 0.5),
+                        shadowColor: Colors.transparent,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30)))),
+                    child: const Text(
+                      'Sign up',
+                      style: TextStyle(fontSize: 20, color: Colors.black),
+                    ),
+                  ),
+                ]),
           ),
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.only(left: 17, right: 17, bottom: 17),
             decoration:
                 const BoxDecoration(color: Color.fromRGBO(248, 248, 248, 1)),
             child: Column(
@@ -644,22 +682,17 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       ? 'Create a new account'
                       : 'Login with an existing account',
                   style: const TextStyle(
-                    fontSize: 20,
-                  ),
+                      fontSize: 20, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 registrationMode ? buildSignUpForm() : buildSignInForm(),
                 ElevatedButton(
                   onPressed: registrationMode ? registerButton : login,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(10),
-                    fixedSize: Size(MediaQuery.of(context).size.width,
-                        MediaQuery.of(context).size.height * 0.06),
-                    backgroundColor: const Color.fromRGBO(154, 197, 244, 1),
-                  ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
+                      minimumSize: const Size(double.infinity, 40)),
+                  child: Text(
+                    registrationMode ? 'Sign Up' : 'Sign In',
+                    style: const TextStyle(
                       fontSize: 20,
                       color: Colors.white,
                     ),

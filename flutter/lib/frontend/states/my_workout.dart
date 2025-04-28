@@ -1,6 +1,8 @@
 import 'package:fitness_app/functional_backend/api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:fitness_app/functional_backend/provider/post_provider.dart';
 
 class MyWorkoutPage extends ConsumerStatefulWidget {
   final int workoutID;
@@ -14,12 +16,14 @@ class MyWorkoutPage extends ConsumerStatefulWidget {
 class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
   late Future<List<Map<String, dynamic>>> activities;
   late Future<Map<String, dynamic>> workoutDetails;
+  late Future<List<Map<String, dynamic>>> comments;
 
   @override
   void initState() {
     super.initState();
     activities = getWorkoutActivities(widget.workoutID);
     workoutDetails = getWorkoutDetails(widget.workoutID);
+    comments = getWorkoutComments(widget.workoutID);
   }
 
   @override
@@ -34,24 +38,6 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
             padding: const EdgeInsets.only(top: 20),
             decoration: const BoxDecoration(color: Colors.white),
             child: Column(children: [
-              Container(
-                padding: const EdgeInsets.only(
-                    top: 20, bottom: 5, left: 3, right: 5),
-                child: Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.arrow_back),
-                    ),
-                    IconButton(
-                        onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-                  ],
-                ),
-              ),
               FutureBuilder<Map<String, dynamic>>(
                   future: workoutDetails,
                   builder: (context, snapshot) {
@@ -60,9 +46,53 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No activities found.'));
+                      return Container(
+                        padding: const EdgeInsets.only(
+                            top: 20, bottom: 5, left: 3, right: 5),
+                        child: Flex(
+                            direction: Axis.horizontal,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                            ]),
+                      );
+                      // const Center(child: Text('No activities found.'));
                     } else {
                       return Column(children: [
+                        Container(
+                          padding: const EdgeInsets.only(
+                              top: 20, bottom: 5, left: 3, right: 5),
+                          child: Flex(
+                            direction: Axis.horizontal,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.arrow_back),
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    deleteWorkout(snapshot.data!['workout_ID']);
+                                    ref
+                                        .read(postNotifier.notifier)
+                                        .loadUserWorkouts();
+                                    ref
+                                        .read(postNotifier.notifier)
+                                        .loadFriendsWorkouts();
+
+                                    Navigator.pop(context);
+                                  },
+                                  icon: const Icon(Icons.more_horiz)),
+                            ],
+                          ),
+                        ),
                         Container(
                             padding: const EdgeInsets.only(
                                 top: 12, right: 15, left: 12, bottom: 5),
@@ -123,7 +153,9 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                   }),
               const Divider(),
               Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  child: SingleChildScrollView(
+                      child: Column(children: [
+                FutureBuilder<List<Map<String, dynamic>>>(
                   future: activities,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -134,45 +166,63 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                       return const Center(child: Text('No activities found.'));
                     } else {
                       List<Map<String, dynamic>> activities = snapshot.data!;
-                      return SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            for (Map<String, dynamic> activity in activities)
-                              ActivityWidget(activity: activity)
-                          ],
-                        ),
+                      return Column(
+                        children: [
+                          for (Map<String, dynamic> activity in activities)
+                            ActivityWidget(activity: activity)
+                        ],
                       );
                     }
                   },
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(bottom: 30, top: 10),
-                decoration: const BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide.none,
-                        left: BorderSide.none,
-                        right: BorderSide.none,
-                        top: BorderSide(
-                            color: Color.fromARGB(255, 230, 230, 230)))),
-                child: const Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text('something')],
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: comments,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No comments found.'));
+                    } else {
+                      List<Map<String, dynamic>> comments = snapshot.data!;
+                      return Column(
+                        children: [
+                          for (Map<String, dynamic> comment in comments)
+                            CommentWidget(comment: comment)
+                        ],
+                      );
+                    }
+                  },
                 ),
-              )
+              ]))),
+              // Container(
+              //   padding: const EdgeInsets.only(bottom: 30, top: 10),
+              //   decoration: const BoxDecoration(
+              //       border: Border(
+              //           bottom: BorderSide.none,
+              //           left: BorderSide.none,
+              //           right: BorderSide.none,
+              //           top: BorderSide(
+              //               color: Color.fromARGB(255, 230, 230, 230)))),
+              //   child: const Flex(
+              //     direction: Axis.horizontal,
+              //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [Text('something')],
+              //   ),
+              // )
             ])));
   }
 }
 
-class ActivityWidget extends ConsumerWidget {
+class ActivityWidget extends StatelessWidget {
   final Map<String, dynamic> activity;
 
   const ActivityWidget({super.key, required this.activity});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Column(children: [
       const SizedBox(height: 20),
       Container(
@@ -209,5 +259,56 @@ class ActivityWidget extends ConsumerWidget {
                 Text(activity['notes']),
               ]))
     ]);
+  }
+}
+
+class CommentWidget extends StatelessWidget {
+  final Map<String, dynamic> comment;
+
+  const CommentWidget({super.key, required this.comment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.only(top: 12, right: 15, left: 12, bottom: 5),
+        child: Flex(
+            direction: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 10,
+            children: [
+              Container(
+                  width: 35,
+                  height: 35,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                    // image: DecorationImage(
+                    //   image: AssetImage(
+                    //       'assets/${snapshot.data!['user_profile_photo']}.png'),
+                    //   fit: BoxFit.fill,
+                    // ),
+                  )),
+              Expanded(
+                  child: Flex(
+                      direction: Axis.vertical,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 5,
+                      children: [
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 5,
+                        children: [
+                          Text(comment['user_name'],
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(comment['content'],
+                              style: const TextStyle(fontSize: 16)),
+                          Text(DateFormat('dd MMMM yyyy')
+                              .format(comment['date'])),
+                        ])
+                  ]))
+            ]));
   }
 }

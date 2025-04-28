@@ -160,3 +160,27 @@ Map<String, dynamic> activityData = {
 //     print('Connection closed 🔒');
 //   }
 // }
+SELECT 
+    e.exercise_target,
+    COUNT(*) AS activity_count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
+FROM workouts w
+LEFT JOIN activities a ON w.workout_ID = a.workout_ID
+LEFT JOIN exercises e ON a.exercise_ID = e.exercise_ID
+wHERE w.user_ID = 2
+GROUP BY e.exercise_target
+
+ORDER BY percentage DESC;
+
+
+SELECT 
+    e.exercise_target,
+    COUNT(*) AS activity_count,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
+FROM exercises e
+LEFT JOIN activities a ON e.exercise_ID = a.exercise_ID
+LEFT JOIN workouts w ON a.workout_ID = w.workout_ID
+wHERE w.user_ID = 2
+GROUP BY e.exercise_target
+
+ORDER BY percentage DESC;

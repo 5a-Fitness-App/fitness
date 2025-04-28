@@ -214,6 +214,7 @@ INSERT INTO exercises (exercise_name, exercise_target) VALUES
 ('Leg Curls (Machine)', 'Legs'),
 ('Calf Raises', 'Legs'),
 ('Single-leg Leg Press', 'Legs');
+('Deadlifts', 'Legs'),
 
 -- Glutes
 INSERT INTO exercises (exercise_name, exercise_target) VALUES
@@ -240,7 +241,6 @@ INSERT INTO exercises (exercise_name, exercise_target) VALUES
 ('Upper Back Rows (Machine)', 'Back'),
 ('Upper Back Rows (Cable)', 'Back'),
 ('Pullovers', 'Back'),
-('Deadlifts', 'Back'),
 ('Pull-ups', 'Back');
 
 -- Shoulders
@@ -445,17 +445,17 @@ INSERT INTO achievements (achievement_description)
 VALUES
 ('First Workout Completed'),
 ('Completed 10 Workouts'),
-('Achieved 100 Squats'),
-('Deadlift Personal Record'),
+('Comment on a friends Post'),
+('Like a friends Post'),
 ('First Friend Added');
 
 INSERT INTO users_achievements (user_ID, achievement_ID, completed, date_earned)
 VALUES
-(1, 1, TRUE, '2024-01-01 10:00'), -- User 1 completes their first workout
-(1, 2, TRUE, '2024-01-05 10:00'), -- User 1 completes 10 workouts
-(2, 3, TRUE, '2024-01-04 11:00'), -- User 2 achieves 100 squats
-(3, 4, TRUE, '2024-02-07 09:00'), -- User 3 achieves a deadlift PR
-(5, 5, TRUE, '2024-03-01 17:00'); -- User 5 adds their first friend
+(1, 1, TRUE, '2024-01-01 10:00'),
+(1, 2, TRUE, '2024-01-05 10:00'),
+(1, 3, TRUE, '2024-01-04 11:00'), 
+(1, 4, TRUE, '2024-02-07 09:00'), 
+(1, 5, TRUE, '2024-03-01 17:00'); 
 
 -- Insert likes
 INSERT INTO likes (user_ID, workout_ID) VALUES
@@ -502,6 +502,9 @@ INSERT INTO comments (user_ID, workout_ID, content) VALUES
 (1, 8, 'Keep going strong!'),
 (1, 9, 'Push day looks amazing!'),
 (1, 10, 'Good recovery workout!'),
+
+INSERT INTO comments (user_ID, workout_ID, content) VALUES
+(2, 1, 'Wow!');
 
 -- User 2 comments on User 3's workout
 (2, 11, 'Love the crab crunches!'),
