@@ -154,64 +154,69 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
               const Divider(),
               Expanded(
                   child: SingleChildScrollView(
-                      child: Column(children: [
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: activities,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No activities found.'));
-                    } else {
-                      List<Map<String, dynamic>> activities = snapshot.data!;
-                      return Column(
-                        children: [
-                          for (Map<String, dynamic> activity in activities)
-                            ActivityWidget(activity: activity)
-                        ],
-                      );
-                    }
-                  },
-                ),
-                FutureBuilder<List<Map<String, dynamic>>>(
-                  future: comments,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No comments found.'));
-                    } else {
-                      List<Map<String, dynamic>> comments = snapshot.data!;
-                      return Column(
-                        children: [
-                          for (Map<String, dynamic> comment in comments)
-                            CommentWidget(comment: comment)
-                        ],
-                      );
-                    }
-                  },
-                ),
-              ]))),
-              // Container(
-              //   padding: const EdgeInsets.only(bottom: 30, top: 10),
-              //   decoration: const BoxDecoration(
-              //       border: Border(
-              //           bottom: BorderSide.none,
-              //           left: BorderSide.none,
-              //           right: BorderSide.none,
-              //           top: BorderSide(
-              //               color: Color.fromARGB(255, 230, 230, 230)))),
-              //   child: const Flex(
-              //     direction: Axis.horizontal,
-              //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     children: [Text('something')],
-              //   ),
-              // )
+                      child: Column(
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: activities,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text('No activities found.'));
+                        } else {
+                          List<Map<String, dynamic>> activities =
+                              snapshot.data!;
+                          return Column(
+                            children: [
+                              for (Map<String, dynamic> activity in activities)
+                                ActivityWidget(activity: activity)
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    const Divider(),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10),
+                      child: const Text('Comments',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20)),
+                    ),
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: comments,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(
+                              child: Text('No comments found.'));
+                        } else {
+                          List<Map<String, dynamic>> comments = snapshot.data!;
+                          return Column(
+                            children: [
+                              for (Map<String, dynamic> comment in comments)
+                                CommentWidget(comment: comment)
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  ]))),
             ])));
   }
 }
@@ -283,11 +288,11 @@ class CommentWidget extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.blue,
-                    // image: DecorationImage(
-                    //   image: AssetImage(
-                    //       'assets/${snapshot.data!['user_profile_photo']}.png'),
-                    //   fit: BoxFit.fill,
-                    // ),
+                    image: DecorationImage(
+                      image: AssetImage(
+                          'assets/${comment['user_profile_photo']}.png'),
+                      fit: BoxFit.fill,
+                    ),
                   )),
               Expanded(
                   child: Flex(

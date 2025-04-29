@@ -37,6 +37,7 @@ class UserNotifier extends StateNotifier<User> {
               user_bio,
               user_dob,
               user_weight,
+        
               user_weight_unit,
               users_account_creation_date,
               user_email

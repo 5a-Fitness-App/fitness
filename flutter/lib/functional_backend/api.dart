@@ -182,6 +182,7 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
     List<List<dynamic>> query = await dbService.readQuery('''
         SELECT
           u.user_name,
+          u.user_profile_photo,
           c.content,
           c.date_commented
         FROM 
@@ -192,7 +193,12 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
       ''', {'workout_ID': workoutID});
 
     List<Map<String, dynamic>> queryRows = query
-        .map((row) => {'user_name': row[0], 'content': row[1], 'date': row[2]})
+        .map((row) => {
+              'user_name': row[0],
+              'user_profile_photo': utf8.decode(row[1].bytes),
+              'content': row[2],
+              'date': row[3]
+            })
         .toList();
 
     return queryRows;
@@ -305,26 +311,28 @@ Future<String?> deleteWorkout(int workoutID) async {
 }
 
 // GET THE PERCENTAGES FOR ACTIVITIES PER EXERCISE TARGET
-Future<List<Map<String, dynamic>>> getTargetPercentages(int userID) async {
-  try {
-    List<List<dynamic>> query = await dbService.readQuery('''
-        SELECT 
-          e.exercise_target,
-          COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) AS activity_count,
-          ROUND(
-              COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) * 100.0 
-              / NULLIF(SUM(COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID)) OVER (), 0), 
-              2
-          ) AS percentage
-        FROM exercises e
-        LEFT JOIN activities a ON e.exercise_ID = a.exercise_ID
-        LEFT JOIN workouts w ON a.workout_ID = w.workout_ID
-        GROUP BY e.exercise_target
-        ORDER BY percentage DESC NULLS LAST;
-      ''', {'user_ID': userID});
+// Future<List<Map<String, dynamic>>> getTargetPercentages(int userID) async {
+//   try {
+//     List<List<dynamic>> query = await dbService.readQuery('''
+//         SELECT 
+//           e.exercise_target,
+//           COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) AS activity_count,
+//           ROUND(
+//               COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) * 100.0 
+//               / NULLIF(SUM(COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID)) OVER (), 0), 
+//               2
+//           ) AS percentage
+//         FROM exercises e
+//         LEFT JOIN activities a ON e.exercise_ID = a.exercise_ID
+//         LEFT JOIN workouts w ON a.workout_ID = w.workout_ID
+//         GROUP BY e.exercise_target
+//         ORDER BY percentage DESC NULLS LAST;
+//       ''', {'user_ID': userID});
 
-      List<Map<String, dynamic>> queryRows = query
-        .map((row) => {'user_name': row[0], 'content': row[1], 'date': row[2]})
-        .toList();
-  } catch (e) {}
-}
+//       List<Map<String, dynamic>> queryRows = query
+//         .map((row) => {'user_name': row[0], 'content': row[1], 'date': row[2]})
+//         .toList();
+//   } catch (e) {
+//     return 
+//   }
+// }
