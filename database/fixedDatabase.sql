@@ -213,8 +213,8 @@ INSERT INTO exercises (exercise_name, exercise_target) VALUES
 ('Leg Extensions (Machine)', 'Legs'),
 ('Leg Curls (Machine)', 'Legs'),
 ('Calf Raises', 'Legs'),
-('Single-leg Leg Press', 'Legs');
-('Deadlifts', 'Legs'),
+('Single-leg Leg Press', 'Legs'),
+('Deadlifts', 'Legs');
 
 -- Glutes
 INSERT INTO exercises (exercise_name, exercise_target) VALUES
@@ -503,10 +503,8 @@ INSERT INTO comments (user_ID, workout_ID, content) VALUES
 (1, 9, 'Push day looks amazing!'),
 (1, 10, 'Good recovery workout!'),
 
-INSERT INTO comments (user_ID, workout_ID, content) VALUES
-(2, 1, 'Wow!');
-
 -- User 2 comments on User 3's workout
+(2, 1, 'Wow!'),
 (2, 11, 'Love the crab crunches!'),
 (2, 12, 'Great bicep curls session!'),
 (2, 13, 'Machine workout looks effective!'),
@@ -545,7 +543,7 @@ INSERT INTO friend_requests (sender_ID, receiver_ID) VALUES
 -- User 4 sends request to User 5
 (4, 5),
 -- User 5 sends request to User 1
-(5, 1);
+(4, 1);
 
 -- Insert friends
 INSERT INTO friends (user_ID, friend_ID) VALUES

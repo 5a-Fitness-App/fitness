@@ -1,9 +1,9 @@
 import 'package:fitness_app/frontend/states/index.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fitness_app/functional_backend/api.dart';
+import 'package:fitness_app/backend/api.dart';
 
 import 'package:flutter/services.dart';
 
@@ -60,6 +60,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   String? passwordError;
 
   String? usernameError;
+
+  String? birthdayError;
 
   bool hidePassword = true;
   bool registrationMode =
@@ -352,99 +354,6 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 imageWithBorder('dolphin', 'dolphin')
               ]),
           const SizedBox(height: 30),
-          Row(
-            spacing: 10,
-            children: [
-              const Text("Enter your birthday: ",
-                  style: TextStyle(fontSize: 16)),
-              Expanded(
-                child: ElevatedButton(
-                    onPressed: _selectDate,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
-                      foregroundColor: Colors.black,
-                      minimumSize: const Size(100, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(10), // ← change radius here
-                      ),
-                    ),
-                    child: Text(
-                      selectedDoB != null
-                          ? '${selectedDoB!.day}/${selectedDoB!.month}/${selectedDoB!.year}'
-                          : 'MM/DD/YYYY',
-                    )),
-              )
-            ],
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          SizedBox(
-              height: 100,
-              child: Flex(
-                direction: Axis.horizontal,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 10,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: weightController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true), // Numeric keyboard
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d*\.?\d*$')),
-                      ], // Allow only numbers and a decimal point
-                      decoration: InputDecoration(
-                        hintText: 'Enter your weight',
-                        labelText: 'Weight',
-                        errorText: emailError,
-                        prefixIcon: const Icon(Icons.monitor_weight_outlined),
-                        enabledBorder: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 1)),
-                        focusedBorder: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            borderSide:
-                                BorderSide(color: Colors.grey, width: 2)),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a number';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return 'Invalid number';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  DropdownMenu<WeightUnitsLabel>(
-                      enableFilter: false,
-                      enableSearch: false,
-                      width: 125,
-                      initialSelection: WeightUnitsLabel.kg,
-                      controller: weightUnitsController,
-                      dropdownMenuEntries: WeightUnitsLabel.entries,
-                      helperText: 'Select weight unit',
-                      inputDecorationTheme: InputDecorationTheme(
-                        filled: true,
-                        fillColor: const Color.fromARGB(255, 230, 230, 230),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                const BorderSide(color: Colors.transparent),
-                            borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.all(10),
-                      ),
-                      onSelected: (WeightUnitsLabel? weightUnit) {
-                        setState(() {
-                          selectedWeightUnit = weightUnit;
-                        });
-                      })
-                ],
-              )),
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -568,6 +477,99 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   }
                   return null;
                 },
+              )),
+          Row(
+            spacing: 10,
+            children: [
+              const Text("Enter your birthday: ",
+                  style: TextStyle(fontSize: 16)),
+              Expanded(
+                child: ElevatedButton(
+                    onPressed: _selectDate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 230, 230, 230),
+                      foregroundColor: Colors.black,
+                      minimumSize: const Size(100, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10), // ← change radius here
+                      ),
+                    ),
+                    child: Text(
+                      selectedDoB != null
+                          ? '${selectedDoB!.day}/${selectedDoB!.month}/${selectedDoB!.year}'
+                          : 'MM/DD/YYYY',
+                    )),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
+          SizedBox(
+              height: 100,
+              child: Flex(
+                direction: Axis.horizontal,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: weightController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true), // Numeric keyboard
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*$')),
+                      ], // Allow only numbers and a decimal point
+                      decoration: InputDecoration(
+                        hintText: 'Enter your weight',
+                        labelText: 'Weight',
+                        errorText: emailError,
+                        prefixIcon: const Icon(Icons.monitor_weight_outlined),
+                        enabledBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 1)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 2)),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a number';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Invalid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  DropdownMenu<WeightUnitsLabel>(
+                      enableFilter: false,
+                      enableSearch: false,
+                      width: 125,
+                      initialSelection: WeightUnitsLabel.kg,
+                      controller: weightUnitsController,
+                      dropdownMenuEntries: WeightUnitsLabel.entries,
+                      helperText: 'Select weight unit',
+                      inputDecorationTheme: InputDecorationTheme(
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 230, 230, 230),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                const BorderSide(color: Colors.transparent),
+                            borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.all(10),
+                      ),
+                      onSelected: (WeightUnitsLabel? weightUnit) {
+                        setState(() {
+                          selectedWeightUnit = weightUnit;
+                        });
+                      })
+                ],
               )),
         ],
       ),

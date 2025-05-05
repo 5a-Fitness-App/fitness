@@ -1,6 +1,6 @@
 import 'dart:collection';
-import 'package:fitness_app/functional_backend/models/workout_draft.dart';
-import 'package:fitness_app/functional_backend/provider/workout_draft_provider.dart';
+import 'package:fitness_app/backend/models/workout_draft.dart';
+import 'package:fitness_app/backend/provider/workout_draft_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -120,12 +120,10 @@ class LogWorkoutPage extends ConsumerStatefulWidget {
 class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   final TextEditingController activityController = TextEditingController();
   ExerciseTypeLabel? selectedExercise;
-  final TextEditingController captionController = TextEditingController();
 
   @override
   void dispose() {
     activityController.dispose();
-    captionController.dispose();
     super.dispose();
   }
 
@@ -139,15 +137,15 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   }
 
   void postWorkout() {
-    String caption = captionController.text.trim();
-
-    ref.read(workoutDraftNotifier.notifier).post(caption);
+    ref.read(workoutDraftNotifier.notifier).post();
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final workoutDraft = ref.watch(workoutDraftNotifier);
     final activities = workoutDraft.activities;
+    final workoutKey = GlobalKey<FormState>();
 
     return GestureDetector(
         onTap: () {
@@ -158,142 +156,229 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
             width: double.infinity,
             padding: const EdgeInsets.only(top: 20),
             decoration: const BoxDecoration(color: Colors.white),
-            child: Column(children: [
-              Container(
-                padding: const EdgeInsets.only(
-                    top: 20, bottom: 10, left: 10, right: 15),
-                child: Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.black, fontSize: 16),
-                        )),
-                    ElevatedButton(
-                        onPressed: postWorkout,
-                        style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor:
-                                const Color.fromARGB(255, 80, 162, 255),
-                            foregroundColor: Colors.white),
-                        child: const Text(
-                          'Post',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        )),
-                  ],
-                ),
-              ),
-              Container(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
+            child: Form(
+                key: workoutKey,
+                child: Column(children: [
+                  Container(
+                    padding: const EdgeInsets.only(
+                        top: 20, bottom: 10, left: 10, right: 15),
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ref.read(workoutDraftNotifier.notifier).cancel();
+                            },
+                            child: const Text(
+                              'Cancel',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 16),
+                            )),
+                        ElevatedButton(
+                            onPressed: postWorkout,
+                            style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 80, 162, 255),
+                                foregroundColor: Colors.white),
+                            child: const Text(
+                              'Post',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                  ),
+                  Container(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextFormField(
+                              autofocus: true,
+                              autocorrect: false,
+                              controller: workoutDraft.captionController,
+                              keyboardType: TextInputType.multiline,
+                              minLines: 5,
+                              maxLines: 5,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Write a caption...',
+                              ),
+                            ),
+                          ])),
+                  const Divider(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (activities.isEmpty)
+                            const Text(
+                              'Add an activity',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          for (ActivityDraft activity in activities)
+                            ActivityWidget(
+                              activity: activity,
+                            )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(bottom: 30, top: 10),
+                    decoration: const BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide.none,
+                            left: BorderSide.none,
+                            right: BorderSide.none,
+                            top: BorderSide(
+                                color: Color.fromARGB(255, 230, 230, 230)))),
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextFormField(
-                          autofocus: true,
-                          autocorrect: false,
-                          controller: captionController,
-                          keyboardType: TextInputType.multiline,
-                          minLines: 5,
-                          maxLines: 5,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Write a caption...',
-                          ),
-                        ),
-                      ])),
-              const Divider(),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (activities.isEmpty)
-                        const Text(
-                          'Add an activity',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      for (ActivityDraft activity in activities)
-                        ActivityWidget(
-                          activity: activity,
-                        )
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(bottom: 30, top: 10),
-                decoration: const BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide.none,
-                        left: BorderSide.none,
-                        right: BorderSide.none,
-                        top: BorderSide(
-                            color: Color.fromARGB(255, 230, 230, 230)))),
-                child: Flex(
-                  direction: Axis.horizontal,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ElevatedButton.icon(
-                        onPressed: () {
-                          ref.read(workoutDraftNotifier.notifier).addActivity(
-                              selectedExercise!.label,
-                              selectedExercise!.metrics);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor:
-                                const Color.fromARGB(255, 80, 162, 255),
-                            foregroundColor: Colors.white),
-                        icon: const Icon(
-                          Icons.add,
-                          color: Colors.white,
-                        ),
-                        label: const Text('Add Activity',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold))),
-                    DropdownMenu<ExerciseTypeLabel>(
-                        enableFilter: false,
-                        enableSearch: false,
-                        width: 200,
-                        initialSelection: ExerciseTypeLabel.running,
-                        controller: activityController,
-                        dropdownMenuEntries: ExerciseTypeLabel.entries,
-                        helperText: 'Select an activity to add',
-                        inputDecorationTheme: InputDecorationTheme(
-                          filled: true,
-                          fillColor: const Color.fromARGB(255, 230, 230, 230),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  const BorderSide(color: Colors.transparent),
-                              borderRadius: BorderRadius.circular(10)),
-                          contentPadding: const EdgeInsets.all(10),
-                        ),
-                        onSelected: (ExerciseTypeLabel? activity) {
-                          setState(() {
-                            selectedExercise = activity;
-                          });
-                        }),
-                  ],
-                ),
-              )
-            ])));
+                        ElevatedButton.icon(
+                            onPressed: () {
+                              ref
+                                  .read(workoutDraftNotifier.notifier)
+                                  .addActivity(selectedExercise!.label,
+                                      selectedExercise!.metrics);
+                            },
+                            style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor:
+                                    const Color.fromARGB(255, 80, 162, 255),
+                                foregroundColor: Colors.white),
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ),
+                            label: const Text('Add Activity',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold))),
+                        DropdownMenu<ExerciseTypeLabel>(
+                            enableFilter: false,
+                            enableSearch: false,
+                            width: 200,
+                            initialSelection: selectedExercise,
+                            controller: activityController,
+                            dropdownMenuEntries: ExerciseTypeLabel.entries,
+                            helperText: 'Select an activity to add',
+                            inputDecorationTheme: InputDecorationTheme(
+                              filled: true,
+                              fillColor:
+                                  const Color.fromARGB(255, 230, 230, 230),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                      color: Colors.transparent),
+                                  borderRadius: BorderRadius.circular(10)),
+                              contentPadding: const EdgeInsets.all(10),
+                            ),
+                            onSelected: (ExerciseTypeLabel? activity) {
+                              setState(() {
+                                selectedExercise = activity;
+                                print(activityController.text);
+                              });
+                            }),
+                      ],
+                    ),
+                  )
+                ]))));
   }
 }
 
-class ActivityWidget extends ConsumerWidget {
+class ActivityWidget extends ConsumerStatefulWidget {
   final ActivityDraft activity;
-  final _formKey = GlobalKey<FormState>();
 
-  ActivityWidget({super.key, required this.activity});
+  const ActivityWidget({super.key, required this.activity});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ActivityWidgetState createState() => ActivityWidgetState();
+}
+
+class ActivityWidgetState extends ConsumerState<ActivityWidget> {
+  ActivityDraft? activity;
+  final _formKey = GlobalKey<FormState>();
+  WeightUnitsLabel? selectedWeightUnit;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedWeightUnit = WeightUnitsLabel.kg;
+  }
+
+  Widget _buildTimeField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      textAlign: TextAlign.center,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(2), // Max 2 digits
+      ],
+      decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          )),
+      validator: (value) {
+        if (value == null || value.isEmpty) return null;
+        final num = int.tryParse(value);
+        if (num == null || num < 0) return 'Invalid';
+
+        // Additional validation based on field type
+        if (label == 'MM' || label == 'SS') {
+          if (num > 59) return 'Max 59';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildTimeInputs() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Time', style: TextStyle(fontSize: 16)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildTimeField(
+                controller: widget.activity.hoursController,
+                label: 'HH',
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeField(
+                controller: widget.activity.minutesController,
+                label: 'MM',
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildTimeField(
+                controller: widget.activity.secondsController,
+                label: 'SS',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Form(
         key: _formKey,
         child: Column(children: [
@@ -313,15 +398,54 @@ class ActivityWidget extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                Text(activity.exerciseType,
+                Text(widget.activity.exerciseType,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold)),
-                if (activity.metrics.contains('time'))
-                  const Text(
-                    'Time',
-                    style: TextStyle(fontSize: 16),
+                if (widget.activity.metrics.contains('reps'))
+                  TextFormField(
+                    controller: widget.activity.repsController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter
+                          .digitsOnly, // Only allow whole numbers
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Reps',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Enter sets';
+                      if (int.tryParse(value) == null)
+                        return 'Enter valid number';
+                      return null;
+                    },
                   ),
-                if (activity.metrics.contains('weight'))
+                if (widget.activity.metrics.contains('sets'))
+                  TextFormField(
+                    controller: widget.activity.setsController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter
+                          .digitsOnly, // Only allow whole numbers
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Sets',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Enter sets';
+                      if (int.tryParse(value) == null)
+                        return 'Enter valid number';
+                      return null;
+                    },
+                  ),
+                if (widget.activity.metrics.contains('time'))
+                  _buildTimeInputs(),
+                if (widget.activity.metrics.contains('weight'))
                   SizedBox(
                       height: 100,
                       child: Flex(
@@ -331,7 +455,7 @@ class ActivityWidget extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: activity.weightController,
+                              controller: widget.activity.weightController,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                       decimal: true), // Numeric keyboard
@@ -342,14 +466,13 @@ class ActivityWidget extends ConsumerWidget {
                               decoration: const InputDecoration(
                                 hintText: 'Enter your weight',
                                 labelText: 'Weight',
-                                prefixIcon:
-                                    const Icon(Icons.monitor_weight_outlined),
-                                enabledBorder: const OutlineInputBorder(
+                                prefixIcon: Icon(Icons.monitor_weight_outlined),
+                                enabledBorder: OutlineInputBorder(
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20)),
                                     borderSide: BorderSide(
                                         color: Colors.grey, width: 1)),
-                                focusedBorder: const OutlineInputBorder(
+                                focusedBorder: OutlineInputBorder(
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20)),
                                     borderSide: BorderSide(
@@ -370,8 +493,8 @@ class ActivityWidget extends ConsumerWidget {
                               enableFilter: false,
                               enableSearch: false,
                               width: 125,
-                              initialSelection: WeightUnitsLabel.kg,
-                              controller: activity.weightUnitsController,
+                              initialSelection: selectedWeightUnit,
+                              controller: widget.activity.weightUnitsController,
                               dropdownMenuEntries: WeightUnitsLabel.entries,
                               helperText: 'Select weight unit',
                               inputDecorationTheme: InputDecorationTheme(
@@ -385,14 +508,15 @@ class ActivityWidget extends ConsumerWidget {
                                 contentPadding: const EdgeInsets.all(10),
                               ),
                               onSelected: (WeightUnitsLabel? weightUnit) {
+                                selectedWeightUnit = weightUnit;
                                 ref
                                     .read(workoutDraftNotifier.notifier)
-                                    .setWeightUnit(activity,
+                                    .setWeightUnit(widget.activity,
                                         weightUnit ?? WeightUnitsLabel.kg);
                               })
                         ],
                       )),
-                if (activity.metrics.contains('distance'))
+                if (widget.activity.metrics.contains('distance'))
                   SizedBox(
                       height: 100,
                       child: Flex(
@@ -402,7 +526,7 @@ class ActivityWidget extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: activity.distanceController,
+                              controller: widget.activity.distanceController,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                       decimal: true), // Numeric keyboard
@@ -413,14 +537,13 @@ class ActivityWidget extends ConsumerWidget {
                               decoration: const InputDecoration(
                                 hintText: 'Enter Distance',
                                 labelText: 'Distance',
-                                prefixIcon:
-                                    const Icon(Icons.monitor_weight_outlined),
-                                enabledBorder: const OutlineInputBorder(
+                                prefixIcon: Icon(Icons.monitor_weight_outlined),
+                                enabledBorder: OutlineInputBorder(
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20)),
                                     borderSide: BorderSide(
                                         color: Colors.grey, width: 1)),
-                                focusedBorder: const OutlineInputBorder(
+                                focusedBorder: OutlineInputBorder(
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(20)),
                                     borderSide: BorderSide(
@@ -442,7 +565,8 @@ class ActivityWidget extends ConsumerWidget {
                               enableSearch: false,
                               width: 125,
                               initialSelection: DistanceUnitsLabel.mi,
-                              controller: activity.distanceUnitsController,
+                              controller:
+                                  widget.activity.distanceUnitsController,
                               dropdownMenuEntries: DistanceUnitsLabel.entries,
                               helperText: 'Select weight unit',
                               inputDecorationTheme: InputDecorationTheme(
@@ -458,16 +582,16 @@ class ActivityWidget extends ConsumerWidget {
                               onSelected: (DistanceUnitsLabel? distanceUnits) {
                                 ref
                                     .read(workoutDraftNotifier.notifier)
-                                    .setDistanceUnit(activity,
+                                    .setDistanceUnit(widget.activity,
                                         distanceUnits ?? DistanceUnitsLabel.mi);
                               })
                         ],
                       )),
-                if (activity.metrics.contains('speed'))
+                if (widget.activity.metrics.contains('speed'))
                   SizedBox(
                     height: 100,
                     child: TextFormField(
-                      controller: activity.speedController,
+                      controller: widget.activity.speedController,
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true), // Numeric keyboard
                       inputFormatters: [
@@ -498,11 +622,11 @@ class ActivityWidget extends ConsumerWidget {
                       },
                     ),
                   ),
-                if (activity.metrics.contains('incline'))
+                if (widget.activity.metrics.contains('incline'))
                   SizedBox(
                     height: 100,
                     child: TextFormField(
-                      controller: activity.inclineController,
+                      controller: widget.activity.inclineController,
                       keyboardType: const TextInputType.numberWithOptions(
                           decimal: true), // Numeric keyboard
                       inputFormatters: [
@@ -533,85 +657,10 @@ class ActivityWidget extends ConsumerWidget {
                       },
                     ),
                   ),
-                if (activity.metrics.contains('reps'))
-                  Flex(direction: Axis.horizontal, spacing: 40, children: [
-                    const Text(
-                      'Reps:',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Card(
-                      color: const Color.fromARGB(255, 230, 230, 230),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(16), // Custom border radius
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () {
-                              ref
-                                  .read(workoutDraftNotifier.notifier)
-                                  .decrementReps(activity);
-                            },
-                          ),
-                          Text((activity.reps ?? 0).toString()),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              ref
-                                  .read(workoutDraftNotifier.notifier)
-                                  .incrementReps(activity);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]),
-                if (activity.metrics.contains('sets'))
-                  Flex(direction: Axis.horizontal, spacing: 40, children: [
-                    const Text(
-                      'Sets:',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    Card(
-                      color: const Color.fromARGB(255, 230, 230, 230),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(16), // Custom border radius
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () {
-                              ref
-                                  .read(workoutDraftNotifier.notifier)
-                                  .decrementSets(activity);
-                            },
-                          ),
-                          Text((activity.sets ?? 0).toString()),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              ref
-                                  .read(workoutDraftNotifier.notifier)
-                                  .incrementSets(activity);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 40,
                   child: TextFormField(
+                    controller: widget.activity.notesController,
                     autofocus: true,
                     autocorrect: false,
                     keyboardType: TextInputType.multiline,
@@ -627,7 +676,7 @@ class ActivityWidget extends ConsumerWidget {
                     onPressed: () {
                       ref
                           .read(workoutDraftNotifier.notifier)
-                          .deleteActivity(activity);
+                          .deleteActivity(widget.activity);
                     },
                     style: ElevatedButton.styleFrom(
                         elevation: 0,

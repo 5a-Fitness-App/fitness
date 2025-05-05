@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fitness_app/frontend/states/login_screen.dart';
 
-import 'package:fitness_app/functional_backend/services/db_service.dart';
+import 'package:fitness_app/backend/services/db_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,11 +37,10 @@ class MyApp extends StatelessWidget {
         home: Builder(builder: (context) => const LoginScreen()));
   }
 
-  // TODO: PostProvider(),
-  // TODO: Implement Achievements
   // TODO: Create Dashboard
   // TODO: clean up code,
-  // TODO: comment creation, deletion
-  // TODO: muscle groups piechart
   // TODO: delete account
+  // TODO: toggle workout public and private
+  // TODO: send friend request
+  // TODO: log workout time
 }

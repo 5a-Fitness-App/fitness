@@ -50,7 +50,7 @@ class DbService {
       Sql.named(sql),
       parameters: values ?? {},
     );
-    print(result);
+
     return result.toList();
   }
 

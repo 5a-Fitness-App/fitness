@@ -50,11 +50,17 @@ class ActivityDraft {
   final int activityDraftID;
   final String exerciseType;
   final List<String> metrics;
-  String notes;
+  final TextEditingController notesController;
 
   // Strength fields
   int? sets;
   int? reps;
+
+  // Rep controller
+  final TextEditingController repsController;
+
+  // Set controllers
+  final TextEditingController setsController;
 
   // Time controllers
   final TextEditingController hoursController;
@@ -79,9 +85,9 @@ class ActivityDraft {
     required this.activityDraftID,
     required this.exerciseType,
     required this.metrics,
-    this.notes = '',
-    this.sets,
-    this.reps,
+    required this.notesController,
+    required this.setsController,
+    required this.repsController,
     required this.hoursController,
     required this.minutesController,
     required this.secondsController,
@@ -96,18 +102,14 @@ class ActivityDraft {
   });
 
   ActivityDraft copyWith(
-      {String? notes,
-      int? sets,
-      int? reps,
-      WeightUnitsLabel? weightUnit,
-      DistanceUnitsLabel? distanceUnit}) {
+      {WeightUnitsLabel? weightUnit, DistanceUnitsLabel? distanceUnit}) {
     return ActivityDraft(
       activityDraftID: activityDraftID,
       exerciseType: exerciseType,
       metrics: metrics,
-      notes: notes ?? this.notes,
-      sets: sets ?? this.sets,
-      reps: reps ?? this.reps,
+      notesController: notesController,
+      setsController: setsController,
+      repsController: repsController,
       hoursController: hoursController,
       minutesController: minutesController,
       secondsController: secondsController,
@@ -125,10 +127,12 @@ class ActivityDraft {
   Map<String, dynamic> toMap() {
     return {
       'exercise_name': exerciseType,
-      'notes': notes,
+      if (notesController.text.isNotEmpty) 'notes': notesController.text.trim(),
       'metrics': {
-        if (sets != null) 'sets': sets,
-        if (reps != null) 'reps': reps,
+        if (_parseInt(setsController.text) != null)
+          'sets': _parseInt(setsController.text),
+        if (_parseInt(repsController.text) != null)
+          'reps': _parseInt(repsController.text),
         if (_parseDouble(weightController.text) != null)
           'weight': _parseDouble(weightController.text),
         if (weightUnitsController.text.isNotEmpty)
@@ -151,6 +155,11 @@ class ActivityDraft {
     return value?.isFinite == true ? value : null;
   }
 
+  int? _parseInt(String text) {
+    final value = int.tryParse(text.trim());
+    return value?.isFinite == true ? value : null;
+  }
+
   String _formattedTime() {
     final h = hoursController.text.trim();
     final m = minutesController.text.trim();
@@ -162,17 +171,17 @@ class ActivityDraft {
 
 class WorkoutDraft {
   final List<ActivityDraft> activities;
-  String caption;
-  WorkoutDraft({required this.activities, this.caption = ''});
-  WorkoutDraft copyWith({List<ActivityDraft>? activities, String? caption}) {
+  final TextEditingController captionController;
+  WorkoutDraft({required this.activities, required this.captionController});
+  WorkoutDraft copyWith({List<ActivityDraft>? activities}) {
     return WorkoutDraft(
         activities: activities ?? this.activities,
-        caption: caption ?? this.caption);
+        captionController: captionController);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'workout_caption': caption,
+      'workout_caption': captionController.text.trim(),
       'activities': activities.map((activity) => activity.toMap()).toList(),
     };
   }

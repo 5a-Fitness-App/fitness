@@ -1,7 +1,7 @@
 import 'package:fitness_app/frontend/states/log_workout_page.dart';
 import 'package:fitness_app/frontend/states/login_screen.dart';
-import 'package:fitness_app/functional_backend/provider/post_provider.dart';
-import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/frontend/states/profile_page.dart';
 import 'package:fitness_app/frontend/states/home_page.dart';

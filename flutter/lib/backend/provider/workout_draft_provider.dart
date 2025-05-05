@@ -1,9 +1,9 @@
-import 'package:fitness_app/functional_backend/api.dart';
-import 'package:fitness_app/functional_backend/models/workout_draft.dart';
-import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+import 'package:fitness_app/backend/api.dart';
+import 'package:fitness_app/backend/models/workout_draft.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fitness_app/functional_backend/models/user.dart';
+import 'package:fitness_app/backend/models/user.dart';
 
 final workoutDraftProvider = StateProvider<int>((ref) => 1);
 
@@ -15,7 +15,9 @@ final workoutDraftNotifier =
 class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
   final Ref ref;
 
-  WorkoutDraftNotifier(this.ref) : super(WorkoutDraft(activities: []));
+  WorkoutDraftNotifier(this.ref)
+      : super(WorkoutDraft(
+            activities: [], captionController: TextEditingController()));
 
   List<ActivityDraft> getActivities() {
     return state.activities;
@@ -28,6 +30,9 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
         activityDraftID: activityID,
         exerciseType: exerciseName,
         metrics: metrics,
+        setsController: TextEditingController(),
+        repsController: TextEditingController(),
+        notesController: TextEditingController(),
         hoursController: TextEditingController(),
         minutesController: TextEditingController(),
         secondsController: TextEditingController(),
@@ -47,54 +52,6 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     activities.remove(activity);
     state = state.copyWith(activities: activities);
     print("activity removed");
-  }
-
-  void incrementReps(ActivityDraft activity) {
-    List<ActivityDraft> activities = state.activities.map((a) {
-      if (a == activity) {
-        return a.copyWith(reps: (a.reps ?? 0) + 1);
-      }
-      return a;
-    }).toList();
-
-    state = state.copyWith(activities: activities);
-  }
-
-  void decrementReps(ActivityDraft activity) {
-    if (activity.reps! > 0) {
-      List<ActivityDraft> activities = state.activities.map((a) {
-        if (a == activity) {
-          return a.copyWith(reps: (a.reps ?? 0) - 1);
-        }
-        return a;
-      }).toList();
-
-      state = state.copyWith(activities: activities);
-    }
-  }
-
-  void incrementSets(ActivityDraft activity) {
-    List<ActivityDraft> activities = state.activities.map((a) {
-      if (a == activity) {
-        return a.copyWith(reps: (a.sets ?? 0) + 1);
-      }
-      return a;
-    }).toList();
-
-    state = state.copyWith(activities: activities);
-  }
-
-  void decrementSets(ActivityDraft activity) {
-    if (activity.sets! > 0) {
-      List<ActivityDraft> activities = state.activities.map((a) {
-        if (a == activity) {
-          return a.copyWith(reps: (a.sets ?? 0) - 1);
-        }
-        return a;
-      }).toList();
-
-      state = state.copyWith(activities: activities);
-    }
   }
 
   int? getSets(ActivityDraft activity) {
@@ -135,24 +92,28 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     print("distance updated");
   }
 
-  String post(
-    String workoutCaption,
-    // bool workoutPublic,
-  ) {
-    state.copyWith(
-      caption: workoutCaption,
-      // public: workoutPublic
-    );
-
+  Future<String> post(
+      // bool workoutPublic,
+      ) async {
     Map<String, dynamic> workout = state.toMap();
-    print(workout.toString());
+    print(workout);
+    print(workout['workout_caption']);
+
     User user = ref.watch(userNotifier);
     int? userID = user.userID;
 
     if (userID != null) {
-      addWorkout(
+      await addWorkout(
           userID, workout['workout_caption'], true, workout['activities']);
     }
+
+    state.captionController.clear();
+    state = state.copyWith(activities: []);
     return 'Post successful';
+  }
+
+  void cancel() {
+    state.captionController.clear();
+    state = state.copyWith(activities: []);
   }
 }

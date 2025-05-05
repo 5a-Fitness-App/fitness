@@ -1,4 +1,4 @@
-import 'package:fitness_app/functional_backend/services/db_service.dart';
+import 'package:fitness_app/backend/services/db_service.dart';
 import 'dart:convert';
 
 // GET A LIST OF THE USER'S FRIENDS' WORKOUTS
@@ -6,6 +6,7 @@ Future<List<Map<String, dynamic>>> getFriendsWorkouts(int userID) async {
   try {
     List<List<dynamic>> query = await dbService.readQuery('''SELECT 
             w.workout_ID,
+            fu.user_ID,
             fu.user_name,
             fu.user_profile_photo,
             w.workout_caption,
@@ -30,12 +31,13 @@ Future<List<Map<String, dynamic>>> getFriendsWorkouts(int userID) async {
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'workout_ID': row[0],
-              'user_name': row[1],
-              'user_profile_photo': utf8.decode(row[2].bytes),
-              'workout_caption': row[3],
-              'workout_date_time': row[4],
-              'total_comments': row[5],
-              'total_likes': row[6]
+              'user_ID': row[1],
+              'user_name': row[2],
+              'user_profile_photo': utf8.decode(row[3].bytes),
+              'workout_caption': row[4],
+              'workout_date_time': row[5],
+              'total_comments': row[6],
+              'total_likes': row[7]
             })
         .toList();
 
@@ -87,7 +89,6 @@ Future<List<Map<String, dynamic>>> getUserWorkouts(int userID) async {
             })
         .toList();
 
-    print(queryRows);
     return queryRows;
   } catch (e) {
     // Handle database errors or unexpected errors
@@ -104,10 +105,12 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
     List<List<dynamic>> query = await dbService.readQuery('''
       SELECT
         w.workout_ID,
+        u.user_ID,
         u.user_name,
         u.user_profile_photo,
         w.workout_caption,
         w.workout_date_time,
+        w.workout_public,
         COUNT(DISTINCT c.comment_ID) AS total_comments, 
         COUNT(DISTINCT l.user_ID) AS total_likes 
         FROM
@@ -125,12 +128,14 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'workout_ID': row[0],
-              'user_name': row[1],
-              'user_profile_photo': utf8.decode(row[2].bytes),
-              'workout_caption': row[3],
-              'workout_date_time': row[4],
-              'total_comments': row[5],
-              'total_likes': row[6]
+              'user_ID': row[1],
+              'user_name': row[2],
+              'user_profile_photo': utf8.decode(row[3].bytes),
+              'workout_caption': row[4],
+              'workout_date_time': row[5],
+              'workout_public': row[6],
+              'total_comments': row[7],
+              'total_likes': row[8]
             })
         .toList();
 
@@ -139,6 +144,41 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
     print('error: $e');
     return {};
     //TODO: change this error handling
+  }
+}
+
+Future<bool> hasUserLikedWorkout(int userID, int workoutID) async {
+  try {
+    final like = await dbService.readQuery('''
+      SELECT user_ID
+        FROM likes WHERE workout_id = @workout_ID AND user_id = @user_ID LIMIT 1;
+        ''', {'user_ID': userID, 'workout_ID': workoutID});
+
+    return like.isNotEmpty;
+  } catch (e) {
+    print('error');
+    return false;
+  }
+}
+
+Future<void> unlikeWorkout(int userID, int workoutID) async {
+  try {
+    await dbService.deleteQuery('''
+        DELETE FROM likes WHERE workout_id = @workout_ID AND user_id = @user_ID;''',
+        {'user_ID': userID, 'workout_ID': workoutID});
+  } catch (e) {
+    print('error: $e');
+  }
+}
+
+Future<void> likeWorkout(int userID, int workoutID) async {
+  try {
+    await dbService.deleteQuery('''
+        INSERT INTO likes (user_ID, workout_ID, date_liked) VALUES
+        (@user_ID, @workout_ID, CURRENT_DATE);
+      ''', {'user_ID': userID, 'workout_ID': workoutID});
+  } catch (e) {
+    print('error: $e');
   }
 }
 
@@ -181,8 +221,10 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
   try {
     List<List<dynamic>> query = await dbService.readQuery('''
         SELECT
+          u.user_ID,
           u.user_name,
           u.user_profile_photo,
+          c.comment_ID,
           c.content,
           c.date_commented
         FROM 
@@ -194,10 +236,12 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
 
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
-              'user_name': row[0],
-              'user_profile_photo': utf8.decode(row[1].bytes),
-              'content': row[2],
-              'date': row[3]
+              'user_ID': row[0],
+              'user_name': row[1],
+              'user_profile_photo': utf8.decode(row[2].bytes),
+              'comment_ID': row[3],
+              'content': row[4],
+              'date': row[5]
             })
         .toList();
 
@@ -275,7 +319,6 @@ Future<String?> addWorkout(int userID, String workoutCaption,
         return 'Exercise not found: ${activity['exercise_name']}';
       }
       int exerciseID = query[0][0];
-      print(exerciseID);
 
       await dbService.insertQuery('''
           INSERT INTO activities (workout_ID, exercise_ID, activity_notes, activity_metrics)
@@ -310,16 +353,171 @@ Future<String?> deleteWorkout(int workoutID) async {
   }
 }
 
+Future<Map<String, dynamic>> getProfileDetails(int userID) async {
+  try {
+    List<List<dynamic>> results = await dbService.readQuery(
+      '''SELECT 
+              user_ID,
+              user_name,
+              user_profile_photo,
+              user_bio,
+              user_weight,
+              user_weight_unit
+              FROM users 
+              WHERE user_ID = @user_ID;''',
+      {'user_ID': userID},
+    );
+
+    List<Map<String, dynamic>> user = results
+        .map((row) => {
+              'user_ID': row[0],
+              'user_name': row[1],
+              'user_profile_photo': utf8.decode(row[2].bytes),
+              'user_bio': row[3],
+              'user_weight': double.parse(row[4]),
+              'user_unit': row[5],
+            })
+        .toList();
+
+    // print(user[0]);
+    return user[0];
+  } catch (e) {
+    print(e);
+    return {};
+  }
+}
+
+Future<String?> addComment(int workoutID, int userID, String content) async {
+  try {
+    await dbService.insertQuery('''
+        INSERT INTO comments (user_ID, workout_ID, content, date_commented) 
+        VALUES
+        (@user_ID, @workout_ID, @content, CURRENT_DATE )
+      ''', {
+      'user_ID': userID,
+      'workout_ID': workoutID,
+      'content': content,
+    });
+
+    return null;
+  } catch (e) {
+    print('comment error $e');
+    return 'error: $e';
+  }
+}
+
+Future<String?> deleteComment(int commentID) async {
+  try {
+    await dbService.deleteQuery('''
+        DELETE FROM comments WHERE comment_ID = @comment_ID
+      ''', {'comment_ID': commentID});
+
+    return null;
+  } catch (e) {
+    return 'error: $e';
+  }
+}
+
+Future<List<Map<String, dynamic>>> getFriends(int userID) async {
+  try {
+    List<List<dynamic>> results = await dbService.readQuery('''
+        SELECT
+          fu.user_ID,
+          fu.user_name,
+          fu.user_profile_photo
+        FROM 
+           friends f
+          JOIN users fu ON f.friend_ID = fu.user_ID
+        WHERE 
+          f.user_ID = @user_ID;
+     ''', {'user_ID': userID});
+    List<Map<String, dynamic>> friendList = results
+        .map((row) => {
+              'user_ID': row[0],
+              'user_name': row[1],
+              'user_profile_photo': utf8.decode(row[2].bytes)
+            })
+        .toList();
+    print(friendList);
+    return friendList;
+  } catch (e) {
+    print(e);
+    return [];
+  }
+}
+
+Future<List<Map<String, dynamic>>> getFriendRequests(int userID) async {
+  try {
+    List<List<dynamic>> results = await dbService.readQuery('''
+        SELECT
+          u.user_ID,
+          u.user_name,
+          u.user_profile_photo
+        FROM 
+           friend_requests fr
+          JOIN users u ON fr.sender_ID = u.user_ID
+        WHERE 
+          fr.receiver_ID = @user_ID;
+     ''', {'user_ID': userID});
+    List<Map<String, dynamic>> friendRequestList = results
+        .map((row) => {
+              'user_ID': row[0],
+              'user_name': row[1],
+              'user_profile_photo': utf8.decode(row[2].bytes)
+            })
+        .toList();
+
+    return friendRequestList;
+  } catch (e) {
+    print(e);
+    return [];
+  }
+}
+
+Future<void> acceptFriendRequest(int receiverID, int senderID) async {
+  try {
+    await dbService.insertQuery('''
+        INSERT INTO friends (user_ID, friend_ID) VALUES (@receiver_ID, @sender_ID), (@sender_ID, @receiver_ID);
+      ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
+
+    await dbService.deleteQuery('''
+        DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
+      ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
+  } catch (e) {
+    print(e);
+  }
+}
+
+Future<void> declineFriendRequest(int receiverID, int senderID) async {
+  try {
+    await dbService.deleteQuery('''
+        DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
+      ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
+  } catch (e) {
+    print(e);
+  }
+}
+
+Future<void> deleteFriend(int userID, int friendID) async {
+  try {
+    await dbService.deleteQuery('''
+        DELETE FROM friends WHERE (user_ID = @user_ID AND friend_ID = @friend_ID) OR (user_ID = @friend_ID AND friend_ID = @user_ID); 
+      ''', {'user_ID': userID, 'friend_ID': friendID});
+  } catch (e) {
+    print(e);
+  }
+}
+
 // GET THE PERCENTAGES FOR ACTIVITIES PER EXERCISE TARGET
 // Future<List<Map<String, dynamic>>> getTargetPercentages(int userID) async {
 //   try {
 //     List<List<dynamic>> query = await dbService.readQuery('''
-//         SELECT 
+//         SELECT
 //           e.exercise_target,
 //           COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) AS activity_count,
 //           ROUND(
-//               COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) * 100.0 
-//               / NULLIF(SUM(COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID)) OVER (), 0), 
+//               COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) * 100.0
+//               / NULLIF(SUM(COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID)) OVER (), 0),
 //               2
 //           ) AS percentage
 //         FROM exercises e
@@ -333,6 +531,6 @@ Future<String?> deleteWorkout(int workoutID) async {
 //         .map((row) => {'user_name': row[0], 'content': row[1], 'date': row[2]})
 //         .toList();
 //   } catch (e) {
-//     return 
+//     return
 //   }
 // }

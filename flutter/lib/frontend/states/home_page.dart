@@ -1,15 +1,14 @@
-import 'package:fitness_app/functional_backend/api.dart';
-import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+import 'package:fitness_app/frontend/modals/show_profile_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:fitness_app/functional_backend/provider/post_provider.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
 import 'package:fitness_app/frontend/states/index.dart';
-import 'package:fitness_app/functional_backend/models/post.dart';
+import 'package:fitness_app/backend/models/post.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:fitness_app/frontend/states/my_workout.dart';
+import 'package:fitness_app/frontend/modals/show_workout_modal.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -49,14 +48,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ]),
             const SizedBox(height: 12),
             FriendsPosts(workouts: posts.friendsWorkouts),
-
             const SizedBox(height: 12),
-            // Center(
-            //   child: TextButton(
-            //     onPressed: () {},
-            //     child: const Text('View More Workouts'),
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -170,7 +162,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-class FriendsPosts extends StatelessWidget {
+class FriendsPosts extends ConsumerWidget {
   final List<Map<String, dynamic>> workouts;
 
   const FriendsPosts({super.key, required this.workouts});
@@ -188,8 +180,21 @@ class FriendsPosts extends StatelessWidget {
     );
   }
 
+  void openProfileModal(BuildContext context, int userID) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) => ViewingProfilePage(userID: userID),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -203,33 +208,44 @@ class FriendsPosts extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
-                    Container(
-                        width: 35,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: AssetImage(
-                                'assets/${workout['user_profile_photo']}.png'),
-                            fit: BoxFit.fill,
-                          ),
-                        )),
+                    InkWell(
+                        onTap: () {
+                          openProfileModal(context, workout['user_ID']);
+                        },
+                        child: Container(
+                            width: 35,
+                            height: 35,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/${workout['user_profile_photo']}.png'),
+                                fit: BoxFit.fill,
+                              ),
+                            ))),
                     Expanded(
-                        child: Flex(
-                            direction: Axis.vertical,
+                        child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 5,
                             children: [
-                          Flex(
-                              direction: Axis.horizontal,
+                          Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               spacing: 5,
                               children: [
-                                Text(
-                                  workout['user_name'] ?? '',
-                                  style: const TextStyle(
+                                InkWell(
+                                  onTap: () {
+                                    openProfileModal(
+                                        context, workout['user_ID']);
+                                  },
+                                  child: Text(
+                                    workout['user_name'] ?? '',
+                                    style: const TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Colors.black, // Explicitly set color
+                                    ),
+                                  ),
                                 ),
                                 Text(
                                     DateFormat('dd MMMM yyyy')
@@ -243,30 +259,49 @@ class FriendsPosts extends StatelessWidget {
                                 fontSize: 18,
                                 //fontWeight: FontWeight.w600
                               )),
-                          Flex(
-                              direction: Axis.horizontal,
+                          Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Flex(
-                                    direction: Axis.horizontal,
-                                    spacing: 5,
-                                    children: [
-                                      const Icon(
-                                          Icons.favorite_outline_rounded),
-                                      Text(
-                                        workout['total_likes'].toString(),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      const Icon(
-                                          Icons.chat_bubble_outline_rounded),
-                                      Text(
-                                        workout['total_comments'].toString(),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ]),
+                                Row(spacing: 5, children: [
+                                  workout['hasLiked']
+                                      ? InkWell(
+                                          onTap: () {
+                                            ref
+                                                .read(postNotifier.notifier)
+                                                .unlikeWorkoutPost(
+                                                    workout['workout_ID']);
+                                          },
+                                          child: const Icon(
+                                              Icons.favorite_rounded),
+                                        )
+                                      : InkWell(
+                                          onTap: () {
+                                            ref
+                                                .read(postNotifier.notifier)
+                                                .likeWorkoutPost(
+                                                    workout['workout_ID']);
+                                          },
+                                          child: const Icon(
+                                              Icons.favorite_border_rounded)),
+                                  Text(
+                                    workout['total_likes'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  InkWell(
+                                      onTap: () {
+                                        openWorkoutModal(
+                                            context, workout['workout_ID']);
+                                      },
+                                      child: const Icon(
+                                          Icons.chat_bubble_outline_rounded)),
+                                  Text(
+                                    workout['total_comments'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ]),
                                 ElevatedButton(
                                     onPressed: () {
                                       openWorkoutModal(
