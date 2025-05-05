@@ -508,6 +508,30 @@ Future<void> deleteFriend(int userID, int friendID) async {
   }
 }
 
+Future<void> toggleWorkoutPublic(int workoutID) async {
+  try {
+    List<List<dynamic>> results = await dbService.readQuery('''
+        SELECT
+          workout_public
+        FROM 
+          workouts
+        WHERE 
+          workout_ID = @workout_ID
+        LIMIT 1;
+     ''', {'workout_ID': workoutID});
+
+    bool workoutPublic = results
+        .map((row) => {'workout_public': row[0]})
+        .toList()[0]['workout_public'];
+
+    await dbService.updateQuery('''
+        UPDATE workouts SET workout_public = @workout_public WHERE workout_id = @workout_id
+      ''', {'workout_public': !workoutPublic, 'workout_id': workoutID});
+  } catch (e) {
+    print(e);
+  }
+}
+
 // GET THE PERCENTAGES FOR ACTIVITIES PER EXERCISE TARGET
 // Future<List<Map<String, dynamic>>> getTargetPercentages(int userID) async {
 //   try {

@@ -57,7 +57,6 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                       height: 60,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        // color: Color.fromARGB(255, 167, 227, 255)
                         image: DecorationImage(
                           image:
                               AssetImage('assets/${user.userProfilePhoto}.png'),
@@ -99,36 +98,6 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
               ),
             ]),
       ),
-      // Flex(
-      //   direction: Axis.horizontal,
-      //   children: [
-      //     const SizedBox(width: 10),
-      //     Expanded(
-      //       child: ElevatedButton(
-      //         onPressed: () {},
-      //         style: ElevatedButton.styleFrom(
-      //             backgroundColor: Colors.transparent,
-      //             foregroundColor: Colors.black,
-      //             side: const BorderSide(
-      //                 color: Colors.black, style: BorderStyle.solid)),
-      //         child: const Text('Edit profile'),
-      //       ),
-      //     ),
-      //     const SizedBox(width: 10),
-      //     Expanded(
-      //       child: ElevatedButton(
-      //         onPressed: () {},
-      //         style: ElevatedButton.styleFrom(
-      //           backgroundColor: Colors.black,
-      //           foregroundColor: Colors.white,
-      //         ),
-      //         child: const Text('Add friends',
-      //             style: TextStyle(fontWeight: FontWeight.bold)),
-      //       ),
-      //     ),
-      //     const SizedBox(width: 10),
-      //   ],
-      // ),
       Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
         ElevatedButton(
           onPressed: dashBoardMode
@@ -263,6 +232,14 @@ class MyPosts extends ConsumerWidget {
                                 Text(
                                     DateFormat('dd MMMM yyyy')
                                         .format(workout['workout_date_time']),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade700)),
+                                const Spacer(),
+                                Text(
+                                    workout['workout_public']
+                                        ? 'Public'
+                                        : 'Private',
                                     style: TextStyle(
                                         fontSize: 15,
                                         color: Colors.grey.shade700))

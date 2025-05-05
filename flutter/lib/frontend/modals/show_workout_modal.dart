@@ -1,11 +1,16 @@
 import 'package:fitness_app/backend/api.dart';
 import 'package:fitness_app/backend/provider/user_provider.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:fitness_app/backend/provider/post_provider.dart';
 import 'package:fitness_app/backend/models/user.dart';
 import 'package:fitness_app/frontend/modals/show_profile_modal.dart';
+
+enum MenuAction {
+  togglePublic, // Represents "Edit" action
+  delete, // Represents "Delete" action
+}
 
 class MyWorkoutPage extends ConsumerStatefulWidget {
   final int workoutID;
@@ -23,6 +28,8 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
   final commentKey = GlobalKey<FormState>();
   TextEditingController commentController = TextEditingController();
   bool isCommenting = false;
+  String? selectedOption; // Initially null (no selection)
+  final List<String> dropdownOptions = ["Option 1", "Option 2"];
 
   @override
   void initState() {
@@ -95,8 +102,28 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                                 icon: const Icon(Icons.arrow_back),
                               ),
                               if (snapshot.data!['user_ID'] == user.userID)
-                                IconButton(
-                                    onPressed: () {
+                                PopupMenuButton<MenuAction>(
+                                  icon: const Icon(Icons.more_vert), // "⋮" icon
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: MenuAction.togglePublic,
+                                      child: Text("Change publicity status"),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: MenuAction.delete,
+                                      child: Text("Delete"),
+                                    ),
+                                  ],
+                                  onSelected: (value) {
+                                    if (value == MenuAction.togglePublic) {
+                                      toggleWorkoutPublic(widget.workoutID);
+                                      ref
+                                          .read(postNotifier.notifier)
+                                          .loadUserWorkouts();
+                                      ref
+                                          .read(postNotifier.notifier)
+                                          .loadUserWorkouts();
+                                    } else if (value == MenuAction.delete) {
                                       deleteWorkout(
                                           snapshot.data!['workout_ID']);
                                       ref
@@ -107,8 +134,23 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                                           .loadFriendsWorkouts();
 
                                       Navigator.pop(context);
-                                    },
-                                    icon: const Icon(Icons.more_horiz)),
+                                    }
+                                  },
+                                ),
+                              // IconButton(
+                              //     onPressed: () {
+                              //       deleteWorkout(
+                              //           snapshot.data!['workout_ID']);
+                              //       ref
+                              //           .read(postNotifier.notifier)
+                              //           .loadUserWorkouts();
+                              //       ref
+                              //           .read(postNotifier.notifier)
+                              //           .loadFriendsWorkouts();
+
+                              //       Navigator.pop(context);
+                              //     },
+                              //     icon: const Icon(Icons.more_horiz)),
                             ],
                           ),
                         ),
