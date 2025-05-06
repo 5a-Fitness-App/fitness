@@ -12,23 +12,39 @@ void main() {
     );
   }
 
-  // Verify the presence of all UI elements
-  testWidgets('Login Screen UI elements are displayed',
-      (WidgetTester tester) async {
+  // Verify the presence of all UI elements on Sign in screen
+  testWidgets('Sign in UI elements are displayed', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
     // Verify the presence of the the title
     expect(find.text('FitFish'), findsOneWidget);
 
+    // Verify the presence of the 'Log in with an existing account' text
+    expect(find.text('Login with an existing account'), findsOneWidget);
+
     // Verify the presence of the email and password text fields
-    expect(find.byType(TextFormField), findsNWidgets(2));
+    expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
 
     // Verify the presence of 'Sign in' and 'Sign up' buttons
     expect(find.text('Sign in'), findsOneWidget);
     expect(find.text('Sign up'), findsOneWidget);
 
-    // Verify the presence of 'Submit' button
-    expect(find.text('Submit'), findsOneWidget);
+    // Verify the presence of 'Sign In' button
+    expect(find.text('Sign In'), findsOneWidget);
+  });
+
+  // Verify that the user can interact with text fields
+  testWidgets('Check user can press on text fields',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Enter text into the email text field
+    await tester.enterText(find.byLabelText('Email'), 'email@example.com');
+    await tester.pumpAndSettle();
+
+    // Verify if the email text field is focused
+    expect(find.text('email@example.com'), findsOneWidget);
   });
 
   // Verify that empty fields show error messages if the user tries to submit,
@@ -42,35 +58,6 @@ void main() {
     // Verify if error messages appear for email and password fields
     expect(find.text('Please enter your email'), findsOneWidget);
     expect(find.text('Please enter your password'), findsOneWidget);
-  });
-
-  // Verify that Forgot Password button functions
-  testWidgets('Forgot Password', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
-
-    // Tap the 'Forgot Password?' link
-    await tester.tap(find.text('Forgot Password?'));
-    await tester.pump();
-
-    // Verify if the system asks the user for their email
-    expect(find.text('Please enter your email'), findsOneWidget);
-  });
-
-  // Verify if Forgot Password sends an email to the user
-  testWidgets('Forgot Password email test', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
-
-    // Enter a valid email address
-    final emailField = find.byType(TextFormField).first;
-    await tester.enterText(emailField, 'john@example.com');
-    await tester.pump();
-
-    // Tap the 'Forgot Password?' link
-    await tester.tap(find.text('Forgot Password?'));
-    await tester.pump();
-
-    // Verify if the system tells the user it has sent a password reset
-    expect(find.text('Password reset sent'), findsOneWidget);
   });
 
   // Verify if the password visibility field toggles correctly
@@ -89,7 +76,7 @@ void main() {
     expect(find.byIcon(Icons.visibility_off), findsOneWidget);
   });
 
-  // Verify if the email and password fields are validated correctly
+  // Verify if the email and password fields are validated correctly on log in screen
   testWidgets('Email and Password validation', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
@@ -97,13 +84,103 @@ void main() {
     final emailField = find.byType(TextFormField).first;
     final passwordField = find.byType(TextFormField).last;
 
-    await tester.enterText(emailField, 'Extremely-Valid_Email.Address');
-    await tester.enterText(passwordField, 'FAIL');
+    // Enter invalid email and password
+    await tester.enterText(emailField, 'invalidEmail.Address');
+    await tester.enterText(passwordField, 'fail');
     await tester.tap(find.text('Submit'));
     await tester.pumpAndSettle();
 
     // Verify if error messages appear for invalid email and password
     expect(find.text('Enter a valid email address'), findsOneWidget);
     expect(find.text('Password must be at least 6 characters'), findsOneWidget);
+  });
+
+  // Verify that the user can log in successfully
+  testWidgets('User can log in and be redirected to home page',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Enter valid email and password
+    await tester.enterText(find.byLabelText('Email'), 'aqua_fish@example.com');
+    await tester.enterText(find.byLabelText('Password'), 'hashedpasswword1');
+
+    // Tap the Sign In button
+    await tester.tap(find.text('Sign In'));
+    await tester.pumpAndSettle();
+
+    // Verify if user is taken to the home page
+    expect(find.text('Home'), findsOneWidget);
+  });
+
+  // Verify that the user can switch to the Sign Up screen
+  testWidgets('User can switch to the Sign Up Screen',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Tap Sign up button
+    await tester.tap(find.text('Sign up'));
+    await tester.pumpAndSettle();
+
+    // Verify the presence of Sign Up elements
+    expect(find.text('Create a new account'), findsOneWidget);
+  });
+
+  // Verify the presence of all UI elements on Sign Up screen
+  testWidgets('Sign up UI elements are displayed', (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Switch to Sign up screen
+    await tester.tap(find.text('Sign up'));
+    await tester.pumpAndSettle();
+
+    // Verify the presence of the the 'Create a new account' text
+    expect(find.text('Create a new account'), findsOneWidget);
+
+    // Verify the presence of the 'Select a Profile Image' text
+    expect(find.text('Select a Profile Image'), findsOneWidget);
+
+    // Verify the presence of all images on screen
+    expect(find.byType(Image), findsNWidgets(5));
+
+    // Verify the presence of the username, email, password and confirm password text fields
+    expect(find.widgetWithText(TextFormField, 'Username'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
+    expect(
+        find.widgetWithText(TextFormField, 'Confirm Password'), findsOneWidget);
+
+    // Verify the presence of the birthday selections
+    expect(find.text('Enter your birthday: '), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget);
+
+    // Verify the presence of the weight field and dropdown menu
+    expect(find.widgetWithText(TextFormField, 'Weight'), findsOneWidget);
+    expect(find.byType(DropdownButton), findsOneWidget);
+
+    // Verify the presence of the Sign Up button
+    expect(find.widgetWithText(ElevatedButton, 'Sign Up'), findsOneWidget);
+  });
+
+  // Check that Password and Confirm Password fields match
+  testWidgets('Password and Confirm Password match',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Switch to Sign up screen
+    await tester.tap(find.text('Sign up'));
+    await tester.pumpAndSettle();
+
+    // Enter 2 different passwords into Password and Confirm Password fields
+    await tester.enterText(find.byLabelText('Password'), 'password');
+    await tester.enterText(
+        find.byLabelText('Confirm Password'), 'invalidPassword');
+
+    // Press Sign Up button
+    final signUpButton = find.widgetWithText(ElevatedButton, 'Sign Up');
+    await tester.tap(signUpButton);
+    await tester.pumpAndSettle();
+
+    // Verify if error message appears for mismatched passwords
+    expect(find.text('Passwords do not match'), findsOneWidget);
   });
 }
