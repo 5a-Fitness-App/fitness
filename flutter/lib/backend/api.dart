@@ -524,11 +524,25 @@ Future<void> toggleWorkoutPublic(int workoutID) async {
         .map((row) => {'workout_public': row[0]})
         .toList()[0]['workout_public'];
 
+    print('wokrout public stats : $workoutPublic');
+
     await dbService.updateQuery('''
         UPDATE workouts SET workout_public = @workout_public WHERE workout_id = @workout_id
       ''', {'workout_public': !workoutPublic, 'workout_id': workoutID});
+
+    print('wokrout public stats changed to  : ${!workoutPublic}');
   } catch (e) {
     print(e);
+  }
+}
+
+Future<void> deleteAccount(int userID) async {
+  try {
+    await dbService.deleteQuery('''
+            DELETE FROM users CASCADE WHERE user_ID = @user_ID;
+        ''', {'user_ID': userID});
+  } catch (e) {
+    print('error deleting account: $e');
   }
 }
 

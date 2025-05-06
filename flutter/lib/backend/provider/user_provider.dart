@@ -107,6 +107,31 @@ class UserNotifier extends StateNotifier<User> {
   }
 
   void logOut() {
-    state = state.copyWith(userID: null, userName: null, userEmail: '');
+    state = state.copyWith(
+        userID: null,
+        userName: null,
+        userEmail: '',
+        userBio: null,
+        userUnits: 'kg',
+        userDOB: DateTime.now(),
+        userWeight: null,
+        accountCreationDate: DateTime.now(),
+        friendCount: null,
+        userProfilePhoto: null);
+  }
+
+  void deleteUserAccount() async {
+    await deleteAccount(state.userID ?? 0);
+    state = state.copyWith(
+        userID: null,
+        userName: null,
+        userEmail: '',
+        userBio: null,
+        userUnits: 'kg',
+        userDOB: DateTime.now(),
+        userWeight: null,
+        accountCreationDate: DateTime.now(),
+        friendCount: null,
+        userProfilePhoto: null);
   }
 }

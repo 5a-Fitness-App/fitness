@@ -54,6 +54,7 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
   @override
   Widget build(BuildContext context) {
     User user = ref.watch(userNotifier);
+
     return GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
@@ -114,9 +115,10 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                                       child: Text("Delete"),
                                     ),
                                   ],
-                                  onSelected: (value) {
+                                  onSelected: (value) async {
                                     if (value == MenuAction.togglePublic) {
-                                      toggleWorkoutPublic(widget.workoutID);
+                                      await toggleWorkoutPublic(
+                                          snapshot.data!['workout_ID']);
                                       ref
                                           .read(postNotifier.notifier)
                                           .loadUserWorkouts();
@@ -124,7 +126,7 @@ class MyWorkoutPageState extends ConsumerState<MyWorkoutPage> {
                                           .read(postNotifier.notifier)
                                           .loadUserWorkouts();
                                     } else if (value == MenuAction.delete) {
-                                      deleteWorkout(
+                                      await deleteWorkout(
                                           snapshot.data!['workout_ID']);
                                       ref
                                           .read(postNotifier.notifier)

@@ -45,6 +45,12 @@ class IndexState extends ConsumerState<Index> {
         context, MaterialPageRoute(builder: (_) => const LoginScreen()));
   }
 
+  void deleteAccount() {
+    ref.read(userNotifier.notifier).deleteUserAccount();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +67,13 @@ class IndexState extends ConsumerState<Index> {
                   leading: const Icon(Icons.logout),
                   title: const Text('Log out'),
                   onTap: logout,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline),
+                  title: const Text('Delete Account'),
+                  iconColor: Colors.red,
+                  textColor: Colors.red,
+                  onTap: deleteAccount,
                 ),
               ],
             )),
