@@ -38,9 +38,7 @@ class MyApp extends StatelessWidget {
   }
 
   // TODO: Create Dashboard
-  // TODO: clean up code,
   // TODO: delete account
-  // TODO: toggle workout public and private
   // TODO: send friend request
   // TODO: log workout time
 }
