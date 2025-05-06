@@ -12,10 +12,10 @@ class DbService {
 
     _connection = await Connection.open(
       Endpoint(
-        host: 'localhost',
-        database: 'fitness',
-        username: 'postgres', //change this to your postgres username
-        password: 'abc123#', //change this to your postgres password
+        host: '10.0.2.2',
+        database: 'testfitness',
+        username: 'jennydoan', //change this to your postgres username
+        password: 'Elgado29#', //change this to your postgres password
       ),
       settings: const ConnectionSettings(sslMode: SslMode.disable),
     );
@@ -32,6 +32,17 @@ class DbService {
     );
   }
 
+  // INSERT AND RETURN ID
+  Future<int> insertAndReturnId(String sql, Map<String, dynamic> values) async {
+    final result = await _connection.execute(
+      Sql.named(sql),
+      parameters: values,
+    );
+
+    // Return the ID from the first row
+    return result.first[0] as int;
+  }
+
   // READ
   Future<List<ResultRow>> readQuery(String sql,
       [Map<String, dynamic>? values]) async {
@@ -39,7 +50,7 @@ class DbService {
       Sql.named(sql),
       parameters: values ?? {},
     );
-    print(result);
+
     return result.toList();
   }
 
