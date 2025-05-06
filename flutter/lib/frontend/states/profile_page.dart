@@ -1,11 +1,13 @@
-import 'package:fitness_app/functional_backend/provider/user_provider.dart';
+import 'package:fitness_app/frontend/modals/show_friend_modal.dart';
+import 'package:fitness_app/backend/api.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_app/functional_backend/services/db_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fitness_app/functional_backend/models/user.dart';
-import 'package:fitness_app/functional_backend/models/workout.dart';
+import 'package:fitness_app/backend/models/user.dart';
 import 'package:intl/intl.dart';
-import 'package:fitness_app/frontend/states/my_workout.dart';
+import 'package:fitness_app/frontend/modals/show_workout_modal.dart';
+import 'package:fitness_app/backend/models/post.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -16,17 +18,24 @@ class ProfilePage extends ConsumerStatefulWidget {
 
 class ProfilePageState extends ConsumerState<ProfilePage> {
   bool dashBoardMode = true;
-  // List<Map<String, dynamic>> userWorkouts= [];
 
-  // @override
-  // void initState() {
-  //   ref.read(userNotifier.notifier).getUserWorkout();
-  //   super.initState();
-  // }
+  void openFriendModal(BuildContext context, int userID) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) => FriendsPage(userID: userID),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     User user = ref.watch(userNotifier);
+    Posts posts = ref.watch(postNotifier);
 
     return SingleChildScrollView(
         child: Column(children: [
@@ -46,14 +55,14 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Container(
                       width: 60,
                       height: 60,
-                      decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color.fromARGB(255, 167, 227, 255)
-                          // image: DecorationImage(
-                          //   image: AssetImage('assets/images/profile.jpg'),
-                          //   fit: BoxFit.fill,
-                          // ),
-                          ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image:
+                              AssetImage('assets/${user.userProfilePhoto}.png'),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -71,12 +80,12 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        '${user.friendCount} friends',
-                        style: const TextStyle(
-                          fontSize: 15,
-                        ),
-                      ),
+                      InkWell(
+                          onTap: () {
+                            openFriendModal(context, user.userID ?? 0);
+                          },
+                          child: Text(
+                              '${user.friendCount} friends')) // Show the result when data is available
                     ],
                   )),
                 ],
@@ -89,44 +98,17 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
               ),
             ]),
       ),
-      Flex(
-        direction: Axis.horizontal,
-        children: [
-          const SizedBox(width: 10),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.black,
-                  side: const BorderSide(
-                      color: Colors.black, style: BorderStyle.solid)),
-              child: const Text('Edit profile'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Add friends',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
       Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              dashBoardMode = false;
-            });
-          },
+          onPressed: dashBoardMode
+              ? () {
+                  setState(() {
+                    dashBoardMode = false;
+                  });
+                }
+              : null,
           style: ElevatedButton.styleFrom(
+            disabledBackgroundColor: Colors.transparent,
             backgroundColor: Colors.transparent,
             fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
                 MediaQuery.of(context).size.height * 0.06),
@@ -141,12 +123,15 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
-            setState(() {
-              dashBoardMode = true;
-            });
-          },
+          onPressed: dashBoardMode
+              ? null
+              : () {
+                  setState(() {
+                    dashBoardMode = true;
+                  });
+                },
           style: ElevatedButton.styleFrom(
+            disabledBackgroundColor: Colors.transparent,
             backgroundColor: Colors.transparent,
             fixedSize: Size(MediaQuery.of(context).size.width * 0.5,
                 MediaQuery.of(context).size.height * 0.06),
@@ -164,7 +149,7 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
       const Divider(),
       SingleChildScrollView(
         child: dashBoardMode
-            ? MyPosts(workouts: user.userWorkouts)
+            ? MyPosts(workouts: posts.userWorkouts)
             : const Dashboard(),
       )
     ]));
@@ -183,12 +168,12 @@ class Dashboard extends StatelessWidget {
   }
 }
 
-class MyPosts extends StatelessWidget {
-  List<Workout> workouts;
+class MyPosts extends ConsumerWidget {
+  final List<Map<String, dynamic>> workouts;
 
-  MyPosts({super.key, required this.workouts});
+  const MyPosts({super.key, required this.workouts});
 
-  void openWorkoutModal(BuildContext context) {
+  void openWorkoutModal(BuildContext context, int workoutID) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -197,17 +182,17 @@ class MyPosts extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
       ),
-      builder: (context) => const MyWorkoutPage(),
+      builder: (context) => MyWorkoutPage(workoutID: workoutID),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (workouts.isEmpty) const Text('Log a workout!'),
-        for (Workout workout in workouts) ...[
+        if (workouts.isEmpty) const Text("You haven't posted"),
+        for (Map<String, dynamic> workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(
                   top: 12, right: 15, left: 12, bottom: 5),
@@ -219,64 +204,98 @@ class MyPosts extends StatelessWidget {
                     Container(
                         width: 35,
                         height: 35,
-                        decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.fromARGB(255, 167, 227, 255)
-                            // image: DecorationImage(
-                            //   image: AssetImage('assets/images/profile.jpg'),
-                            //   fit: BoxFit.fill,
-                            // ),
-                            )),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage(
+                                'assets/${workout['user_profile_photo']}.png'),
+                            fit: BoxFit.fill,
+                          ),
+                        )),
                     Expanded(
-                        child: Flex(
-                            direction: Axis.vertical,
+                        child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 5,
                             children: [
-                          Flex(
-                              direction: Axis.horizontal,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               spacing: 5,
                               children: [
-                                Flex(
-                                    direction: Axis.horizontal,
-                                    spacing: 5,
-                                    children: [
-                                      Text(
-                                        workout.workoutUserName ?? '',
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                          DateFormat('dd MMMM yyyy')
-                                              .format(workout.workoutDateTime),
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.grey.shade700))
-                                    ]),
                                 Text(
-                                    workout.workoutPublic ?? false
-                                        ? 'Private'
-                                        : 'Public',
-                                    style:
-                                        TextStyle(color: Colors.grey.shade700))
+                                  workout['user_name'] ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black, // Explicitly set color
+                                  ),
+                                ),
+                                Text(
+                                    DateFormat('dd MMMM yyyy')
+                                        .format(workout['workout_date_time']),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade700)),
+                                const Spacer(),
+                                Text(
+                                    workout['workout_public']
+                                        ? 'Public'
+                                        : 'Private',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade700))
                               ]),
-                          Text(workout.workoutTitle ?? '',
+                          Text(workout['workout_caption'] ?? '',
                               style: const TextStyle(
                                 fontSize: 18,
                                 //fontWeight: FontWeight.w600
                               )),
-                          Flex(
-                              direction: Axis.horizontal,
+                          Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const SizedBox(
-                                  width: 10,
-                                ),
+                                Row(spacing: 5, children: [
+                                  workout['hasLiked']
+                                      ? InkWell(
+                                          onTap: () {
+                                            ref
+                                                .read(postNotifier.notifier)
+                                                .unlikeWorkoutPost(
+                                                    workout['workout_ID']);
+                                          },
+                                          child: const Icon(
+                                              Icons.favorite_rounded),
+                                        )
+                                      : InkWell(
+                                          onTap: () {
+                                            ref
+                                                .read(postNotifier.notifier)
+                                                .likeWorkoutPost(
+                                                    workout['workout_ID']);
+                                          },
+                                          child: const Icon(
+                                              Icons.favorite_border_rounded)),
+                                  Text(
+                                    workout['total_likes'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  InkWell(
+                                      onTap: () {
+                                        openWorkoutModal(
+                                            context, workout['workout_ID']);
+                                      },
+                                      child: const Icon(
+                                          Icons.chat_bubble_outline_rounded)),
+                                  Text(
+                                    workout['total_comments'].toString(),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ]),
                                 ElevatedButton(
                                     onPressed: () {
-                                      openWorkoutModal(context);
+                                      openWorkoutModal(
+                                          context, workout['workout_ID'] ?? 0);
                                     },
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.black),
