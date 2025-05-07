@@ -19,7 +19,7 @@ void main() {
     // Verify the presence of the the title
     expect(find.text('FitFish'), findsOneWidget);
 
-    // Verify the presence of the 'Log in with an existing account' text
+    // Verify the presence of the 'Login with an existing account' text
     expect(find.text('Login with an existing account'), findsOneWidget);
 
     // Verify the presence of the email and password text fields
@@ -35,7 +35,7 @@ void main() {
   });
 
   // Verify that the user can interact with text fields
-  testWidgets('Check user can press on text fields',
+  testWidgets('User can interact with text fields',
       (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
@@ -61,7 +61,8 @@ void main() {
   });
 
   // Verify if the password visibility field toggles correctly
-  testWidgets('Toggling password visibility', (WidgetTester tester) async {
+  testWidgets('User can toggle password visibility',
+      (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
     // Find the password visibility toggle button
@@ -95,8 +96,8 @@ void main() {
     expect(find.text('Password must be at least 6 characters'), findsOneWidget);
   });
 
-  // Verify that the user can log in successfully
-  testWidgets('User can log in and be redirected to home page',
+  // Verify that the user can sign in successfully
+  testWidgets('User can sign in and be redirected to home page',
       (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
