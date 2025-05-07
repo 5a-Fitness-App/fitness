@@ -27,7 +27,7 @@ void main() {
     expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
 
     // Verify the presence of 'Sign in' and 'Sign up' buttons
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
     expect(find.text('Sign up'), findsOneWidget);
 
     // Verify the presence of 'Sign In' button
@@ -51,8 +51,8 @@ void main() {
   testWidgets('Empty fields show errors', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Tap submit button without entering anything
-    await tester.tap(find.text('Submit'));
+    // Tap Sign button without entering anything
+    await tester.tap(find.text('Sign In'));
     await tester.pump();
 
     // Verify if error messages appear for email and password fields
@@ -88,7 +88,7 @@ void main() {
     // Enter invalid email and password
     await tester.enterText(emailField, 'invalidEmail.Address');
     await tester.enterText(passwordField, 'fail');
-    await tester.tap(find.text('Submit'));
+    await tester.tap(find.text('Sign In'));
     await tester.pumpAndSettle();
 
     // Verify if error messages appear for invalid email and password
