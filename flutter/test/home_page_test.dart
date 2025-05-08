@@ -1,8 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/frontend/states/home_page.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:fitness_app/backend/models/post.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
+
+// Class to create mock posts for testing
+class MockPostNotifier extends PostNotifier {
+  MockPostNotifier(super.ref) {
+    state = Posts(userWorkouts: [], friendsWorkouts: []);
+  }
+
+  // Add test workouts
+  void addWorkout(Map<String, dynamic> workout) {
+    state = state.copyWith(
+      friendsWorkouts: [...state.friendsWorkouts, workout],
+    );
+  }
+
+  // Delete workouts for testing
+  void removeWorkout(int workoutID) {
+    state = state.copyWith(
+      friendsWorkouts: state.friendsWorkouts
+          .where((workout) => workout['id'] != workoutID)
+          .toList(),
+    );
+  }
+}
 
 void main() {
   Widget createWidgetUnderTest() {
@@ -74,5 +99,53 @@ void main() {
 
     // Verify that the user is taken to a workout
     expect(find.text('Comments'), findsOneWidget);
+  });
+
+  // Verify that when no posts are available, a message is displayed
+  testWidgets('Display message when no posts are available',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        // Override posts to make it empty with no workouts
+        overrides: [
+          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Check if a message is displayed indicating no posts are available
+    expect(find.text("You're friends haven't posted"), findsOneWidget);
+  });
+
+  // Verify that when posts are available they are displayed
+  testWidgets('Displays posts when available', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postNotifier.overrideWith(
+            (ref) {
+              // Create a mock post with the name 'Test'
+              final mock = MockPostNotifier(ref);
+              mock.addWorkout({
+                'id': 1,
+                'workoutName': 'Test',
+                'workout_ID': 1,
+                'hasLiked': false,
+              });
+              return mock;
+            },
+          ),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Check if 'Test' post is displayed
+    expect(find.text('Test'), findsOneWidget);
   });
 }
