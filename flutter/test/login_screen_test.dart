@@ -40,7 +40,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
 
     // Enter text into the email text field
-    await tester.enterText(find.byLabelText('Email'), 'email@example.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Email')), 'email@example.com');
     await tester.pumpAndSettle();
 
     // Verify if the email text field is focused
@@ -102,8 +103,10 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
 
     // Enter valid email and password
-    await tester.enterText(find.byLabelText('Email'), 'aqua_fish@example.com');
-    await tester.enterText(find.byLabelText('Password'), 'hashedpassword1');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Email')), 'aqua_fish@example.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Password')), 'hashedpassword1');
 
     // Tap the Sign In button
     await tester.tap(find.text('Sign In'));
@@ -172,9 +175,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Enter 2 different passwords into Password and Confirm Password fields
-    await tester.enterText(find.byLabelText('Password'), 'password');
     await tester.enterText(
-        find.byLabelText('Confirm Password'), 'invalidPassword');
+        find.widgetWithText(TextFormField, ('Password')), 'password');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Confirm Password')),
+        'invalidPassword');
 
     // Press Sign Up button
     final signUpButton = find.widgetWithText(ElevatedButton, 'Sign Up');
@@ -182,6 +187,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify if error message appears for mismatched passwords
-    expect(find.text('Passwords do not match'), findsOneWidget);
+    expect(find.text("Passwords don't match"), findsOneWidget);
   });
 }
