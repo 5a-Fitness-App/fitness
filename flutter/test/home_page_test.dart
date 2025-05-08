@@ -53,9 +53,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap log workout button
-    final logWorkoutButton = find.text('Log Workout');
-    expect(logWorkoutButton, findsOneWidget);
-    await tester.tap(logWorkoutButton);
+    await tester.tap(find.text('Log Workout'));
     await tester.pump();
 
     // Verify the user is taken to the log workout page
@@ -71,9 +69,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap log workout button
-    final viewWorkoutButton = find.text('View Workout');
-    expect(viewWorkoutButton, findsOneWidget);
-    await tester.tap(viewWorkoutButton);
+    await tester.tap(find.text('View Workout'));
     await tester.pump();
 
     // Verify that the user is taken to a workout

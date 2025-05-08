@@ -103,7 +103,7 @@ void main() {
 
     // Enter valid email and password
     await tester.enterText(find.byLabelText('Email'), 'aqua_fish@example.com');
-    await tester.enterText(find.byLabelText('Password'), 'hashedpasswword1');
+    await tester.enterText(find.byLabelText('Password'), 'hashedpassword1');
 
     // Tap the Sign In button
     await tester.tap(find.text('Sign In'));
