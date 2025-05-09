@@ -6,55 +6,45 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:fitness_app/backend/models/post.dart';
 import 'package:fitness_app/backend/provider/post_provider.dart';
 
-// Class to create mock posts for testing
-class MockPostNotifier extends PostNotifier {
-  MockPostNotifier(super.ref) {
+// Class to create empty mock with no posts
+class MockPostNotifierEmpty extends PostNotifier {
+  MockPostNotifierEmpty(super.ref) {
     state = Posts(userWorkouts: [], friendsWorkouts: []);
   }
+}
 
-  // Add test workouts
-  void addWorkout(Map<String, dynamic> workout) {
-    state = state.copyWith(
-      friendsWorkouts: [...state.friendsWorkouts, workout],
-    );
-  }
-
-  // Delete workouts for testing
-  void removeWorkout(int workoutID) {
-    state = state.copyWith(
-      friendsWorkouts: state.friendsWorkouts
-          .where((workout) => workout['id'] != workoutID)
-          .toList(),
+// Class to create populated mock with a friend's post
+class MockPostNotifierPopulated extends PostNotifier {
+  MockPostNotifierPopulated(super.ref) {
+    state = Posts(
+      userWorkouts: [],
+      friendsWorkouts: [
+        {
+          'id': 1,
+          'workoutName': 'Test Workout',
+          'workout_ID': 1,
+          'hasLiked': false,
+        },
+      ],
     );
   }
 }
 
 void main() {
-  Widget createWidgetUnderTest({List<Override> overrides = const []}) {
-    return ProviderScope(
-      overrides: overrides,
-      child: MaterialApp(home: HomePage()),
-    );
+  Widget createWidgetUnderTest() {
+    return const MaterialApp(home: HomePage());
   }
 
   // Verify the presence of all UI elements
   testWidgets('Home Page UI elements are displayed',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      createWidgetUnderTest(overrides: [
-        postNotifier.overrideWith(
-          (ref) {
-            final mock = MockPostNotifier(ref);
-            mock.addWorkout({
-              'id': 1,
-              'workoutName': 'Test Workout',
-              'workout_ID': 1,
-              'hasLiked': false,
-            });
-            return mock;
-          },
-        ),
-      ]),
+      ProviderScope(
+        overrides: [
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
     );
 
     // Give time for the UI to load
@@ -88,7 +78,14 @@ void main() {
   // Verify that the Log Workout button takes the user to the log workout page
   testWidgets('Log Workout button takes user to log_workout_page',
       (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
 
     // Give time for the UI to load
     await tester.pumpAndSettle();
@@ -102,24 +99,15 @@ void main() {
   });
 
   // Verify that the View Workout button takes the user to view the workout
-  testWidgets('View workout button takes user to view the workout ',
+  testWidgets('View workout button takes user to view the workout',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      createWidgetUnderTest(overrides: [
-        postNotifier.overrideWith(
-          (ref) {
-            // Populate with mock workouts
-            final mock = MockPostNotifier(ref);
-            mock.addWorkout({
-              'id': 1,
-              'workoutName': 'Test Workout',
-              'workout_ID': 1,
-              'hasLiked': false,
-            });
-            return mock;
-          },
-        ),
-      ]),
+      ProviderScope(
+        overrides: [
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
     );
 
     // Give time for the UI to load
@@ -138,9 +126,8 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        // Override posts to make it empty with no workouts
         overrides: [
-          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifierEmpty(ref)),
         ],
         child: createWidgetUnderTest(),
       ),
@@ -155,21 +142,12 @@ void main() {
   // Verify that when posts are available they are displayed
   testWidgets('Display Posts when available', (WidgetTester tester) async {
     await tester.pumpWidget(
-      createWidgetUnderTest(overrides: [
-        postNotifier.overrideWith(
-          (ref) {
-            // Populate with mock workouts
-            final mock = MockPostNotifier(ref);
-            mock.addWorkout({
-              'id': 1,
-              'workoutName': 'Test Workout',
-              'workout_ID': 1,
-              'hasLiked': false,
-            });
-            return mock;
-          },
-        ),
-      ]),
+      ProviderScope(
+        overrides: [
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
     );
 
     await tester.pumpAndSettle();
