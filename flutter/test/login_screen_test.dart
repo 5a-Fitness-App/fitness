@@ -52,7 +52,7 @@ void main() {
   testWidgets('Empty fields show errors', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Tap Sign button without entering anything
+    // Tap Sign In button without entering anything
     await tester.tap(find.text('Sign In'));
     await tester.pump();
 
@@ -89,7 +89,9 @@ void main() {
     // Enter invalid email and password
     await tester.enterText(emailField, 'invalidEmail.Address');
     await tester.enterText(passwordField, 'fail');
-    await tester.tap(find.text('Sign In'));
+    final signInButton = find.widgetWithText(ElevatedButton, 'Sign In');
+    expect(signInButton, findsOneWidget);
+    await tester.tap(signInButton);
     await tester.pumpAndSettle();
 
     // Verify if error messages appear for invalid email and password
@@ -109,7 +111,9 @@ void main() {
         find.widgetWithText(TextFormField, ('Password')), 'hashedpassword1');
 
     // Tap the Sign In button
-    await tester.tap(find.text('Sign In'));
+    final signInButton = find.widgetWithText(ElevatedButton, 'Sign In');
+    expect(signInButton, findsOneWidget);
+    await tester.tap(signInButton);
     await tester.pumpAndSettle();
 
     // Verify if user is taken to the home page
