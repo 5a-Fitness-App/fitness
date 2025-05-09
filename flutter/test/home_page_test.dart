@@ -40,7 +40,22 @@ void main() {
   // Verify the presence of all UI elements
   testWidgets('Home Page UI elements are displayed',
       (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(
+      createWidgetUnderTest(overrides: [
+        postNotifier.overrideWith(
+          (ref) {
+            final mock = MockPostNotifier(ref);
+            mock.addWorkout({
+              'id': 1,
+              'workoutName': 'Test Workout',
+              'workout_ID': 1,
+              'hasLiked': false,
+            });
+            return mock;
+          },
+        ),
+      ]),
+    );
 
     // Give time for the UI to load
     await tester.pumpAndSettle();
@@ -59,7 +74,7 @@ void main() {
     // Verify recent activity is visible
     expect(find.text('Recent Activity'), findsOneWidget);
 
-    // Verify posts are visible, waiting for backend to be implemented
+    // Verify posts are visible
     expect(find.text('View Workout'), findsWidgets);
 
     // Verify comments and likes are visible
@@ -87,9 +102,24 @@ void main() {
   });
 
   // Verify that the View Workout button takes the user to view the workout
-  testWidgets('View Workout button takes user to view the workout',
+  testWidgets('View workout button takes user to view the workout ',
       (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(
+      createWidgetUnderTest(overrides: [
+        postNotifier.overrideWith(
+          (ref) {
+            final mock = MockPostNotifier(ref);
+            mock.addWorkout({
+              'id': 1,
+              'workoutName': 'Test Workout',
+              'workout_ID': 1,
+              'hasLiked': false,
+            });
+            return mock;
+          },
+        ),
+      ]),
+    );
 
     // Give time for the UI to load
     await tester.pumpAndSettle();
@@ -122,31 +152,27 @@ void main() {
   });
 
   // Verify that when posts are available they are displayed
-  testWidgets('Displays posts when available', (WidgetTester tester) async {
+  testWidgets('Display Posts when available', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          postNotifier.overrideWith(
-            (ref) {
-              // Create a mock post with the name 'Test'
-              final mock = MockPostNotifier(ref);
-              mock.addWorkout({
-                'id': 1,
-                'workoutName': 'Test',
-                'workout_ID': 1,
-                'hasLiked': false,
-              });
-              return mock;
-            },
-          ),
-        ],
-        child: createWidgetUnderTest(),
-      ),
+      createWidgetUnderTest(overrides: [
+        postNotifier.overrideWith(
+          (ref) {
+            final mock = MockPostNotifier(ref);
+            mock.addWorkout({
+              'id': 1,
+              'workoutName': 'Test Workout',
+              'workout_ID': 1,
+              'hasLiked': false,
+            });
+            return mock;
+          },
+        ),
+      ]),
     );
 
     await tester.pumpAndSettle();
 
     // Check if 'Test' post is displayed
-    expect(find.text('Test'), findsOneWidget);
+    expect(find.text('Test Workout'), findsOneWidget);
   });
 }
