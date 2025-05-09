@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/frontend/states/profile_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fitness_app/backend/models/user.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
+import 'package:fitness_app/backend/provider/post_provider.dart';
 
 void main() {
+  // Create mock user
+  final mockUser = User(
+    userID: 1,
+    userName: 'test',
+    userProfilePhoto: 'fish',
+    userBio: 'testBiography',
+    userDOB: DateTime(2000, 01, 01),
+    userWeight: 0,
+    userUnits: 'kg',
+    accountCreationDate: DateTime.now(),
+    userEmail: 'test@email.com',
+    friendCount: 2,
+  );
+
+  // Create widget for testing
+  Widget createWidgetUnderTest() {
+    return const ProviderScope(
+      //  overrides: [
+      //  userNotifier.overrideWith((ref) => mockUser),
+      //      postNotifier.overrideWith((ref) => mockPosts),
+      // ],
+      child: MaterialApp(home: ProfilePage()),
+    );
+  }
+
   // Verify the presence of all UI elements
   testWidgets('Profile Page UI elements are displayed',
       (WidgetTester tester) async {
