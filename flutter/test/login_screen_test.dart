@@ -162,7 +162,7 @@ void main() {
 
     // Verify the presence of the weight field and dropdown menu
     expect(find.widgetWithText(TextFormField, 'Weight'), findsOneWidget);
-    expect(find.byType(DropdownButton), findsOneWidget);
+    expect(find.byType(DropdownMenu), findsOneWidget);
 
     // Verify the presence of the Sign Up button
     expect(find.widgetWithText(ElevatedButton, 'Sign Up'), findsOneWidget);
@@ -190,6 +190,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify if error message appears for mismatched passwords
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.text("Passwords don't match"), findsOneWidget);
   });
 }
