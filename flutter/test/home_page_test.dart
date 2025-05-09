@@ -30,8 +30,9 @@ class MockPostNotifier extends PostNotifier {
 }
 
 void main() {
-  Widget createWidgetUnderTest() {
-    return const ProviderScope(
+  Widget createWidgetUnderTest({List<Override> overrides = const []}) {
+    return ProviderScope(
+      overrides: overrides,
       child: MaterialApp(home: HomePage()),
     );
   }

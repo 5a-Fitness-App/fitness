@@ -29,6 +29,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     Posts posts = ref.watch(postNotifier);
 
     return Scaffold(
+      key: const Key('homePage'),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(

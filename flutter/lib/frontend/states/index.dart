@@ -54,7 +54,6 @@ class IndexState extends ConsumerState<Index> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: const Key('homePage'),
       backgroundColor: Colors.white,
       endDrawer: Drawer(
         child: TextButton(
