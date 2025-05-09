@@ -108,6 +108,7 @@ void main() {
       createWidgetUnderTest(overrides: [
         postNotifier.overrideWith(
           (ref) {
+            // Populate with mock workouts
             final mock = MockPostNotifier(ref);
             mock.addWorkout({
               'id': 1,
@@ -157,6 +158,7 @@ void main() {
       createWidgetUnderTest(overrides: [
         postNotifier.overrideWith(
           (ref) {
+            // Populate with mock workouts
             final mock = MockPostNotifier(ref);
             mock.addWorkout({
               'id': 1,
@@ -172,7 +174,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Check if 'Test' post is displayed
+    // Check if 'Test Workout' post is displayed
     expect(find.text('Test Workout'), findsOneWidget);
   });
 }

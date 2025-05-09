@@ -27,7 +27,7 @@ void main() {
     expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
 
     // Verify the presence of 'Sign in' and 'Sign up' buttons
-    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
     expect(find.text('Sign up'), findsOneWidget);
 
     // Verify the presence of 'Sign In' button
