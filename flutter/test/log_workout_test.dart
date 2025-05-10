@@ -45,7 +45,7 @@ void main() {
   });
 
   // Verify the presence of all UI elements in an activity
-  testWidgets('Log Workout Page UI elements are displayed',
+  testWidgets('Activity UI elements are displayed',
       (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
