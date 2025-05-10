@@ -75,7 +75,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify username, friends and biography are visible
-    expect(find.text('testUsernmae'), findsOneWidget);
+    expect(find.text('testUsername'), findsOneWidget);
     expect(find.text('2 friends'), findsOneWidget);
     expect(find.text('testBiography'), findsOneWidget);
 

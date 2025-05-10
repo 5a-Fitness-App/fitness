@@ -67,12 +67,9 @@ void main() {
     // Verify posts are visible
     expect(find.text('View Workout'), findsWidgets);
 
-    // Verify comments and likes are visible
-    expect(find.textContaining('❤️'), findsWidgets);
-    expect(find.textContaining('💬'), findsWidgets);
-
-    // Verify view more workouts button is visible
-    //expect(find.text('View More Workouts'), findsOneWidget);
+    // Verify likes and comments are visible
+    expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+    expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsWidgets);
   });
 
   // Verify that the Log Workout button takes the user to the log workout page
