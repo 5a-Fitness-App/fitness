@@ -162,7 +162,7 @@ void main() {
 
     // Verify the presence of the weight field and dropdown menu
     expect(find.widgetWithText(TextFormField, 'Weight'), findsOneWidget);
-    expect(find.byType(DropdownMenu), findsOneWidget);
+    expect(find.byType(DropdownMenu<WeightUnitsLabel>), findsOneWidget);
 
     // Verify the presence of the Sign Up button
     expect(find.widgetWithText(ElevatedButton, 'Sign Up'), findsOneWidget);
