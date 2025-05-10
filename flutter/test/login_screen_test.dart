@@ -192,4 +192,41 @@ void main() {
     // Verify if error message appears for mismatched passwords
     expect(find.text("Passwords don't match"), findsOneWidget);
   });
+
+  // Verify user can sign up
+  testWidgets('User is able to Sign Up', (WidgetTester tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // Switch to Sign up screen
+    await tester.tap(find.text('Sign up'));
+    await tester.pumpAndSettle();
+
+    // Enter valid information into the text fields
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Username')), 'testUsername');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Email')), 'testEmail');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Password')), 'testPassword');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Confirm Password')),
+        'testPassword');
+
+    // Enter valid inforamtion into Birthday
+    await tester.tap(find.text('MM/DD/YYYY'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    // Enter valid information into weight
+    await tester.enterText(
+        find.widgetWithText(TextFormField, ('Weight')), '70');
+
+    // Tap Sign Up button
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Sign Up'));
+    await tester.pumpAndSettle();
+
+    // Expect to find Home title
+    expect(find.text('Home'), findsOneWidget);
+  });
 }
