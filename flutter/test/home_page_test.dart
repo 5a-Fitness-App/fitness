@@ -23,7 +23,7 @@ class MockPostNotifierPopulated extends PostNotifier {
           'id': 1,
           'workoutName': 'Test Workout',
           'workout_ID': 1,
-          'hasLiked': false,
+          'hasLiked': false
         },
       ],
     );

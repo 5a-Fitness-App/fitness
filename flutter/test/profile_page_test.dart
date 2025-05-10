@@ -11,17 +11,16 @@ import 'package:fitness_app/backend/models/post.dart';
 class MockUserNotifier extends UserNotifier {
   MockUserNotifier(super.ref) {
     state = User(
-      userID: 1,
-      userName: 'test',
-      userProfilePhoto: 'fish',
-      userBio: 'testBiography',
-      userDOB: DateTime(2000, 01, 01),
-      userWeight: 0,
-      userUnits: 'kg',
-      accountCreationDate: DateTime.now(),
-      userEmail: 'test@email.com',
-      friendCount: 2,
-    );
+        userID: 1,
+        userName: 'testUsername',
+        userProfilePhoto: 'fish',
+        userBio: 'testBiography',
+        userDOB: DateTime(2000, 01, 01),
+        userWeight: 0,
+        userUnits: 'kg',
+        accountCreationDate: DateTime.now(),
+        userEmail: 'test@email.com',
+        friendCount: 2);
   }
 }
 
@@ -33,7 +32,7 @@ class MockPostNotifier extends PostNotifier {
         'id': 1,
         'workoutName': 'Test Workout',
         'workout_ID': 1,
-        'hasLiked': false,
+        'hasLiked': false
       }
     ], friendsWorkouts: []);
   }
@@ -52,32 +51,50 @@ void main() {
   testWidgets('Profile Page UI elements are displayed',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      createWidgetUnderTest(overrides: [
-        userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
-        postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
-      ]),
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
     );
 
     // Give time for the UI to load
     await tester.pumpAndSettle();
 
-    // Verify username and biography are visible
-    expect(find.text('test'), findsOneWidget);
+    // Tap on My Posts
+    await tester.tap(find.text('My Posts'));
+    await tester.pumpAndSettle();
+
+    // Verify username, friends and biography are visible
+    expect(find.text('testUsernmae'), findsOneWidget);
+    expect(find.text('2 friends'), findsOneWidget);
     expect(find.text('testBiography'), findsOneWidget);
 
     // Verify Dashboard and My Posts buttons are visible
     expect(find.text('Dashboard'), findsOneWidget);
     expect(find.text('My Posts'), findsOneWidget);
+
+    // Verify the test workout is visible
+    expect(find.text('Test Workout'), findsOneWidget);
+    expect(find.textContaining('❤️'), findsOneWidget);
+
+    // Verify view workout buttons is visible
+    expect(find.text('View Workout'), findsOneWidget);
   });
 
   // Verify user can switch between Dashboard and My Posts
   testWidgets('User can switch between Dashboard and My Posts',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      createWidgetUnderTest(overrides: [
-        userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
-        postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
-      ]),
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
     );
 
     // Give time for the UI to load
@@ -95,6 +112,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify if Dashboard is displayed
-    // expect(something only in dashboard)
+    // expect(find.text('something only in dashboard'),findsOneWidget);
   });
 }
