@@ -25,8 +25,8 @@ class MockUserNotifier extends UserNotifier {
 }
 
 // Mock Post for testing
-class MockPostNotifier extends PostNotifier {
-  MockPostNotifier(super.ref) {
+class MockPostNotifierPopulated extends PostNotifier {
+  MockPostNotifierPopulated(super.ref) {
     state = Posts(userWorkouts: [
       {
         'id': 1,
@@ -35,6 +35,13 @@ class MockPostNotifier extends PostNotifier {
         'hasLiked': false
       }
     ], friendsWorkouts: []);
+  }
+}
+
+// Empty Mock Posts for testing
+class MockPostNotifierEmpty extends PostNotifier {
+  MockPostNotifierEmpty(super.ref) {
+    state = Posts(userWorkouts: [], friendsWorkouts: []);
   }
 }
 
@@ -54,7 +61,7 @@ void main() {
       ProviderScope(
         overrides: [
           userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
-          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
         ],
         child: createWidgetUnderTest(),
       ),
@@ -91,7 +98,7 @@ void main() {
       ProviderScope(
         overrides: [
           userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
-          postNotifier.overrideWith((ref) => MockPostNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
         ],
         child: createWidgetUnderTest(),
       ),
@@ -113,5 +120,55 @@ void main() {
 
     // Verify if Dashboard is displayed
     // expect(find.text('something only in dashboard'),findsOneWidget);
+  });
+
+  // Verify no posts alerts the user
+  testWidgets('Display message when user has no posts',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifierEmpty(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap My Posts
+    await tester.tap(find.text('My Posts'));
+    await tester.pumpAndSettle();
+
+    // Expect to find message regarding not posting
+    expect(find.text("You haven't posted"), findsOneWidget);
+  });
+
+  // Verify that pressing view workout takes the user to the workout
+  testWidgets('View Workout button takes user to view their workout',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+          postNotifier.overrideWith((ref) => MockPostNotifierPopulated(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap My Posts
+    await tester.tap(find.text('My Posts'));
+    await tester.pumpAndSettle();
+
+    // Tap view workout
+    await tester.tap(find.widgetWithText(ElevatedButton, 'View Workout'));
+    await tester.pumpAndSettle();
+
+    // Find an element in the workout
+    expect(find.text('Comments'), findsOneWidget);
   });
 }
