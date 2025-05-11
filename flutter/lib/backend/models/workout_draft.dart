@@ -57,7 +57,7 @@ class ActivityDraft {
   final String
       exerciseType; // Type of exercise (e.g. Running, Treadmill, DeadLifts)
 
-  // The list of metrics being tracked for this activty. Dependent on exercise type that the user selects from frontend/states/log_workout_modal.dart
+  // The list of metrics being tracked for this activty. Dependent on exercise type that the user selects
   final List<String> metrics;
 
   // Input fields

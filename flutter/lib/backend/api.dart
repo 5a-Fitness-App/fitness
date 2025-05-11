@@ -1,9 +1,10 @@
 import 'package:fitness_app/backend/services/db_service.dart';
 import 'dart:convert';
 
-// GET A LIST OF THE USER'S FRIENDS' WORKOUTS
+// Fetches a list of workouts from the user's friends
 Future<List<Map<String, dynamic>>> getFriendsWorkouts(int userID) async {
   try {
+    // Query to get friend workouts with like/comment counts
     List<List<dynamic>> query = await dbService.readQuery('''SELECT 
             w.workout_ID,
             fu.user_ID,
@@ -28,6 +29,7 @@ Future<List<Map<String, dynamic>>> getFriendsWorkouts(int userID) async {
           ORDER BY 
             w.workout_date_time DESC;''', {'user_ID': userID});
 
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'workout_ID': row[0],
@@ -43,17 +45,17 @@ Future<List<Map<String, dynamic>>> getFriendsWorkouts(int userID) async {
 
     return queryRows;
   } catch (e) {
-    // Handle database errors or unexpected errors
+    // Return error if query fails
     return [
       {'error': 'Error during post retrieval: $e'}
     ];
-    // return 'An unexpected error occurred.';
   }
 }
 
-//GET A LIST OF THE USER'S WORKOUTS
+// Fetches a list of the user's own workouts
 Future<List<Map<String, dynamic>>> getUserWorkouts(int userID) async {
   try {
+    // Query to get user workouts with like/comment counts
     List<List<dynamic>> query = await dbService.readQuery('''SELECT 
             w.workout_ID,
             u.user_name,
@@ -76,6 +78,7 @@ Future<List<Map<String, dynamic>>> getUserWorkouts(int userID) async {
           ORDER BY 
             w.workout_date_time DESC;''', {'user_ID': userID});
 
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'workout_ID': row[0],
@@ -91,17 +94,17 @@ Future<List<Map<String, dynamic>>> getUserWorkouts(int userID) async {
 
     return queryRows;
   } catch (e) {
-    // Handle database errors or unexpected errors
+    // Return error if query fails
     return [
       {'error': 'Error during post retrieval: $e'}
     ];
-    // return 'An unexpected error occurred.';
   }
 }
 
-// GET THE DETAILS OF A SELECTED WORKOUT
+// Gets detailed information about a specific workout
 Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
   try {
+    // Query to get workout details with like/comment counts
     List<List<dynamic>> query = await dbService.readQuery('''
       SELECT
         w.workout_ID,
@@ -125,6 +128,7 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
           w.workout_ID;
       ''', {'workout_ID': workoutID});
 
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'workout_ID': row[0],
@@ -143,12 +147,13 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
   } catch (e) {
     print('error: $e');
     return {};
-    //TODO: change this error handling
   }
 }
 
+// Checks if a user has liked a specific workout
 Future<bool> hasUserLikedWorkout(int userID, int workoutID) async {
   try {
+    // Query to check for existing like
     final like = await dbService.readQuery('''
       SELECT user_ID
         FROM likes WHERE workout_id = @workout_ID AND user_id = @user_ID LIMIT 1;
@@ -161,6 +166,7 @@ Future<bool> hasUserLikedWorkout(int userID, int workoutID) async {
   }
 }
 
+// Removes a like from a workout
 Future<void> unlikeWorkout(int userID, int workoutID) async {
   try {
     await dbService.deleteQuery('''
@@ -171,6 +177,7 @@ Future<void> unlikeWorkout(int userID, int workoutID) async {
   }
 }
 
+// Adds a like to a workout
 Future<void> likeWorkout(int userID, int workoutID) async {
   try {
     await dbService.deleteQuery('''
@@ -182,9 +189,10 @@ Future<void> likeWorkout(int userID, int workoutID) async {
   }
 }
 
-// GET THE ACTIVITIES FOR A SELECTED WORKOUT
+// Gets all activities/exercises for a specific workout
 Future<List<Map<String, dynamic>>> getWorkoutActivities(int workoutID) async {
   try {
+    // Query to get workout activities
     List<List<dynamic>> query = await dbService.readQuery('''
           SELECT
             e.exercise_name,
@@ -199,6 +207,7 @@ Future<List<Map<String, dynamic>>> getWorkoutActivities(int workoutID) async {
             a.workout_ID = @workout_ID;
         ''', {'workout_ID': workoutID});
 
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'exercise_name': utf8.decode(row[0].bytes),
@@ -212,13 +221,13 @@ Future<List<Map<String, dynamic>>> getWorkoutActivities(int workoutID) async {
   } catch (e) {
     print('error: $e');
     return [];
-    //TODO: change this error handling
   }
 }
 
-// GET THE COMMENTS OF A SELECTED WORKOUT
+// Gets all comments for a specific workout
 Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
   try {
+    // Query to get workout comments
     List<List<dynamic>> query = await dbService.readQuery('''
         SELECT
           u.user_ID,
@@ -234,6 +243,7 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
           c.workout_ID = @workout_ID
       ''', {'workout_ID': workoutID});
 
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> queryRows = query
         .map((row) => {
               'user_ID': row[0],
@@ -253,8 +263,9 @@ Future<List<Map<String, dynamic>>> getWorkoutComments(int workoutID) async {
   }
 }
 
-// GET THE USER'S FRIEND COUNT
+// Gets the friend count for a user
 Future<int> getFriendCount(int userID) async {
+  // Query to count user's friends
   List<List<dynamic>> query = await dbService.readQuery('''
         SELECT
           COUNT(f.friend_ID) AS friend_count
@@ -271,10 +282,11 @@ Future<int> getFriendCount(int userID) async {
   return friendCount[0]['friend_count'];
 }
 
-// REGISTER A NEW USER
+// Registers a new user
 Future<String?> register(String username, String profilePhoto, DateTime dob,
     double weight, String weightUnits, String email, String password) async {
   try {
+    // Insert new user record
     await dbService.insertQuery(
         '''INSERT INTO users (user_name, user_profile_photo, user_dob, user_weight, user_weight_unit, users_account_creation_date, user_email, user_password) VALUES
         (@user_name, @user_profile_photo, @dob, @weight, @weight_units, CURRENT_DATE, @email, @password);''',
@@ -295,10 +307,11 @@ Future<String?> register(String username, String profilePhoto, DateTime dob,
   }
 }
 
-// CREATE A NEW WORKOUT
+// Creates a new workout with activities
 Future<String?> addWorkout(int userID, String workoutCaption,
     bool workoutPublic, List<Map<String, dynamic>> activities) async {
   try {
+    // Insert workout and get generated ID
     int workoutID = await dbService.insertAndReturnId('''
         INSERT INTO workouts (user_ID, workout_caption, workout_date_time, workout_public)
         VALUES
@@ -310,7 +323,9 @@ Future<String?> addWorkout(int userID, String workoutCaption,
       'workout_public': workoutPublic,
     });
 
+    // Add each activity to the workout
     for (Map<String, dynamic> activity in activities) {
+      // Get exercise ID for the activity
       List<List<dynamic>> query = await dbService.readQuery('''
           SELECT exercise_ID FROM exercises WHERE exercise_name = @exercise_name
         ''', {'exercise_name': activity['exercise_name']});
@@ -320,6 +335,7 @@ Future<String?> addWorkout(int userID, String workoutCaption,
       }
       int exerciseID = query[0][0];
 
+      // Insert activity record
       await dbService.insertQuery('''
           INSERT INTO activities (workout_ID, exercise_ID, activity_notes, activity_metrics)
           VALUES
@@ -339,7 +355,7 @@ Future<String?> addWorkout(int userID, String workoutCaption,
   }
 }
 
-// DELETE A WORKOUT
+// Deletes a workout
 Future<String?> deleteWorkout(int workoutID) async {
   try {
     await dbService.deleteQuery('''
@@ -353,8 +369,10 @@ Future<String?> deleteWorkout(int workoutID) async {
   }
 }
 
+// Gets profile details for a user
 Future<Map<String, dynamic>> getProfileDetails(int userID) async {
   try {
+    // Query to get user profile data
     List<List<dynamic>> results = await dbService.readQuery(
       '''SELECT 
               user_ID,
@@ -368,6 +386,7 @@ Future<Map<String, dynamic>> getProfileDetails(int userID) async {
       {'user_ID': userID},
     );
 
+    // Convert query results to Map
     List<Map<String, dynamic>> user = results
         .map((row) => {
               'user_ID': row[0],
@@ -379,7 +398,6 @@ Future<Map<String, dynamic>> getProfileDetails(int userID) async {
             })
         .toList();
 
-    // print(user[0]);
     return user[0];
   } catch (e) {
     print(e);
@@ -387,6 +405,7 @@ Future<Map<String, dynamic>> getProfileDetails(int userID) async {
   }
 }
 
+// Adds a comment to a workout
 Future<String?> addComment(int workoutID, int userID, String content) async {
   try {
     await dbService.insertQuery('''
@@ -406,6 +425,7 @@ Future<String?> addComment(int workoutID, int userID, String content) async {
   }
 }
 
+// Deletes a comment
 Future<String?> deleteComment(int commentID) async {
   try {
     await dbService.deleteQuery('''
@@ -418,8 +438,10 @@ Future<String?> deleteComment(int commentID) async {
   }
 }
 
+// Gets a list of the user's friends
 Future<List<Map<String, dynamic>>> getFriends(int userID) async {
   try {
+    // Query to get user's friends
     List<List<dynamic>> results = await dbService.readQuery('''
         SELECT
           fu.user_ID,
@@ -431,6 +453,8 @@ Future<List<Map<String, dynamic>>> getFriends(int userID) async {
         WHERE 
           f.user_ID = @user_ID;
      ''', {'user_ID': userID});
+
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> friendList = results
         .map((row) => {
               'user_ID': row[0],
@@ -446,8 +470,10 @@ Future<List<Map<String, dynamic>>> getFriends(int userID) async {
   }
 }
 
+// Gets pending friend requests for a user
 Future<List<Map<String, dynamic>>> getFriendRequests(int userID) async {
   try {
+    // Query to get pending friend requests
     List<List<dynamic>> results = await dbService.readQuery('''
         SELECT
           u.user_ID,
@@ -459,6 +485,8 @@ Future<List<Map<String, dynamic>>> getFriendRequests(int userID) async {
         WHERE 
           fr.receiver_ID = @user_ID;
      ''', {'user_ID': userID});
+
+    // Convert query results to List of Maps
     List<Map<String, dynamic>> friendRequestList = results
         .map((row) => {
               'user_ID': row[0],
@@ -474,12 +502,15 @@ Future<List<Map<String, dynamic>>> getFriendRequests(int userID) async {
   }
 }
 
+// Accepts a friend request and establishes mutual friendship
 Future<void> acceptFriendRequest(int receiverID, int senderID) async {
   try {
+    // Create mutual friend records
     await dbService.insertQuery('''
         INSERT INTO friends (user_ID, friend_ID) VALUES (@receiver_ID, @sender_ID), (@sender_ID, @receiver_ID);
       ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
 
+    // Remove the friend request
     await dbService.deleteQuery('''
         DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
       ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
@@ -488,8 +519,10 @@ Future<void> acceptFriendRequest(int receiverID, int senderID) async {
   }
 }
 
+// Declines a friend request
 Future<void> declineFriendRequest(int receiverID, int senderID) async {
   try {
+    // Remove the friend request
     await dbService.deleteQuery('''
         DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
       ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
@@ -498,8 +531,10 @@ Future<void> declineFriendRequest(int receiverID, int senderID) async {
   }
 }
 
+// Deletes a friend relationship
 Future<void> deleteFriend(int userID, int friendID) async {
   try {
+    // Remove both directions of friendship
     await dbService.deleteQuery('''
         DELETE FROM friends WHERE (user_ID = @user_ID AND friend_ID = @friend_ID) OR (user_ID = @friend_ID AND friend_ID = @user_ID); 
       ''', {'user_ID': userID, 'friend_ID': friendID});
@@ -508,8 +543,10 @@ Future<void> deleteFriend(int userID, int friendID) async {
   }
 }
 
+// Toggles a workout's public/private status
 Future<void> toggleWorkoutPublic(int workoutID) async {
   try {
+    // Get current public status
     List<List<dynamic>> results = await dbService.readQuery('''
         SELECT
           workout_public
@@ -526,6 +563,7 @@ Future<void> toggleWorkoutPublic(int workoutID) async {
 
     print('wokrout public stats : $workoutPublic');
 
+    // Toggle the public status
     await dbService.updateQuery('''
         UPDATE workouts SET workout_public = @workout_public WHERE workout_id = @workout_id
       ''', {'workout_public': !workoutPublic, 'workout_id': workoutID});
@@ -536,6 +574,7 @@ Future<void> toggleWorkoutPublic(int workoutID) async {
   }
 }
 
+// Deletes a user account
 Future<void> deleteAccount(int userID) async {
   try {
     await dbService.deleteQuery('''
@@ -545,30 +584,3 @@ Future<void> deleteAccount(int userID) async {
     print('error deleting account: $e');
   }
 }
-
-// GET THE PERCENTAGES FOR ACTIVITIES PER EXERCISE TARGET
-// Future<List<Map<String, dynamic>>> getTargetPercentages(int userID) async {
-//   try {
-//     List<List<dynamic>> query = await dbService.readQuery('''
-//         SELECT
-//           e.exercise_target,
-//           COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) AS activity_count,
-//           ROUND(
-//               COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID) * 100.0
-//               / NULLIF(SUM(COUNT(w.workout_ID) FILTER (WHERE w.user_ID = @user_ID)) OVER (), 0),
-//               2
-//           ) AS percentage
-//         FROM exercises e
-//         LEFT JOIN activities a ON e.exercise_ID = a.exercise_ID
-//         LEFT JOIN workouts w ON a.workout_ID = w.workout_ID
-//         GROUP BY e.exercise_target
-//         ORDER BY percentage DESC NULLS LAST;
-//       ''', {'user_ID': userID});
-
-//       List<Map<String, dynamic>> queryRows = query
-//         .map((row) => {'user_name': row[0], 'content': row[1], 'date': row[2]})
-//         .toList();
-//   } catch (e) {
-//     return
-//   }
-// }

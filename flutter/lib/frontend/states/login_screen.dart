@@ -9,8 +9,10 @@ import 'package:flutter/services.dart';
 
 import 'dart:collection';
 
+// type for Weight Units drop down menu
 typedef WeightUnits = DropdownMenuEntry<WeightUnitsLabel>;
 
+// Enumeration for selecting weight units with the label text they display
 enum WeightUnitsLabel {
   kg('kg'),
   lb('lb');
@@ -18,6 +20,7 @@ enum WeightUnitsLabel {
   const WeightUnitsLabel(this.label);
   final String label;
 
+  // List of dropdown entries for weight units
   static final List<WeightUnits> entries = UnmodifiableListView<WeightUnits>(
     values
         .map<WeightUnits>(
@@ -31,6 +34,7 @@ enum WeightUnitsLabel {
   );
 }
 
+// Login screen widget with ConsumerStatefulWidget for state management
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -39,14 +43,19 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class LoginScreenState extends ConsumerState<LoginScreen> {
+  // Form Keys for validation
   final signUpFormKey = GlobalKey<FormState>();
   final signInFormKey = GlobalKey<FormState>();
 
-  // Signing in controllers
+  // Controllers for sign-in form
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // Signing up controllers
+  // error messages for signing in
+  String? emailError;
+  String? passwordError;
+
+  // Controllers for sign-up form
   final userNameController = TextEditingController();
   final signUpEmailController = TextEditingController();
   DateTime? selectedDoB;
@@ -56,13 +65,13 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   final signUpPasswordController = TextEditingController();
   final passwordConfirmController = TextEditingController();
 
-  String? emailError;
-  String? passwordError;
-
+  // error messages for signing up
   String? usernameError;
-
+  String? signUpEmailError; // TODO: implement
+  String? signUpPasswordError; // TODO: implement
   String? birthdayError;
 
+  // UI State variables
   bool hidePassword = true;
   bool registrationMode =
       false; //if false shows login form, if true shows registration form
@@ -70,13 +79,14 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   // Initially selected profile image
   String selectedProfileImage = 'fish';
 
-  // Method to update the selected profile image
+  // Update the selected profile image
   void _selectImage(String image) {
     setState(() {
       selectedProfileImage = image;
     });
   }
 
+  // Shows date picker for birthday selection
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -90,6 +100,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     });
   }
 
+  // Helper widget for profile image selection with border
   Widget imageWithBorder(String image, String imageName) {
     bool isSelected = selectedProfileImage == imageName;
 
@@ -118,11 +129,19 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
+    // Clean up controllers
     emailController.dispose();
     passwordController.dispose();
+    userNameController.dispose();
+    signUpEmailController.dispose();
+    signUpPasswordController.dispose();
+    passwordConfirmController.dispose();
+    weightController.dispose();
+    weightUnitsController.dispose();
     super.dispose();
   }
 
+  // Handles login form submission
   void login() async {
     setState(() {
       emailError = null; // Reset errors before validating
@@ -135,6 +154,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             .read(userNotifier.notifier)
             .login(emailController.text.trim(), passwordController.text.trim());
 
+        // Successful login
         if (errorMessage == null) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -149,6 +169,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             }));
           }
         } else {
+          // Failed login
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -175,59 +196,67 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  // Handles registration form submission
+
   void registerButton() async {
-    setState(() {
-      emailError = null; // Reset errors before validating
-      passwordError = null;
-    });
-
-    if (selectedDoB == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select your date of birth.')),
-        );
-      }
-      return;
-    }
-
-    if (selectedWeightUnit == null) {
-      if (mounted) {
-        selectedWeightUnit = WeightUnitsLabel.kg;
-      }
-      return;
-    }
-
     try {
-      String? errorMessage = await register(
-          userNameController.text.trim(),
-          selectedProfileImage,
-          selectedDoB!,
-          double.parse(weightController.text.trim()),
-          selectedWeightUnit!.label,
-          signUpEmailController.text.trim(),
-          signUpPasswordController.text.trim());
+      setState(() {
+        signUpEmailError = null; // Reset errors before validating
+        signUpPasswordError = null;
+      });
 
-      if (errorMessage == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Account created for ${emailController.text.trim()}')),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Registration failed: Please try again')),
-          );
+      if (signUpFormKey.currentState!.validate()) {
+        // Validate required fields
+        if (selectedDoB == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Please select your date of birth.')),
+            );
+          }
+          return;
         }
 
-        if (errorMessage == 'An account with this email already exists') {
-          setState(() {
-            emailError =
-                errorMessage; // Show error message in the password field
-          });
+        if (selectedWeightUnit == null) {
+          if (mounted) {
+            selectedWeightUnit = WeightUnitsLabel.kg;
+          }
+          return;
+        }
+
+        String? errorMessage = await register(
+            userNameController.text.trim(),
+            selectedProfileImage,
+            selectedDoB!,
+            double.parse(weightController.text.trim()),
+            selectedWeightUnit!.label,
+            signUpEmailController.text.trim(),
+            signUpPasswordController.text.trim());
+
+        if (errorMessage == null) {
+          // Successful registration
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(
+                      'Account created for ${signUpEmailController.text.trim()}')),
+            );
+          }
+        } else {
+          // Failed registration
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Registration failed: Please try again')),
+            );
+          }
+
+          if (errorMessage == 'An account with this email already exists') {
+            setState(() {
+              emailError =
+                  errorMessage; // Show error message in the password field
+            });
+          }
         }
       }
     } catch (e) {
@@ -240,11 +269,13 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  // Builds the sign-in form widget
   Widget buildSignInForm() {
     return Form(
       key: signInFormKey,
       child: Column(
         children: [
+          // Email input field
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -274,6 +305,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   return null;
                 },
               )),
+
+          // Password input field
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -312,16 +345,16 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  // Builds the sign-up form widget
   Widget buildSignUpForm() {
     return Form(
       key: signUpFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Profile image selection
           Container(
-              decoration: const BoxDecoration(
-                  shape: BoxShape.circle // Rounded corners for the border
-                  ),
+              decoration: const BoxDecoration(shape: BoxShape.circle),
               child: ClipOval(
                 child: InkWell(
                   onTap: () => _selectImage(selectedProfileImage),
@@ -333,16 +366,17 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               )),
-          const SizedBox(
-            height: 15,
-          ),
+
+          const SizedBox(height: 15),
+
           Text(
             'Select a Profile Image',
             style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
           ),
-          const SizedBox(
-            height: 10,
-          ),
+
+          const SizedBox(height: 10),
+
+          // Profile image options
           Row(
               spacing: 10,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,7 +387,10 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 imageWithBorder('crab', 'crab'),
                 imageWithBorder('dolphin', 'dolphin')
               ]),
+
           const SizedBox(height: 30),
+
+          // Username field
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -381,6 +418,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   return null;
                 },
               )),
+
+          // Email field
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -388,7 +427,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter your email',
                   labelText: 'Email',
-                  errorText: emailError,
+                  errorText: signUpEmailError,
                   prefixIcon: const Icon(Icons.mail_outline),
                   enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -410,6 +449,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   return null;
                 },
               )),
+
+          // Password field
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -418,7 +459,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter your password',
                   labelText: 'Password',
-                  errorText: passwordError,
+                  errorText: signUpPasswordError,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -443,6 +484,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   return null;
                 },
               )),
+
+          // Password confirmation field with matching validation
           SizedBox(
               height: 100,
               child: TextFormField(
@@ -451,7 +494,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Enter your password again',
                   labelText: 'Confirm Password',
-                  errorText: passwordError,
+                  errorText: signUpPasswordError,
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -473,11 +516,13 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   if (value == null ||
                       value.isEmpty ||
                       value != signUpPasswordController.text.trim()) {
-                    return "Passwords don't match";
+                    return "Passwords do not match";
                   }
                   return null;
                 },
               )),
+
+          // Birthday selection
           Row(
             spacing: 10,
             children: [
@@ -503,9 +548,10 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               )
             ],
           ),
-          const SizedBox(
-            height: 30,
-          ),
+
+          const SizedBox(height: 30),
+
+          // Weight input with unit selection
           SizedBox(
               height: 100,
               child: Flex(
@@ -547,6 +593,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       },
                     ),
                   ),
+
+                  // Weight unit dropdown
                   DropdownMenu<WeightUnitsLabel>(
                       enableFilter: false,
                       enableSearch: false,
@@ -583,6 +631,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
       body: SingleChildScrollView(
           child: Column(
         children: [
+          // Header section with logo and gradient background
           Container(
             width: double.infinity,
             height: MediaQuery.of(context).size.height * 0.4,
@@ -595,8 +644,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             )),
-            child: Flex(
-              direction: Axis.horizontal,
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -617,6 +665,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           ),
+
+          // Form toggle buttons
           Container(
             decoration:
                 const BoxDecoration(color: Color.fromRGBO(154, 197, 244, 1)),
@@ -672,6 +722,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ]),
           ),
+
+          // Form content
           Container(
             padding: const EdgeInsets.only(left: 17, right: 17, bottom: 17),
             decoration:
