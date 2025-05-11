@@ -51,8 +51,8 @@ class UserNotifier extends StateNotifier<User> {
                 u.user_email,
                 COUNT(f.friend_ID) AS friend_count
               FROM users u
-                 JOIN friends f ON u.user_ID = f.user_ID
-              WHERE user_email = @email 
+                 LEFT JOIN friends f ON u.user_ID = f.user_ID
+              WHERE user_email = @email
               GROUP BY u.user_ID
               LIMIT 1;
             ''',
