@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/frontend/states/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fitness_app/backend/services/db_service.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockDbService extends Mock implements DbService {}
 
 // Testing for the Login Screen
-void main() {
+void main() async {
   // Provider scope for riverpod
   Widget createWidgetUnderTest() {
     return const ProviderScope(

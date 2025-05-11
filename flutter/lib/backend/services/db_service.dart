@@ -12,11 +12,7 @@ class DbService {
 
     _connection = await Connection.open(
       Endpoint(
-<<<<<<< HEAD:flutter/lib/functional_backend/services/db_service.dart
-        host: 'localhost',
-=======
         host: '10.0.2.2',
->>>>>>> 74942777de49518e7efd6ba3f7fd30a5ab10e3d2:flutter/lib/backend/services/db_service.dart
         database: 'testfitness',
         username: 'jennydoan', //change this to your postgres username
         password: 'Elgado29#', //change this to your postgres password

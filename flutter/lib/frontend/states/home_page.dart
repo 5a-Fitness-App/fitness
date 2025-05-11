@@ -110,24 +110,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Expanded(
-                    //   child: ElevatedButton(
-                    //     onPressed: () {
-                    //       //  Implement Start Workout logic
-                    //     },
-                    //     style: ElevatedButton.styleFrom(
-                    //       backgroundColor: Colors.grey.shade300,
-                    //       padding: const EdgeInsets.symmetric(vertical: 12),
-                    //       shape: RoundedRectangleBorder(
-                    //         borderRadius: BorderRadius.circular(10),
-                    //       ),
-                    //     ),
-                    //     child: const Text(
-                    //       'Start Workout',
-                    //       style: TextStyle(color: Colors.black),
-                    //     ),
-                    //   ),
-                    // ),
                   ],
                 ),
               ],
@@ -204,14 +186,17 @@ class FriendsPosts extends ConsumerWidget {
           Container(
               padding: const EdgeInsets.only(
                   top: 12, right: 15, left: 12, bottom: 5),
-              child: Flex(
-                  direction: Axis.horizontal,
+              child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
+                    //Poster's profile photo
                     InkWell(
                         onTap: () {
-                          openProfileModal(context, workout['user_ID']);
+                          openProfileModal(
+                              context,
+                              workout[
+                                  'user_ID']); // open the poster's profile modal
                         },
                         child: Container(
                             width: 35,
@@ -233,6 +218,7 @@ class FriendsPosts extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               spacing: 5,
                               children: [
+                                //Poster's username
                                 InkWell(
                                   onTap: () {
                                     openProfileModal(
@@ -248,6 +234,8 @@ class FriendsPosts extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
+
+                                //Formatted date that workout was posted
                                 Text(
                                     DateFormat('dd MMMM yyyy')
                                         .format(workout['workout_date_time']),
@@ -255,16 +243,21 @@ class FriendsPosts extends ConsumerWidget {
                                         fontSize: 15,
                                         color: Colors.grey.shade700))
                               ]),
+
+                          //Workout caption
                           Text(workout['workout_caption'] ?? '',
                               style: const TextStyle(
                                 fontSize: 18,
                                 //fontWeight: FontWeight.w600
                               )),
+
+                          //Display likes
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(spacing: 5, children: [
                                   workout['hasLiked']
+                                      //If the logged in user HAS LIKED the post
                                       ? InkWell(
                                           onTap: () {
                                             ref
@@ -275,6 +268,7 @@ class FriendsPosts extends ConsumerWidget {
                                           child: const Icon(
                                               Icons.favorite_rounded),
                                         )
+                                      //If the logged in user has NOT LIKED the post
                                       : InkWell(
                                           onTap: () {
                                             ref
@@ -284,25 +278,36 @@ class FriendsPosts extends ConsumerWidget {
                                           },
                                           child: const Icon(
                                               Icons.favorite_border_rounded)),
+
+                                  //Number of likes
                                   Text(
                                     workout['total_likes'].toString(),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
+
                                   const SizedBox(width: 5),
+
+                                  //Comments Icon
                                   InkWell(
                                       onTap: () {
                                         openWorkoutModal(
-                                            context, workout['workout_ID']);
+                                            context,
+                                            workout[
+                                                'workout_ID']); //Navigates to
                                       },
                                       child: const Icon(
                                           Icons.chat_bubble_outline_rounded)),
+
+                                  //Display number of comments
                                   Text(
                                     workout['total_comments'].toString(),
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold),
                                   ),
                                 ]),
+
+                                //Button to open workout modal
                                 ElevatedButton(
                                     onPressed: () {
                                       openWorkoutModal(
