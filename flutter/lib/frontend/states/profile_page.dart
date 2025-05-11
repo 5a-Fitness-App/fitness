@@ -332,7 +332,6 @@ class MyPosts extends ConsumerWidget {
                                       child: const Icon(
                                           Icons.chat_bubble_outline_rounded)),
 
-                                  // Display comment count
                                   Text(
                                     workout['total_comments'].toString(),
                                     style: const TextStyle(

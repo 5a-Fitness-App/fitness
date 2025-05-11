@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:fitness_app/frontend/modals/show_workout_modal.dart';
 
+// Profile viewing page widget that shows user details and their workouts
 class ViewingProfilePage extends ConsumerStatefulWidget {
   final int userID;
 
@@ -13,12 +14,14 @@ class ViewingProfilePage extends ConsumerStatefulWidget {
   ViewingProfilePageState createState() => ViewingProfilePageState();
 }
 
+// State class for the profile viewing page
 class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
   late Future<Map<String, dynamic>> profile;
 
   @override
   void initState() {
     super.initState();
+    // Initialize future to load profile data
     profile = getProfileDetails(widget.userID);
   }
 
@@ -26,6 +29,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
+          // Dismiss keyboard when tapping outside
           FocusScope.of(context).unfocus();
         },
         child: Container(
@@ -35,6 +39,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
             decoration: const BoxDecoration(color: Colors.white),
             child: SingleChildScrollView(
               child: Column(children: [
+                // FutureBuilder for loading profile details
                 FutureBuilder<Map<String, dynamic>>(
                     future: profile,
                     builder: (context, snapshot) {
@@ -47,6 +52,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                             child: Text('No activities found.'));
                       } else {
                         return Column(children: [
+                          // Profile header with back button and username
                           Container(
                             padding: const EdgeInsets.only(
                                 top: 20, bottom: 5, left: 3, right: 5),
@@ -69,16 +75,19 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                               ],
                             ),
                           ),
+                          // Profile details section
                           Container(
                             padding: const EdgeInsets.all(20),
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 spacing: 15,
                                 children: [
+                                  // Profile picture and basic info row
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
+                                      // Profile picture
                                       Align(
                                         alignment: Alignment.topLeft,
                                         child: Container(
@@ -86,7 +95,6 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                                           height: 60,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            // color: Color.fromARGB(255, 167, 227, 255)
                                             image: DecorationImage(
                                               image: AssetImage(
                                                   'assets/${snapshot.data!['user_profile_photo']}.png'),
@@ -96,6 +104,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                                         ),
                                       ),
                                       const SizedBox(width: 20),
+                                      // Username and friend count
                                       Expanded(
                                           child: Flex(
                                         direction: Axis.vertical,
@@ -112,27 +121,25 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
+                                          // FutureBuilder for friend count
                                           FutureBuilder<int>(
-                                            future: getFriendCount(snapshot
-                                                    .data![
-                                                'user_ID']), // The future you're waiting on
+                                            future: getFriendCount(
+                                                snapshot.data!['user_ID']),
                                             builder: (context, snapshot) {
                                               if (snapshot.connectionState ==
                                                   ConnectionState.waiting) {
-                                                return const Text(
-                                                    'Loading...'); // Show a loading indicator or message while waiting
+                                                return const Text('Loading...');
                                               } else if (snapshot.hasError) {
                                                 return Text(
-                                                    'Error: ${snapshot.error}'); // Handle errors if any
+                                                    'Error: ${snapshot.error}');
                                               } else if (snapshot.hasData) {
                                                 return Text(
                                                   '${snapshot.data} friends',
                                                   style: const TextStyle(
                                                       fontSize: 16),
-                                                ); // Show the result when data is available
+                                                );
                                               } else {
-                                                return const Text(
-                                                    'No data'); // Handle case where no data is returned
+                                                return const Text('No data');
                                               }
                                             },
                                           )
@@ -140,6 +147,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                                       )),
                                     ],
                                   ),
+                                  // User bio text
                                   Text(
                                     snapshot.data!['user_bio'] ?? '',
                                     style: const TextStyle(
@@ -152,6 +160,7 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
                       }
                     }),
                 const Divider(),
+                // FutureBuilder for loading user workouts
                 FutureBuilder<List<Map<String, dynamic>>>(
                     future: getUserWorkouts(widget.userID),
                     builder: (context, snapshot) {
@@ -172,11 +181,13 @@ class ViewingProfilePageState extends ConsumerState<ViewingProfilePage> {
   }
 }
 
+// Widget for displaying a list of workout posts in a profile
 class ProfilePosts extends StatelessWidget {
   final List<Map<String, dynamic>> workouts;
 
   const ProfilePosts({super.key, required this.workouts});
 
+  // Function to open workout details modal
   void openWorkoutModal(BuildContext context, int workoutID) {
     showModalBottomSheet(
       context: context,
@@ -195,7 +206,9 @@ class ProfilePosts extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Empty state message
         if (workouts.isEmpty) const Text('Log a workout!'),
+        // List of workout posts
         for (Map<String, dynamic> workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(
@@ -205,6 +218,7 @@ class ProfilePosts extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: 10,
                   children: [
+                    // Workout author profile picture
                     Container(
                         width: 35,
                         height: 35,
@@ -216,11 +230,13 @@ class ProfilePosts extends StatelessWidget {
                             fit: BoxFit.fill,
                           ),
                         )),
+                    // Workout details column
                     Expanded(
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 5,
                             children: [
+                          // Workout header row with name, date and privacy status
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               spacing: 5,
@@ -246,11 +262,12 @@ class ProfilePosts extends StatelessWidget {
                                     style:
                                         TextStyle(color: Colors.grey.shade700))
                               ]),
+                          // Workout caption text
                           Text(workout['workout_caption'] ?? '',
                               style: const TextStyle(
                                 fontSize: 18,
-                                //fontWeight: FontWeight.w600
                               )),
+                          // Workout actions row (likes, comments, view button)
                           Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -274,6 +291,7 @@ class ProfilePosts extends StatelessWidget {
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ]),
+                                // View workout button
                                 ElevatedButton(
                                     onPressed: () {
                                       openWorkoutModal(

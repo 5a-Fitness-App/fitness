@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_app/frontend/modals/show_profile_modal.dart';
 import 'package:fitness_app/backend/models/user.dart';
 
+// Main page for displaying friends and friend requests
 class FriendsPage extends ConsumerStatefulWidget {
   final int userID;
 
@@ -14,16 +15,20 @@ class FriendsPage extends ConsumerStatefulWidget {
   FriendsPageState createState() => FriendsPageState();
 }
 
+// State class for FriendsPage
 class FriendsPageState extends ConsumerState<FriendsPage> {
   late Future<List<Map<String, dynamic>>> friends;
   late Future<List<Map<String, dynamic>>> friendRequests;
+
   @override
   void initState() {
     super.initState();
+    // Initialize futures to load friends and friend requests
     friends = getFriends(widget.userID);
     friendRequests = getFriendRequests(widget.userID);
   }
 
+  // Function to reload friends and friend requests data
   void _loadData() {
     setState(() {
       friends = getFriends(widget.userID);
@@ -35,6 +40,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
+          // Dismiss keyboard when tapping outside
           FocusScope.of(context).unfocus();
         },
         child: Container(
@@ -46,6 +52,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 20,
               children: [
+                // Header section with back button
                 Container(
                   padding: const EdgeInsets.only(
                       top: 20, bottom: 5, left: 3, right: 5),
@@ -68,6 +75,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                     ],
                   ),
                 ),
+                // Friend requests section header
                 const Row(children: [
                   SizedBox(
                     width: 15,
@@ -77,6 +85,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   )
                 ]),
+                // FutureBuilder for loading friend requests
                 FutureBuilder<List<Map<String, dynamic>>>(
                     future: friendRequests,
                     builder: (context, snapshot) {
@@ -92,6 +101,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                         return Column(
                           spacing: 10,
                           children: [
+                            // Display each friend request as a widget
                             for (Map<String, dynamic> friendRequest
                                 in friendRequests)
                               FriendRequestWidget(
@@ -105,6 +115,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                       }
                     }),
                 const Divider(),
+                // Friends list section header
                 const Row(children: [
                   SizedBox(
                     width: 15,
@@ -114,6 +125,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   )
                 ]),
+                // FutureBuilder for loading friends list
                 FutureBuilder<List<Map<String, dynamic>>>(
                   future: friends,
                   builder: (context, snapshot) {
@@ -128,6 +140,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
                       return Column(
                         spacing: 10,
                         children: [
+                          // Display each friend as a widget
                           for (Map<String, dynamic> friend in friends)
                             FriendWidget(friend: friend, onResponse: _loadData),
                           const SizedBox(height: 50)
@@ -141,6 +154,7 @@ class FriendsPageState extends ConsumerState<FriendsPage> {
   }
 }
 
+// Widget for displaying a single friend item
 class FriendWidget extends ConsumerWidget {
   final Map<String, dynamic> friend;
   final VoidCallback onResponse;
@@ -148,6 +162,7 @@ class FriendWidget extends ConsumerWidget {
   const FriendWidget(
       {super.key, required this.friend, required this.onResponse});
 
+  // Function to open profile modal
   void openProfileModal(BuildContext context, int userID) {
     showModalBottomSheet(
       context: context,
@@ -163,6 +178,7 @@ class FriendWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get current user data
     User user = ref.watch(userNotifier);
     int userID = user.userID ?? 0;
 
@@ -173,6 +189,7 @@ class FriendWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 10,
           children: [
+            // Friend profile picture
             InkWell(
                 onTap: () {
                   openProfileModal(context, friend['user_ID']);
@@ -188,6 +205,7 @@ class FriendWidget extends ConsumerWidget {
                         fit: BoxFit.fill,
                       ),
                     ))),
+            // Friend name
             Expanded(
               child: InkWell(
                 onTap: () {
@@ -207,6 +225,7 @@ class FriendWidget extends ConsumerWidget {
                 ),
               ),
             ),
+            // Button to remove friend
             ElevatedButton.icon(
                 onPressed: () {
                   deleteFriend(userID, friend['user_ID']);
@@ -222,6 +241,7 @@ class FriendWidget extends ConsumerWidget {
   }
 }
 
+// Widget for displaying a single friend request item
 class FriendRequestWidget extends ConsumerWidget {
   final Map<String, dynamic> friendRequest;
   final VoidCallback onResponse;
@@ -229,6 +249,7 @@ class FriendRequestWidget extends ConsumerWidget {
   const FriendRequestWidget(
       {super.key, required this.friendRequest, required this.onResponse});
 
+  // Function to open profile modal
   void openProfileModal(BuildContext context, int userID) {
     showModalBottomSheet(
       context: context,
@@ -244,6 +265,7 @@ class FriendRequestWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get current user data
     User user = ref.watch(userNotifier);
     int userID = user.userID ?? 0;
 
@@ -254,6 +276,7 @@ class FriendRequestWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 10,
           children: [
+            // Friend request profile picture
             Container(
                 width: 35,
                 height: 35,
@@ -265,6 +288,7 @@ class FriendRequestWidget extends ConsumerWidget {
                     fit: BoxFit.fill,
                   ),
                 )),
+            // Friend request name
             Expanded(
                 child: Text(friendRequest['user_name'] ?? '',
                     style: const TextStyle(
@@ -272,9 +296,11 @@ class FriendRequestWidget extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.black, // Explicitly set color
                     ))),
+            // Accept/decline buttons
             Row(
               spacing: 5,
               children: [
+                // Decline button
                 ElevatedButton.icon(
                     onPressed: () {
                       declineFriendRequest(userID, friendRequest['user_ID']);
@@ -284,6 +310,7 @@ class FriendRequestWidget extends ConsumerWidget {
                         foregroundColor: Colors.white,
                         backgroundColor: Colors.red),
                     label: const Icon(Icons.close_rounded)),
+                // Accept button
                 ElevatedButton.icon(
                     onPressed: () {
                       acceptFriendRequest(userID, friendRequest['user_ID']);
