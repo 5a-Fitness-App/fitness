@@ -5,19 +5,23 @@ import 'package:fitness_app/backend/models/user.dart';
 import 'dart:convert';
 import 'package:fitness_app/backend/provider/post_provider.dart';
 
+// Provider for tracking user IDs (initialized to 1)
 final userProvider = StateProvider<int>((ref) => 1);
 
+// StateNotifierProvider for managing user state
 final userNotifier = StateNotifierProvider<UserNotifier, User>((ref) {
   return UserNotifier(ref);
 });
 
 class UserNotifier extends StateNotifier<User> {
-  final Ref ref;
+  final Ref ref; // Reference to provider container
 
+  // Initialize UserNotifier with default User values
   UserNotifier(this.ref)
       : super(
             User(accountCreationDate: DateTime.now(), userDOB: DateTime.now()));
 
+  // Handles user login with email and password
   Future<String?> login(String email, String password) async {
     try {
       List<List<dynamic>> passwordResults = await dbService.readQuery(
@@ -85,7 +89,7 @@ class UserNotifier extends StateNotifier<User> {
 
           print('userid: ${state.userID}');
 
-          return null;
+          return null; // Return null to indicate successful login
         } else {
           // If passwords don't match, return an error message
           return 'Email or password is incorrect';
@@ -98,14 +102,17 @@ class UserNotifier extends StateNotifier<User> {
     }
   }
 
+  // Updates the friend count for the current user
   Future<void> updateFriendCount() async {
     int friendCount = await getFriendCount(state.userID!);
 
+    // Update state with new friend count and refresh posts
     state = state.copyWith(friendCount: friendCount);
     ref.read(postNotifier.notifier).loadFriendsWorkouts();
     ref.read(postNotifier.notifier).loadUserWorkouts();
   }
 
+  // Logs out the current user by resetting state to default values
   void logOut() {
     state = state.copyWith(
         userID: null,
@@ -120,6 +127,7 @@ class UserNotifier extends StateNotifier<User> {
         userProfilePhoto: null);
   }
 
+  // Deletes the current user account and resets state
   void deleteUserAccount() async {
     await deleteAccount(state.userID ?? 0);
     state = state.copyWith(
