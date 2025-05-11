@@ -1,3 +1,5 @@
+// Model to store the logged in user's data to be shared across the app
+// Managed by backend/providers/user_provider.dart
 class User {
   int? userID;
 

@@ -1,3 +1,5 @@
+// Posts class hold a list for the logged in user's friends' posts and a separate list for their own posts
+// Managed by Post Provider in backend/post_provider.dart
 class Posts {
   final List<Map<String, dynamic>> userWorkouts;
   final List<Map<String, dynamic>> friendsWorkouts;

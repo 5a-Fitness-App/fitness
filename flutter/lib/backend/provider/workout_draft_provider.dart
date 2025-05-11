@@ -54,14 +54,6 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     print("activity removed");
   }
 
-  int? getSets(ActivityDraft activity) {
-    return activity.sets;
-  }
-
-  int? getReps(ActivityDraft activity) {
-    return activity.reps;
-  }
-
   void setDistanceUnit(
       ActivityDraft updatedActivity, DistanceUnitsLabel distanceUnit) {
     List<ActivityDraft> updatedActivities = state.activities.map((activity) {

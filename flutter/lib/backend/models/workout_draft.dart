@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:collection';
 
+// type for Weight Units drop down menu
 typedef WeightUnits = DropdownMenuEntry<WeightUnitsLabel>;
 
+// Enumeration for selecting weight units with the label text they display
 enum WeightUnitsLabel {
   kg('kg'),
   lb('lb');
@@ -23,8 +25,10 @@ enum WeightUnitsLabel {
   );
 }
 
+// Type for Distance Units drop down menu
 typedef DistanceUnits = DropdownMenuEntry<DistanceUnitsLabel>;
 
+// Enumeration for selecting distance units with the label text they display
 enum DistanceUnitsLabel {
   mi('mi'),
   km('km');
@@ -46,38 +50,41 @@ enum DistanceUnitsLabel {
   );
 }
 
+// Class representing an activity draft with all possible metrics
+// Metrics used depend on the exercise type
 class ActivityDraft {
-  final int activityDraftID;
-  final String exerciseType;
-  final List<String> metrics;
-  final TextEditingController notesController;
+  final int activityDraftID; // Unique identifier to
+  final String
+      exerciseType; // Type of exercise (e.g. Running, Treadmill, DeadLifts)
 
-  // Strength fields
-  int? sets;
-  int? reps;
+  // The list of metrics being tracked for this activty. Dependent on exercise type that the user selects from frontend/states/log_workout_modal.dart
+  final List<String> metrics;
+
+  // Input fields
+  final TextEditingController notesController;
 
   // Rep controller
   final TextEditingController repsController;
 
-  // Set controllers
+  // Set controller
   final TextEditingController setsController;
-
-  // Time controllers
-  final TextEditingController hoursController;
-  final TextEditingController minutesController;
-  final TextEditingController secondsController;
 
   // Weight controllers
   final TextEditingController weightController;
   final TextEditingController weightUnitsController;
   WeightUnitsLabel? selectedWeightUnit;
 
+  // Time controllers
+  final TextEditingController hoursController;
+  final TextEditingController minutesController;
+  final TextEditingController secondsController;
+
   // Distance controllers
   final TextEditingController distanceController;
   final TextEditingController distanceUnitsController;
   DistanceUnitsLabel? selectedDistanceUnit;
 
-  // Other metrics
+  // Other metric controllers
   final TextEditingController speedController;
   final TextEditingController inclineController;
 
@@ -124,6 +131,7 @@ class ActivityDraft {
     );
   }
 
+  // Converts to map to insert as a JSON into the database when the workout draft is posted
   Map<String, dynamic> toMap() {
     return {
       'exercise_name': exerciseType,
@@ -150,16 +158,19 @@ class ActivityDraft {
     };
   }
 
+  // Helper method to parse a string into a double (returns null if invalid)
   double? _parseDouble(String text) {
     final value = double.tryParse(text.trim());
     return value?.isFinite == true ? value : null;
   }
 
+  // Helper method to parse a string into an integer (returns null if invalid)
   int? _parseInt(String text) {
     final value = int.tryParse(text.trim());
     return value?.isFinite == true ? value : null;
   }
 
+  // Formats time from hours, minutes, seconds controllers into HH:MM:SS format
   String _formattedTime() {
     final h = hoursController.text.trim();
     final m = minutesController.text.trim();
@@ -169,16 +180,21 @@ class ActivityDraft {
   }
 }
 
+// Class representing a workout draft containing multiple activities
 class WorkoutDraft {
-  final List<ActivityDraft> activities;
-  final TextEditingController captionController;
+  final List<ActivityDraft> activities; // List of activities in the workout
+  final TextEditingController
+      captionController; // Controller for workout caption
+
   WorkoutDraft({required this.activities, required this.captionController});
+
   WorkoutDraft copyWith({List<ActivityDraft>? activities}) {
     return WorkoutDraft(
         activities: activities ?? this.activities,
         captionController: captionController);
   }
 
+  // Converts to map to insert as a JSON into the database when the workout draft is posted
   Map<String, dynamic> toMap() {
     return {
       'workout_caption': captionController.text.trim(),
