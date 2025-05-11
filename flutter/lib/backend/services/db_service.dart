@@ -12,10 +12,12 @@ class DbService {
 
     _connection = await Connection.open(
       Endpoint(
-        host: '10.0.2.2',
-        database: 'testfitness',
-        username: 'jennydoan', //change this to your postgres username
-        password: 'Elgado29#', //change this to your postgres password
+        host:
+            '10.0.2.2', // TODO: '10.0.2.2' only works for android studio emulator, use 'localhost' for Xcode
+        database:
+            'testfitness', // TODO: change this to what you have named the database in psql
+        username: 'jennydoan', // TODO: change this to your postgres username
+        password: 'Elgado29#', // TODO: change this to your postgres password
       ),
       settings: const ConnectionSettings(sslMode: SslMode.disable),
     );
