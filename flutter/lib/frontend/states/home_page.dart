@@ -9,7 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:fitness_app/frontend/modals/show_workout_modal.dart';
+import 'package:fitness_app/frontend/modals/log_workout_modal.dart';
 
+// Widget to display the home page
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -17,15 +19,32 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
+// State for the HomePage Widget
 class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
+    // Load the workout of the user's friends when the widget is initialised
     ref.read(postNotifier.notifier).loadFriendsWorkouts();
     super.initState();
   }
 
+  // Opens a modal bottom sheet that allows the user to log a new workout
+  void openLogWorkoutModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
+      builder: (context) => const LogWorkoutPage(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Watch the post provider to get the friend's workouts data
     Posts posts = ref.watch(postNotifier);
 
     return Scaffold(
@@ -35,6 +54,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Build the streak banner at the top of the home page
             _buildStreakBanner(),
             const Divider(),
             const SizedBox(height: 10),
@@ -47,8 +67,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               )
             ]),
+
             const SizedBox(height: 12),
+
+            // Display the recent workout posts from the user's friends
             FriendsPosts(workouts: posts.friendsWorkouts),
+
             const SizedBox(height: 12),
           ],
         ),
@@ -56,7 +80,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  // streak banner with progress and buttons
+  // Build streak banner with progress and buttons
   Widget _buildStreakBanner() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -67,6 +91,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // TODO: working streak tracking to be implemented later
                 const Text(
                   '🔥 70',
                   style: TextStyle(
@@ -75,25 +100,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                     color: Colors.black87,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 const Text(
                   'Streak',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
+
                 const SizedBox(height: 20),
+
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          //  switches to the 'Log Workout'
-                          context
-                              .findAncestorStateOfType<IndexState>()
-                              ?.setState(() {
-                            context
-                                .findAncestorStateOfType<IndexState>()
-                                ?.selectedPage = 1;
-                          });
+                          openLogWorkoutModal();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
@@ -115,11 +137,16 @@ class _HomePageState extends ConsumerState<HomePage> {
               ],
             ),
           ),
+
           const SizedBox(width: 16),
+
+          // Circular progress indicator for daily achievements.
+
           CircularPercentIndicator(
             radius: 70.0,
             lineWidth: 15.0,
-            percent: 4 / 5,
+            percent:
+                4 / 5, // TODO: hardcoded, to be implemented with acheivements
             center: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -145,11 +172,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
+// Widget to display the workout posts of the user's friends
 class FriendsPosts extends ConsumerWidget {
+  // List of workout data from friends to display
   final List<Map<String, dynamic>> workouts;
 
   const FriendsPosts({super.key, required this.workouts});
 
+  // Opens modal bottom sheet to display the details of a specific workout
   void openWorkoutModal(BuildContext context, int workoutID) {
     showModalBottomSheet(
       context: context,
@@ -163,6 +193,7 @@ class FriendsPosts extends ConsumerWidget {
     );
   }
 
+  // Opens modal bottom sheet to display the profile of a specific user
   void openProfileModal(BuildContext context, int userID) {
     showModalBottomSheet(
       context: context,
@@ -181,7 +212,10 @@ class FriendsPosts extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Display a message if the user's frineds haven't posted any workouts
         if (workouts.isEmpty) const Text("You're friends haven't posted"),
+
+        // Iterate through the list of friends' workouts and display each one
         for (Map<String, dynamic> workout in workouts) ...[
           Container(
               padding: const EdgeInsets.only(

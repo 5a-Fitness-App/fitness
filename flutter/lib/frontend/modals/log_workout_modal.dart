@@ -110,6 +110,7 @@ enum ExerciseTypeLabel {
   );
 }
 
+// Main page for logging workouts
 class LogWorkoutPage extends ConsumerStatefulWidget {
   const LogWorkoutPage({super.key});
 
@@ -117,6 +118,7 @@ class LogWorkoutPage extends ConsumerStatefulWidget {
   LogWorkoutPageState createState() => LogWorkoutPageState();
 }
 
+// State class for LogWorkoutPage
 class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   final TextEditingController activityController = TextEditingController();
   ExerciseTypeLabel? selectedExercise;
@@ -130,12 +132,13 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   @override
   void initState() {
     super.initState();
-
+    // Set default selected exercise
     setState(() {
       selectedExercise = ExerciseTypeLabel.running;
     });
   }
 
+  // Function to post the workout
   void postWorkout() {
     ref.read(workoutDraftNotifier.notifier).post();
     Navigator.pop(context);
@@ -143,12 +146,14 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get current workout draft state
     final workoutDraft = ref.watch(workoutDraftNotifier);
     final activities = workoutDraft.activities;
     final workoutKey = GlobalKey<FormState>();
 
     return GestureDetector(
         onTap: () {
+          // Dismiss keyboard when tapping outside
           FocusScope.of(context).unfocus();
         },
         child: Container(
@@ -159,6 +164,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
             child: Form(
                 key: workoutKey,
                 child: Column(children: [
+                  // Header with cancel and post buttons
                   Container(
                     padding: const EdgeInsets.only(
                         top: 20, bottom: 10, left: 10, right: 15),
@@ -166,6 +172,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                       direction: Axis.horizontal,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Cancel button
                         TextButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -176,6 +183,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                               style:
                                   TextStyle(color: Colors.black, fontSize: 16),
                             )),
+                        // Post button
                         ElevatedButton(
                             onPressed: postWorkout,
                             style: ElevatedButton.styleFrom(
@@ -191,6 +199,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                       ],
                     ),
                   ),
+                  // Caption input field
                   Container(
                       padding: const EdgeInsets.all(15),
                       child: Column(
@@ -210,15 +219,18 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                             ),
                           ])),
                   const Divider(),
+                  // List of activities
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
+                          // Placeholder when no activities added
                           if (activities.isEmpty)
                             const Text(
                               'Add an activity',
                               style: TextStyle(color: Colors.grey),
                             ),
+                          // Display each activity
                           for (ActivityDraft activity in activities)
                             ActivityWidget(
                               activity: activity,
@@ -227,6 +239,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                       ),
                     ),
                   ),
+                  // Bottom section with add activity controls
                   Container(
                     padding: const EdgeInsets.only(bottom: 30, top: 10),
                     decoration: const BoxDecoration(
@@ -241,6 +254,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Add activity button
                         ElevatedButton.icon(
                             onPressed: () {
                               ref
@@ -261,6 +275,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold))),
+                        // Exercise type dropdown
                         DropdownMenu<ExerciseTypeLabel>(
                             enableFilter: false,
                             enableSearch: false,
@@ -282,7 +297,6 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                             onSelected: (ExerciseTypeLabel? activity) {
                               setState(() {
                                 selectedExercise = activity;
-                                print(activityController.text);
                               });
                             }),
                       ],
@@ -292,6 +306,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
   }
 }
 
+// Widget for displaying and editing a single activity
 class ActivityWidget extends ConsumerStatefulWidget {
   final ActivityDraft activity;
 
@@ -301,6 +316,7 @@ class ActivityWidget extends ConsumerStatefulWidget {
   ActivityWidgetState createState() => ActivityWidgetState();
 }
 
+// State class for ActivityWidget
 class ActivityWidgetState extends ConsumerState<ActivityWidget> {
   ActivityDraft? activity;
   final _formKey = GlobalKey<FormState>();
@@ -312,6 +328,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
     selectedWeightUnit = WeightUnitsLabel.kg;
   }
 
+  // Helper method to build time input fields
   Widget _buildTimeField({
     required TextEditingController controller,
     required String label,
@@ -334,7 +351,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
         final num = int.tryParse(value);
         if (num == null || num < 0) return 'Invalid';
 
-        // Additional validation based on field type
+        // Additional validation for minutes/seconds
         if (label == 'MM' || label == 'SS') {
           if (num > 59) return 'Max 59';
         }
@@ -343,6 +360,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
     );
   }
 
+  // Build time input fields (hours, minutes, seconds)
   Widget _buildTimeInputs() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,6 +369,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
         const SizedBox(height: 8),
         Row(
           children: [
+            // Hours field
             Expanded(
               child: _buildTimeField(
                 controller: widget.activity.hoursController,
@@ -358,6 +377,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
               ),
             ),
             const SizedBox(width: 8),
+            // Minutes field
             Expanded(
               child: _buildTimeField(
                 controller: widget.activity.minutesController,
@@ -365,6 +385,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
               ),
             ),
             const SizedBox(width: 8),
+            // Seconds field
             Expanded(
               child: _buildTimeField(
                 controller: widget.activity.secondsController,
@@ -383,6 +404,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
         key: _formKey,
         child: Column(children: [
           const SizedBox(height: 20),
+          // Activity container
           Container(
             width: MediaQuery.of(context).size.width - 20,
             padding:
@@ -398,16 +420,18 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
+                // Exercise type name
                 Text(widget.activity.exerciseType,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold)),
+
+                // Reps field (if applicable)
                 if (widget.activity.metrics.contains('reps'))
                   TextFormField(
                     controller: widget.activity.repsController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter
-                          .digitsOnly, // Only allow whole numbers
+                      FilteringTextInputFormatter.digitsOnly,
                     ],
                     decoration: InputDecoration(
                       labelText: 'Reps',
@@ -422,13 +446,14 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                       return null;
                     },
                   ),
+
+                // Sets field (if applicable)
                 if (widget.activity.metrics.contains('sets'))
                   TextFormField(
                     controller: widget.activity.setsController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter
-                          .digitsOnly, // Only allow whole numbers
+                      FilteringTextInputFormatter.digitsOnly,
                     ],
                     decoration: InputDecoration(
                       labelText: 'Sets',
@@ -443,8 +468,12 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                       return null;
                     },
                   ),
+
+                // Time inputs (if applicable)
                 if (widget.activity.metrics.contains('time'))
                   _buildTimeInputs(),
+
+                // Weight input (if applicable)
                 if (widget.activity.metrics.contains('weight'))
                   SizedBox(
                       height: 100,
@@ -453,16 +482,17 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 10,
                         children: [
+                          // Weight value field
                           Expanded(
                             child: TextFormField(
                               controller: widget.activity.weightController,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                      decimal: true), // Numeric keyboard
+                                      decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                     RegExp(r'^\d*\.?\d*$')),
-                              ], // Allow only numbers and a decimal point
+                              ],
                               decoration: const InputDecoration(
                                 hintText: 'Enter your weight',
                                 labelText: 'Weight',
@@ -489,6 +519,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               },
                             ),
                           ),
+                          // Weight unit dropdown
                           DropdownMenu<WeightUnitsLabel>(
                               enableFilter: false,
                               enableSearch: false,
@@ -516,6 +547,8 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               })
                         ],
                       )),
+
+                // Distance input (if applicable)
                 if (widget.activity.metrics.contains('distance'))
                   SizedBox(
                       height: 100,
@@ -524,16 +557,17 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 10,
                         children: [
+                          // Distance value field
                           Expanded(
                             child: TextFormField(
                               controller: widget.activity.distanceController,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
-                                      decimal: true), // Numeric keyboard
+                                      decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                     RegExp(r'^\d*\.?\d*$')),
-                              ], // Allow only numbers and a decimal point
+                              ],
                               decoration: const InputDecoration(
                                 hintText: 'Enter Distance',
                                 labelText: 'Distance',
@@ -560,6 +594,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               },
                             ),
                           ),
+                          // Distance unit dropdown
                           DropdownMenu<DistanceUnitsLabel>(
                               enableFilter: false,
                               enableSearch: false,
@@ -587,17 +622,19 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               })
                         ],
                       )),
+
+                // Speed input (if applicable)
                 if (widget.activity.metrics.contains('speed'))
                   SizedBox(
                     height: 100,
                     child: TextFormField(
                       controller: widget.activity.speedController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true), // Numeric keyboard
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^\d*\.?\d*$')),
-                      ], // Allow only numbers and a decimal point
+                      ],
                       decoration: const InputDecoration(
                         hintText: 'Enter speed',
                         labelText: 'Speed',
@@ -622,17 +659,19 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                       },
                     ),
                   ),
+
+                // Incline input (if applicable)
                 if (widget.activity.metrics.contains('incline'))
                   SizedBox(
                     height: 100,
                     child: TextFormField(
                       controller: widget.activity.inclineController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true), // Numeric keyboard
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^\d*\.?\d*$')),
-                      ], // Allow only numbers and a decimal point
+                      ],
                       decoration: const InputDecoration(
                         hintText: 'Enter incline',
                         labelText: 'Incline',
@@ -657,6 +696,8 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                       },
                     ),
                   ),
+
+                // Notes field
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 40,
                   child: TextFormField(
@@ -672,6 +713,8 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                     ),
                   ),
                 ),
+
+                // Delete button
                 ElevatedButton.icon(
                     onPressed: () {
                       ref
