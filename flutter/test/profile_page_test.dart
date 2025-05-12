@@ -30,10 +30,13 @@ class MockPostNotifierPopulated extends PostNotifier {
     state = Posts(userWorkouts: [
       {
         'id': 1,
-        'workoutName': 'Test Workout',
+        'workout_caption': 'Test Workout',
+        'workout_date_time': DateTime.now(),
+        'user_profile_photo': 'fish',
         'workout_ID': 1,
-        'hasLiked': false
-      }
+        'hasLiked': false,
+        'workout_public': true
+      },
     ], friendsWorkouts: []);
   }
 }
@@ -85,7 +88,8 @@ void main() {
 
     // Verify the test workout is visible
     expect(find.text('Test Workout'), findsOneWidget);
-    expect(find.textContaining('❤️'), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+    expect(find.byIcon(Icons.chat_bubble_outline_rounded), findsWidgets);
 
     // Verify view workout buttons is visible
     expect(find.text('View Workout'), findsOneWidget);

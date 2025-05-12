@@ -151,10 +151,13 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
     final activities = workoutDraft.activities;
     final workoutKey = GlobalKey<FormState>();
 
+    //  a FocusNode for controlling the keyboard focus
+    final focusNode = FocusNode();
+
     return GestureDetector(
         onTap: () {
           // Dismiss keyboard when tapping outside
-          FocusScope.of(context).unfocus();
+          FocusScope.of(context).requestFocus(FocusNode());
         },
         child: Container(
             height: double.infinity,
@@ -206,8 +209,9 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextFormField(
-                              autofocus: true,
+                              autofocus: false,
                               autocorrect: false,
+                              focusNode: focusNode,
                               controller: workoutDraft.captionController,
                               keyboardType: TextInputType.multiline,
                               minLines: 5,
@@ -249,8 +253,7 @@ class LogWorkoutPageState extends ConsumerState<LogWorkoutPage> {
                             right: BorderSide.none,
                             top: BorderSide(
                                 color: Color.fromARGB(255, 230, 230, 230)))),
-                    child: Flex(
-                      direction: Axis.horizontal,
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -320,13 +323,6 @@ class ActivityWidget extends ConsumerStatefulWidget {
 class ActivityWidgetState extends ConsumerState<ActivityWidget> {
   ActivityDraft? activity;
   final _formKey = GlobalKey<FormState>();
-  WeightUnitsLabel? selectedWeightUnit;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedWeightUnit = WeightUnitsLabel.kg;
-  }
 
   // Helper method to build time input fields
   Widget _buildTimeField({
@@ -400,6 +396,7 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(workoutDraftNotifier);
     return Form(
         key: _formKey,
         child: Column(children: [
@@ -524,7 +521,8 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               enableFilter: false,
                               enableSearch: false,
                               width: 125,
-                              initialSelection: selectedWeightUnit,
+                              initialSelection:
+                                  widget.activity.selectedWeightUnit,
                               controller: widget.activity.weightUnitsController,
                               dropdownMenuEntries: WeightUnitsLabel.entries,
                               helperText: 'Select weight unit',
@@ -539,11 +537,10 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                                 contentPadding: const EdgeInsets.all(10),
                               ),
                               onSelected: (WeightUnitsLabel? weightUnit) {
-                                selectedWeightUnit = weightUnit;
                                 ref
                                     .read(workoutDraftNotifier.notifier)
-                                    .setWeightUnit(widget.activity,
-                                        weightUnit ?? WeightUnitsLabel.kg);
+                                    .setWeightUnit(
+                                        widget.activity, weightUnit!);
                               })
                         ],
                       )),
@@ -599,11 +596,12 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               enableFilter: false,
                               enableSearch: false,
                               width: 125,
-                              initialSelection: DistanceUnitsLabel.mi,
+                              initialSelection:
+                                  widget.activity.selectedDistanceUnit,
                               controller:
                                   widget.activity.distanceUnitsController,
                               dropdownMenuEntries: DistanceUnitsLabel.entries,
-                              helperText: 'Select weight unit',
+                              helperText: 'Select distance unit',
                               inputDecorationTheme: InputDecorationTheme(
                                 filled: true,
                                 fillColor:
@@ -617,8 +615,8 @@ class ActivityWidgetState extends ConsumerState<ActivityWidget> {
                               onSelected: (DistanceUnitsLabel? distanceUnits) {
                                 ref
                                     .read(workoutDraftNotifier.notifier)
-                                    .setDistanceUnit(widget.activity,
-                                        distanceUnits ?? DistanceUnitsLabel.mi);
+                                    .setDistanceUnit(
+                                        widget.activity, distanceUnits!);
                               })
                         ],
                       )),

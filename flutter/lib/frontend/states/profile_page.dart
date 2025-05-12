@@ -95,11 +95,12 @@ class ProfilePageState extends ConsumerState<ProfilePage> {
                           ),
 
                           // Friend count
-                          InkWell(
-                              onTap: () {
-                                openFriendModal(context, user.userID ?? 0);
-                              },
-                              child: Text('${user.friendCount} friends'))
+                          Material(
+                              child: InkWell(
+                                  onTap: () {
+                                    openFriendModal(context, user.userID ?? 0);
+                                  },
+                                  child: Text('${user.friendCount} friends')))
                         ]))
                   ]),
 
@@ -295,7 +296,8 @@ class MyPosts extends ConsumerWidget {
                                 Row(spacing: 5, children: [
                                   // Conditional rendering of liked/unliked icon.
                                   workout['hasLiked']
-                                      ? InkWell(
+                                      ? Material(
+                                          child: InkWell(
                                           onTap: () {
                                             ref
                                                 .read(postNotifier.notifier)
@@ -304,16 +306,17 @@ class MyPosts extends ConsumerWidget {
                                           },
                                           child: const Icon(
                                               Icons.favorite_rounded),
-                                        )
-                                      : InkWell(
-                                          onTap: () {
-                                            ref
-                                                .read(postNotifier.notifier)
-                                                .likeWorkoutPost(
-                                                    workout['workout_ID']);
-                                          },
-                                          child: const Icon(
-                                              Icons.favorite_border_rounded)),
+                                        ))
+                                      : Material(
+                                          child: InkWell(
+                                              onTap: () {
+                                                ref
+                                                    .read(postNotifier.notifier)
+                                                    .likeWorkoutPost(
+                                                        workout['workout_ID']);
+                                              },
+                                              child: const Icon(Icons
+                                                  .favorite_border_rounded))),
 
                                   // Display like count
                                   Text(
@@ -324,13 +327,14 @@ class MyPosts extends ConsumerWidget {
 
                                   const SizedBox(width: 5),
 
-                                  InkWell(
-                                      onTap: () {
-                                        openWorkoutModal(
-                                            context, workout['workout_ID']);
-                                      },
-                                      child: const Icon(
-                                          Icons.chat_bubble_outline_rounded)),
+                                  Material(
+                                      child: InkWell(
+                                          onTap: () {
+                                            openWorkoutModal(
+                                                context, workout['workout_ID']);
+                                          },
+                                          child: const Icon(Icons
+                                              .chat_bubble_outline_rounded))),
 
                                   Text(
                                     workout['total_comments'].toString(),

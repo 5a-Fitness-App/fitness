@@ -21,7 +21,9 @@ class MockPostNotifierPopulated extends PostNotifier {
       friendsWorkouts: [
         {
           'id': 1,
-          'workoutName': 'Test Workout',
+          'workout_caption': 'Test Workout',
+          'workout_date_time': DateTime.now(),
+          'user_profile_photo': 'fish',
           'workout_ID': 1,
           'hasLiked': false
         },

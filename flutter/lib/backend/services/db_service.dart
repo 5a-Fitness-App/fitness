@@ -21,7 +21,7 @@ class DbService {
     _connection = await Connection.open(
       Endpoint(
         host:
-            '10.0.2.2', // TODO: '10.0.2.2' only works for android studio emulator, use 'localhost' for Xcode
+            '192.168.0.29', // TODO: '10.0.2.2' only works for android studio emulator, use 'localhost' for Xcode
         database:
             'testfitness', // TODO: change this to what you have named the database in psql
         username: 'jennydoan', // TODO: change this to your postgres username

@@ -44,8 +44,10 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
         secondsController: TextEditingController(),
         weightController: TextEditingController(),
         weightUnitsController: TextEditingController(),
+        selectedWeightUnit: WeightUnitsLabel.kg,
         distanceController: TextEditingController(),
         distanceUnitsController: TextEditingController(),
+        selectedDistanceUnit: DistanceUnitsLabel.km,
         speedController: TextEditingController(),
         inclineController: TextEditingController());
     activities.add(activity);
@@ -92,7 +94,7 @@ class WorkoutDraftNotifier extends StateNotifier<WorkoutDraft> {
     }).toList();
 
     state = state.copyWith(activities: updatedActivities);
-    print("distance updated");
+    print("weight updated");
   }
 
   Future<String> post(
