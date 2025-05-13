@@ -2,7 +2,6 @@ import 'package:fitness_app/frontend/modals/show_profile_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:fitness_app/backend/provider/post_provider.dart';
-import 'package:fitness_app/frontend/states/index.dart';
 import 'package:fitness_app/backend/models/post.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

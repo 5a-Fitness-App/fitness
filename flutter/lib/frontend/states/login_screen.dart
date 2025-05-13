@@ -36,7 +36,11 @@ enum WeightUnitsLabel {
 
 // Login screen widget with ConsumerStatefulWidget for state management
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  final Future<String?> Function(
+          String, String, DateTime, double, String, String, String)?
+      registerOverride;
+
+  const LoginScreen({super.key, this.registerOverride});
 
   @override
   LoginScreenState createState() => LoginScreenState();
@@ -67,8 +71,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
 
   // error messages for signing up
   String? usernameError;
-  String? signUpEmailError; // TODO: implement
-  String? signUpPasswordError; // TODO: implement
+  String? signUpEmailError;
+  String? signUpPasswordError;
   String? birthdayError;
 
   // UI State variables
@@ -200,6 +204,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
 
   void registerButton() async {
     try {
+      final registerFn = widget.registerOverride ?? register;
+
       setState(() {
         signUpEmailError = null; // Reset errors before validating
         signUpPasswordError = null;
@@ -224,7 +230,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           return;
         }
 
-        String? errorMessage = await register(
+        String? errorMessage = await registerFn(
             userNameController.text.trim(),
             selectedProfileImage,
             selectedDoB!,
@@ -741,6 +747,9 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
                 registrationMode ? buildSignUpForm() : buildSignInForm(),
                 ElevatedButton(
+                  key: registrationMode
+                      ? const Key('signUpButton')
+                      : const Key('signInButton'),
                   onPressed: registrationMode ? registerButton : login,
                   style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 40)),

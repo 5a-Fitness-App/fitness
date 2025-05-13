@@ -302,9 +302,8 @@ class FriendRequestWidget extends ConsumerWidget {
               children: [
                 // Decline button
                 ElevatedButton.icon(
-                    onPressed: () async {
-                      await declineFriendRequest(
-                          userID, friendRequest['user_ID']);
+                    onPressed: () {
+                      declineFriendRequest(userID, friendRequest['user_ID']);
                       onResponse();
                     },
                     style: ElevatedButton.styleFrom(
@@ -313,9 +312,8 @@ class FriendRequestWidget extends ConsumerWidget {
                     label: const Icon(Icons.close_rounded)),
                 // Accept button
                 ElevatedButton.icon(
-                    onPressed: () async {
-                      await acceptFriendRequest(
-                          userID, friendRequest['user_ID']);
+                    onPressed: () {
+                      acceptFriendRequest(userID, friendRequest['user_ID']);
                       ref.read(userNotifier.notifier).updateFriendCount();
 
                       onResponse();

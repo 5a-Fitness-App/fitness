@@ -3,16 +3,49 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/frontend/states/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fitness_app/backend/services/db_service.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:fitness_app/backend/models/user.dart';
+import 'package:fitness_app/backend/provider/user_provider.dart';
+import 'mock_api.dart' as mock_api;
 
-class MockDbService extends Mock implements DbService {}
+// MOCK USER NOTIFIER TO LOGIN
+class MockUserNotifier extends UserNotifier {
+  MockUserNotifier(super.ref) {
+    state = User(userDOB: DateTime.now(), accountCreationDate: DateTime.now());
+  }
+
+  @override
+  Future<String?> login(String email, String password) async {
+    try {
+      if (password.isEmpty) {
+        return 'Email or password is incorrect';
+      } else {
+        String userPassword = 'hashedpassword1';
+
+        if (password == userPassword) {
+          print('userid: ${state.userID}');
+          return null; // Return null to indicate successful login
+        } else {
+          // If passwords don't match, return an error message
+          return 'Email or password is incorrect';
+        }
+      }
+    } catch (e) {
+      // Handle database errors or unexpected errors
+      print('Error during login: $e');
+      return 'An unexpected error occurred.';
+    }
+  }
+}
 
 // Testing for the Login Screen
 void main() async {
   // Provider scope for riverpod
   Widget createWidgetUnderTest() {
     return const ProviderScope(
-      child: MaterialApp(home: LoginScreen()),
+      child: MaterialApp(
+          home: LoginScreen(
+        registerOverride: mock_api.mockRegister,
+      )),
     );
   }
 
@@ -105,7 +138,15 @@ void main() async {
   // Verify that the user can sign in successfully
   testWidgets('User can sign in and be redirected to home page',
       (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+          // postNotifier.overrideWith((ref) => MockPostNotifierEmpty(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
 
     // Enter valid email and password
     await tester.enterText(
@@ -189,17 +230,27 @@ void main() async {
         'invalidPassword');
 
     // Press Sign Up button
-    final signUpButton = find.widgetWithText(ElevatedButton, 'Sign Up');
-    await tester.tap(signUpButton);
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(); // Wait for animations/scrolls
+    await tester.ensureVisible(find.byKey(const Key('signUpButton')));
+    await tester.tap(find.byKey(const Key('signUpButton')));
+
+    // Wait for form submission
+    await tester.pump();
 
     // Verify if error message appears for mismatched passwords
-    expect(find.text("Passwords don't match"), findsOneWidget);
+    expect(find.text("Passwords do not match"), findsOneWidget);
   });
 
   // Verify user can sign up
   testWidgets('User is able to Sign Up', (WidgetTester tester) async {
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userNotifier.overrideWith((ref) => MockUserNotifier(ref)),
+        ],
+        child: createWidgetUnderTest(),
+      ),
+    );
 
     // Switch to Sign up screen
     await tester.tap(find.text('Sign up'));
@@ -209,7 +260,7 @@ void main() async {
     await tester.enterText(
         find.widgetWithText(TextFormField, ('Username')), 'testUsername');
     await tester.enterText(
-        find.widgetWithText(TextFormField, ('Email')), 'testEmail');
+        find.widgetWithText(TextFormField, ('Email')), 'test@example.com');
     await tester.enterText(
         find.widgetWithText(TextFormField, ('Password')), 'testPassword');
     await tester.enterText(
@@ -217,6 +268,8 @@ void main() async {
         'testPassword');
 
     // Enter valid inforamtion into Birthday
+    await tester.ensureVisible(find.text("MM/DD/YYYY"));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('MM/DD/YYYY'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
@@ -227,10 +280,23 @@ void main() async {
         find.widgetWithText(TextFormField, ('Weight')), '70');
 
     // Tap Sign Up button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Sign Up'));
-    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('signUpButton')));
+    await tester.tap(find.byKey(const Key('signUpButton')));
 
-    // Expect to find Home title
-    expect(find.text('Home'), findsOneWidget);
+    // 6. Wait for animations and API calls
+    await tester.pump(); // Process the tap
+    await tester.pump(const Duration(seconds: 3)); // Allow SnackBar to appear
+
+    // 7. Verify success SnackBar
+    final snackBarFinder = find.byType(SnackBar);
+    expect(snackBarFinder, findsOneWidget);
+
+    expect(
+      find.descendant(
+        of: snackBarFinder,
+        matching: find.text('Account created for test@example.com'),
+      ),
+      findsOneWidget,
+    );
   });
 }

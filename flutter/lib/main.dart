@@ -9,7 +9,8 @@ import 'package:fitness_app/backend/services/db_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dbService.init();
+  await dbService.init(
+      'localhost'); // TODO: '10.0.2.2' only works for android studio emulator, use 'localhost' for Xcode
 
   runApp(const ProviderScope(child: MyApp()));
 }

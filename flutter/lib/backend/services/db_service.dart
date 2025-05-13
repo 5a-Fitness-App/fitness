@@ -15,13 +15,12 @@ class DbService {
   bool _isInitialized = false;
 
   // Initializes the database connection
-  Future<void> init() async {
+  Future<void> init(String host) async {
     if (_isInitialized) return; // Skip if already initialized
 
     _connection = await Connection.open(
       Endpoint(
-        host:
-            '192.168.0.29', // TODO: '10.0.2.2' only works for android studio emulator, use 'localhost' for Xcode
+        host: host, // TODO: change the host id in main.dart
         database:
             'testfitness', // TODO: change this to what you have named the database in psql
         username: 'jennydoan', // TODO: change this to your postgres username

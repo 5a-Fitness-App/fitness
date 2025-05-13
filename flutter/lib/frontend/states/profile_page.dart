@@ -1,5 +1,4 @@
 import 'package:fitness_app/frontend/modals/show_friend_modal.dart';
-import 'package:fitness_app/backend/api.dart';
 import 'package:fitness_app/backend/provider/post_provider.dart';
 import 'package:fitness_app/backend/provider/user_provider.dart';
 import 'package:flutter/material.dart';
