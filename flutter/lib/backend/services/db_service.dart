@@ -9,16 +9,16 @@ class DbService {
   static final DbService _instance = DbService._internal();
 
   // Database connection object
-  late final Connection _connection;
+  late final Connection connection;
 
   // Flag to track initialization status
-  bool _isInitialized = false;
+  bool isInitialized = false;
 
   // Initializes the database connection
   Future<void> init(String host) async {
-    if (_isInitialized) return; // Skip if already initialized
+    if (isInitialized) return; // Skip if already initialized
 
-    _connection = await Connection.open(
+    connection = await Connection.open(
       Endpoint(
         host: host, // TODO: change the host id in main.dart
         database:
@@ -28,14 +28,14 @@ class DbService {
       ),
       settings: const ConnectionSettings(sslMode: SslMode.disable),
     );
-    _isInitialized = true;
+    isInitialized = true;
   }
 
   factory DbService() => _instance;
 
   // INSERT: Executes an insert query with parameters
   Future<void> insertQuery(String sql, Map<String, dynamic> values) async {
-    await _connection.execute(
+    await connection.execute(
       Sql.named(sql),
       parameters: values,
     );
@@ -43,7 +43,7 @@ class DbService {
 
   // INSERT AND RETURN ID: Executes insert and returns the generated ID
   Future<int> insertAndReturnId(String sql, Map<String, dynamic> values) async {
-    final result = await _connection.execute(
+    final result = await connection.execute(
       Sql.named(sql),
       parameters: values,
     );
@@ -55,7 +55,7 @@ class DbService {
   // READ: Executes a select query and returns results
   Future<List<ResultRow>> readQuery(String sql,
       [Map<String, dynamic>? values]) async {
-    final result = await _connection.execute(
+    final result = await connection.execute(
       Sql.named(sql),
       parameters: values ?? {},
     );
@@ -65,7 +65,7 @@ class DbService {
 
   // UPDATE: Executes an update query and returns number of affected rows
   Future<int> updateQuery(String sql, Map<String, dynamic> values) async {
-    final affected = await _connection.execute(
+    final affected = await connection.execute(
       Sql.named(sql),
       parameters: values,
     );
@@ -74,7 +74,7 @@ class DbService {
 
   // DELETE: Executes a delete query and returns number of affected rows
   Future<int> deleteQuery(String sql, Map<String, dynamic> values) async {
-    final affected = await _connection.execute(
+    final affected = await connection.execute(
       Sql.named(sql),
       parameters: values,
     );
