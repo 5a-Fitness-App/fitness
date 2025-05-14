@@ -145,13 +145,12 @@ Future<Map<String, dynamic>> getWorkoutDetails(int workoutID) async {
 
     return queryRows[0];
   } catch (e) {
-    print('error: $e');
-    return {};
+    return {'error': e};
   }
 }
 
 // Checks if a user has liked a specific workout
-Future<bool> hasUserLikedWorkout(int userID, int workoutID) async {
+Future<bool?> hasUserLikedWorkout(int userID, int workoutID) async {
   try {
     // Query to check for existing like
     final like = await dbService.readQuery('''
@@ -162,7 +161,7 @@ Future<bool> hasUserLikedWorkout(int userID, int workoutID) async {
     return like.isNotEmpty;
   } catch (e) {
     print('error');
-    return false;
+    return null;
   }
 }
 
@@ -503,7 +502,7 @@ Future<List<Map<String, dynamic>>> getFriendRequests(int userID) async {
 }
 
 // Accepts a friend request and establishes mutual friendship
-Future<void> acceptFriendRequest(int receiverID, int senderID) async {
+Future<String?> acceptFriendRequest(int receiverID, int senderID) async {
   try {
     // Create mutual friend records
     await dbService.insertQuery('''
@@ -514,37 +513,46 @@ Future<void> acceptFriendRequest(int receiverID, int senderID) async {
     await dbService.deleteQuery('''
         DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
       ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
+
+    return null;
   } catch (e) {
     print(e);
+    return 'error: $e';
   }
 }
 
 // Declines a friend request
-Future<void> declineFriendRequest(int receiverID, int senderID) async {
+Future<String?> declineFriendRequest(int receiverID, int senderID) async {
   try {
     // Remove the friend request
     await dbService.deleteQuery('''
         DELETE FROM friend_requests WHERE receiver_ID = @receiver_ID AND sender_ID = @sender_ID; 
       ''', {'receiver_ID': receiverID, 'sender_ID': senderID});
+
+    return null;
   } catch (e) {
     print(e);
+    return 'error: $e';
   }
 }
 
 // Deletes a friend relationship
-Future<void> deleteFriend(int userID, int friendID) async {
+Future<String?> deleteFriend(int userID, int friendID) async {
   try {
     // Remove both directions of friendship
     await dbService.deleteQuery('''
         DELETE FROM friends WHERE (user_ID = @user_ID AND friend_ID = @friend_ID) OR (user_ID = @friend_ID AND friend_ID = @user_ID); 
       ''', {'user_ID': userID, 'friend_ID': friendID});
+
+    return null;
   } catch (e) {
     print(e);
+    return 'error: $e';
   }
 }
 
 // Toggles a workout's public/private status
-Future<void> toggleWorkoutPublic(int workoutID) async {
+Future<String?> toggleWorkoutPublic(int workoutID) async {
   try {
     // Get current public status
     List<List<dynamic>> results = await dbService.readQuery('''
@@ -568,19 +576,23 @@ Future<void> toggleWorkoutPublic(int workoutID) async {
         UPDATE workouts SET workout_public = @workout_public WHERE workout_id = @workout_id
       ''', {'workout_public': !workoutPublic, 'workout_id': workoutID});
 
-    print('workout public stats changed to  : ${!workoutPublic}');
+    return ('workout public stats changed to  : ${!workoutPublic}');
   } catch (e) {
     print(e);
+    return 'error; $e';
   }
 }
 
 // Deletes a user account
-Future<void> deleteAccount(int userID) async {
+Future<String?> deleteAccount(int userID) async {
   try {
     await dbService.deleteQuery('''
             DELETE FROM users CASCADE WHERE user_ID = @user_ID;
         ''', {'user_ID': userID});
+
+    return null;
   } catch (e) {
     print('error deleting account: $e');
+    return 'error: $e';
   }
 }
