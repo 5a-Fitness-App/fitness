@@ -576,7 +576,7 @@ Future<String?> toggleWorkoutPublic(int workoutID) async {
         UPDATE workouts SET workout_public = @workout_public WHERE workout_id = @workout_id
       ''', {'workout_public': !workoutPublic, 'workout_id': workoutID});
 
-    return ('workout public stats changed to  : ${!workoutPublic}');
+    return null;
   } catch (e) {
     print(e);
     return 'error; $e';

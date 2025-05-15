@@ -84,11 +84,6 @@ void main() {
 
   test('Successful insertQuery() method', () async {
     try {
-      dbService = DbService();
-
-      // Initialise the connection
-      await dbService.init(testHost);
-
       await dbService.connection.execute('''
       CREATE TABLE IF NOT EXISTS test_table (
         id SERIAL PRIMARY KEY,
@@ -105,6 +100,7 @@ void main() {
           .execute('''SELECT value FROM test_table WHERE name = 'test';''');
 
       expect(result.first[0], 123);
+
       print('✅ Insert query executed successfully');
     } catch (e) {
       fail('Failed to execute insertQuery method(): $e');
@@ -113,11 +109,6 @@ void main() {
 
   test('Successful insertAndReturnId() method', () async {
     try {
-      dbService = DbService();
-
-      // Initialise the connection
-      await dbService.init(testHost);
-
       await dbService.connection.execute('''
       CREATE TABLE IF NOT EXISTS test_table (
         id SERIAL PRIMARY KEY,
@@ -159,13 +150,13 @@ void main() {
       );
 
       // Execute deletion
-      final deletedCount = await dbService.deleteQuery(
+      final affectedRows = await dbService.deleteQuery(
         'DELETE FROM test_table WHERE name = @name RETURNING *',
         {'name': 'test'},
       );
 
       // Verify that one row was deleted
-      expect(deletedCount, 1);
+      expect(affectedRows, 1);
 
       print('✅ Delete query executed successfully');
     } catch (e) {

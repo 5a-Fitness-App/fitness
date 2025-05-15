@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fitness_app/backend/api.dart';
 import 'package:fitness_app/backend/services/db_service.dart';
@@ -21,7 +18,9 @@ void main() {
     }
   });
 
-  test('Successful getFriendsWorkout function with valid userID', () async {
+  test(
+      'Successful getFriendsWorkout function with valid userID and the user has at least one friend',
+      () async {
     try {
       final result = await getFriendsWorkouts(1);
 
@@ -257,7 +256,7 @@ void main() {
 
   test('Unsuccesful likeWorkout() function with invalid userID', () async {
     try {
-      await unlikeWorkout(-1, 5);
+      await likeWorkout(-1, 5);
 
       final isLiked = await hasUserLikedWorkout(-1, 5);
 
@@ -271,7 +270,7 @@ void main() {
 
   test('Unsuccesful likeWorkout() function with invalid workoutID', () async {
     try {
-      await unlikeWorkout(1, -5);
+      await likeWorkout(1, -5);
 
       final isLiked = await hasUserLikedWorkout(1, -5);
 
@@ -411,14 +410,8 @@ void main() {
 
   test('Successful register() function with valid inputs', () async {
     try {
-      final result = await register(
-          'testing',
-          'fish',
-          DateTime.now(),
-          90,
-          'kg',
-          'testing@example.com', //already registered email,
-          'pass');
+      final result = await register('testing', 'fish', DateTime.now(), 90, 'kg',
+          'testing@example.com', 'pass');
 
       expect(result, null);
 
@@ -435,7 +428,7 @@ void main() {
     }
   });
 
-  test('Successful register() function with invalid email', () async {
+  test('Unsuccessful register() function with invalid email', () async {
     try {
       final result = await register(
           'testing',
@@ -454,7 +447,7 @@ void main() {
     }
   });
 
-  test('Successful register() function with invalid username', () async {
+  test('Unsuccessful register() function with invalid username', () async {
     try {
       final result = await register(
           'aqua_fish', // already registered username
@@ -484,7 +477,7 @@ void main() {
     }
   });
 
-  test('Successful register() function with invalid weight', () async {
+  test('Unsuccessful register() function with invalid weight', () async {
     try {
       final result = await register(
           'testing',
@@ -503,7 +496,7 @@ void main() {
     }
   });
 
-  test('Successful register() function with invalid weight unit', () async {
+  test('Unsuccessful register() function with invalid weight unit', () async {
     try {
       final result = await register(
           'testing',
@@ -522,7 +515,7 @@ void main() {
     }
   });
 
-  test('Successful register() function with invalid profile photo', () async {
+  test('Unsuccessful register() function with invalid profile photo', () async {
     try {
       final result = await register('testing', '', DateTime.now(), 90, 'kg',
           'testing@example.com', 'pass');
@@ -531,7 +524,7 @@ void main() {
 
       print('✅ register (with invalid profile photo) executed as expected');
     } catch (e) {
-      fail('Failed to execute register (with profile phot0): $e');
+      fail('Failed to execute register (with profile photo): $e');
     }
   });
 
@@ -552,7 +545,7 @@ void main() {
     }
   });
 
-  test('Unuccessful addWorkout() function with invalid userID', () async {
+  test('Unsuccessful addWorkout() function with invalid userID', () async {
     try {
       final results =
           await addWorkout(-1, 'testingtestingtestingtesting', true, []);
@@ -570,7 +563,6 @@ void main() {
     }
   });
 
-  TODO:
   test('Successful deleteWorkout() function with valid workoutID', () async {
     int? workoutID;
 
@@ -602,7 +594,6 @@ void main() {
     }
   });
 
-  TODO:
   test('Unsuccesful deleteWorkout() function with invalid workoutID', () async {
     try {
       await deleteWorkout(-1);
@@ -939,7 +930,7 @@ void main() {
           .map((row) => {'workout_public': row[0]})
           .toList()[0]['workout_public'];
 
-      await toggleWorkoutPublic(1);
+      final error = await toggleWorkoutPublic(1);
 
       List<List<dynamic>> toggleCheck = await dbService.readQuery(
           '''SELECT workout_public FROM workouts WHERE workout_ID = 1;''', {});
@@ -948,6 +939,7 @@ void main() {
           .toList()[0]['workout_public'];
 
       expect(toggledStatus, !initialStatus);
+      expect(error, null);
 
       print(
           '✅ toggleWorkoutPublic (with valid workoutID) executed as expected');
@@ -956,7 +948,7 @@ void main() {
     }
   });
 
-  test('Unsuccesful toggleWorkoutPublic() function with valid workoutID',
+  test('Unsuccesful toggleWorkoutPublic() function with invalid workoutID',
       () async {
     try {
       final error = await toggleWorkoutPublic(-1);
@@ -972,7 +964,7 @@ void main() {
     }
   });
 
-  test('Successfull deleteAccount with valid userID', () async {
+  test('Successful deleteAccount with valid userID', () async {
     try {
       final userID = await dbService.insertAndReturnId('''
         INSERT INTO users (user_name, user_profile_photo, user_bio, user_dob, user_weight, user_weight_unit, users_account_creation_date, user_email, user_password) VALUES 
@@ -982,6 +974,7 @@ void main() {
       final check = await dbService.readQuery(
           '''SELECT * FROM users WHERE user_ID = @user_ID;''',
           {'user_ID': userID});
+
       expect(check, isNotEmpty);
 
       final error = await deleteAccount(userID);
@@ -999,7 +992,7 @@ void main() {
     }
   });
 
-  test('Unsuccessfull deleteAccount with invalid userID', () async {
+  test('Unsuccessful deleteAccount with invalid userID', () async {
     try {
       final error = await deleteAccount(-1);
 
